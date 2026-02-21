@@ -39,12 +39,15 @@ Règles : -assurez-vous de toujours executer la derniere commande avant de comme
 
 ## 🏗️ Structure des branches
 
-    main(master)        → version stable
-    develop     → version d’intégration
+    develop     → branche par défaut (version d’intégration)
+    master      → version stable
     feature/... → branches de travail
 
-Règles : - Ne jamais travailler directement sur main - Tout le monde
-part de develop
+Règles :
+- Ne jamais pousser directement sur **master** (réservé aux releases stables)
+- Ne jamais pousser directement sur **develop** sans passer par une Pull Request
+- Tout le monde crée ses branches depuis **develop**
+- La branche par défaut du dépôt GitHub est **develop**
 
 ------------------------------------------------------------------------
 
@@ -144,8 +147,8 @@ Chaque jour :
 
 ## ❌ À ne jamais faire
 
-    git push origin main
-    git pull origin main
+    git push origin master
+    git pull origin master
 
 
 ------------------------------------------------------------------------
