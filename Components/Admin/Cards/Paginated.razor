@@ -1,24 +1,24 @@
 @* Composant UI : pagination réutilisable avec fenêtre de pages visibles. *@
-<div class="flex h-16 items-center justify-end px-6">
-      <div class="flex h-[40px] w-auto items-center justify-center gap-2 sm:gap-3">
+<div class="flex items-center justify-end mt-4">
+      <div class="flex w-auto items-center justify-center gap-2 sm:gap-3">
             <button @onclick="GoToPreviousPage" disabled="@(SafeCurrentPage == 1)"
-                    class="flex h-[40px] w-[98px] items-center justify-center gap-2 rounded-xl border border-slate-700 text-black disabled:cursor-not-allowed disabled:opacity-50">
-                  <i class="fas fa-arrow-left text-xs"></i>
-                  <span class="Button text-black">Prec</span>
+                    class="flex p-4 px-5 items-center justify-center gap-2 rounded-xl border border-slate-700 text-black disabled:cursor-not-allowed disabled:opacity-50">
+                  <i class="fas fa-arrow-left text-xl sm:text-sm"></i>
+                  <span class="Button text-black hidden sm:block">Prec</span>
             </button>
             @foreach (var pageNumber in VisiblePages)
             {
                   <button @onclick="() => GoToPage(pageNumber)"
                           class="@(SafeCurrentPage == pageNumber
-                              ? "flex h-[40px] min-w-[40px] px-3 items-center justify-center rounded-xl border border-slate-600 bg-black text-white"
-                              : "flex h-[40px] min-w-[40px] px-3 items-center justify-center rounded-xl border border-slate-700 text-black hover:bg-slate-900")">
+                              ? "flex p-4 px-5 items-center justify-center rounded-xl border border-slate-600 bg-black text-white"
+                              : "flex p-4 px-5 items-center justify-center rounded-xl border border-slate-700 text-black hover:bg-slate-900")">
                         <span class="Button">@pageNumber</span>
                   </button>
             }
             <button @onclick="GoToNextPage" disabled="@(SafeCurrentPage == SafeTotalPages)"
-                    class="flex h-[40px] w-[98px] items-center justify-center gap-2 rounded-xl border border-slate-700 text-black disabled:cursor-not-allowed disabled:opacity-50">
-                  <span class="Button text-black">Suiv</span>
-                  <i class="fas fa-arrow-right text-xs"></i>
+                    class="flex p-4 px-5 items-center justify-center gap-2 rounded-xl border border-slate-700 text-black disabled:cursor-not-allowed disabled:opacity-50">
+                  <span class="Button text-black hidden sm:block">Suiv</span>
+                  <i class="fas fa-arrow-right text-xl sm:text-sm"></i> 
             </button>
       </div>
 </div>

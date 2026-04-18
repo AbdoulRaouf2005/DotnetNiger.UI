@@ -1,5 +1,7 @@
 ﻿@* Composant tableau : affichage des posts avec actions voir/éditer/supprimer. *@
 @using DotnetNiger.UI.Models.Responses
+@using System.Net
+@using System.Text.RegularExpressions
 @inject NavigationManager NavigationManager
 
 <div class="overflow-hidden rounded-lg bg-white shadow">
@@ -9,7 +11,9 @@
                         <tr>
                               <th class="Button px-6 py-4 text-left text-text">Titre</th>
                               <th class="Button px-6 py-4 text-left text-text">Auteur</th>
-                              <th class="Button px-6 py-4 text-left text-text">Categorie</th>
+                              <th class="Button px-6 py-4 text-left text-text">Catégories liées</th>
+                              <th class="Button px-6 py-4 text-left text-text">Type</th>
+                              <th class="Button px-6 py-4 text-left text-text">Aperçu</th>
                               <th class="Button px-6 py-4 text-left text-text">Vue</th>
                               <th class="Button px-6 py-4 text-left text-text">Statut</th>
                               <th class="Button px-6 py-4 text-left text-text">Date</th>
@@ -17,12 +21,24 @@
                         </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200">
-                        @foreach (var post in Posts)
+                        @if (Posts is null || Posts.Count == 0)
+                        {
+                              <tr>
+                                    <td colspan="9" class="px-6 py-10 text-center text-sm text-gray-500">
+                                          Aucun article disponible.
+                                    </td>
+                              </tr>
+                        }
+                        else
+                        {
+                        foreach (var post in Posts)
                         {
                               <tr class="transition hover:bg-gray-50">
                                     <td class="px-6 py-4 text-sm font-medium text-text">@post.Title</td>
                                     <td class="px-6 py-4 text-sm text-text">@post.AuthorName</td>
-                                    <td class="px-6 py-4 text-sm text-text">@string.Join(", ", post.Categories.Select(c => c.Name))</td>
+                                    <td class="px-6 py-4 text-sm text-text">@GetCategoryLabel(post)</td>
+                                    <td class="px-6 py-4 text-sm text-text">@GetPostTypeLabel(post.PostType)</td>
+                                    <td class="px-6 py-4 text-sm text-text">@GetPreviewText(post)</td>
                                     <td class="px-6 py-4 text-sm text-text">
                                           <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800">@post.ViewCount</span>
                                     </td>
@@ -39,10 +55,6 @@
                                     <td class="px-6 py-4 text-sm text-text">@post.PublishedAt.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td class="px-6 py-4 text-sm">
                                           <div class="flex gap-3">
-                                                <button @onclick='() => NavigationManager.NavigateTo($"/admin/blog/{post.Id}")'
-                                                        class="text-text transition hover:text-blue-600" title="Voir">
-                                                      <i class="fas fa-eye"></i>
-                                                </button>
                                                 <button @onclick='() => NavigationManager.NavigateTo($"/admin/blog/edit/{post.Id}")'
                                                         class="text-text transition hover:text-yellow-600" title="Editer">
                                                       <i class="fas fa-edit"></i>
@@ -55,6 +67,7 @@
                                     </td>
                               </tr>
                         }
+                        }
                   </tbody>
             </table>
       </div>
@@ -63,4 +76,34 @@
 @code {
       [Parameter] public List<PostDto> Posts { get; set; } = new();
       [Parameter] public EventCallback<Guid> OnDelete { get; set; }
+
+      private static string GetPostTypeLabel(string? postType)
+      {
+            return string.IsNullOrWhiteSpace(postType) ? "Sans catégorie" : postType;
+      }
+
+      private static string GetCategoryLabel(PostDto post)
+      {
+            if (post.Categories is { Count: > 0 })
+            {
+                  return string.Join(", ", post.Categories.Select(c => c.Name));
+            }
+
+            return "Aucune catégorie liée";
+      }
+
+      private static string GetPreviewText(PostDto post)
+      {
+            var source = !string.IsNullOrWhiteSpace(post.Excerpt) ? post.Excerpt : post.ContentHTML;
+
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                  return "Aucun aperçu";
+            }
+
+            var plainText = Regex.Replace(source, "<.*?>", string.Empty);
+            plainText = WebUtility.HtmlDecode(plainText).Trim();
+
+            return plainText.Length <= 90 ? plainText : $"{plainText[..90].Trim()}...";
+      }
 }

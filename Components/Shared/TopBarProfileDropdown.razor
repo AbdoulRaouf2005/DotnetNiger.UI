@@ -1,0 +1,190 @@
+@using System.Security.Claims
+@inject NavigationManager Navigation
+@inject AuthService Auth
+@inject IProfileService ProfileService
+
+<div class="relative">
+    <div class="flex items-center gap-5">
+        <button type="button"
+                class="relative text-secondary transition duration-150 ease-in-out hover:text-hover"
+                aria-label="Notifications"
+                title="Notifications">
+            <i class="fas fa-bell text-xl"></i>
+            @if (ResolvedNotificationCount > 0)
+            {
+                <span class="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">@ResolvedNotificationCount</span>
+            }
+        </button>
+
+        <button type="button"
+            class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-gray-200 shadow-sm"
+                @onclick="ToggleMenu"
+                aria-expanded="@isMenuOpen"
+                aria-haspopup="true"
+                aria-label="Menu profil utilisateur"
+                title="@DisplayName">
+            @if (!string.IsNullOrWhiteSpace(ResolvedAvatarUrl))
+            {
+                <img src="@ResolvedAvatarUrl" alt="Avatar de @DisplayName" class="h-full w-full object-cover" />
+            }
+            else
+            {
+                <span class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-secondary">@Initials</span>
+            }
+        </button>
+    </div>
+
+    @if (isMenuOpen)
+    {
+        <button type="button" class="fixed inset-0 z-20 cursor-default bg-transparent" @onclick="CloseMenu" aria-label="Fermer le menu"></button>
+
+        <div class="absolute right-0 top-[52px] z-30 w-48 overflow-hidden rounded-xl border border-red-400 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+            <button type="button"
+                    class="flex w-full items-start gap-2 px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-gray-50"
+                    @onclick="NavigateToProfileAsync">
+                <i class="far fa-user text-base text-gray-700"></i>
+                <span class="flex flex-col leading-tight">
+                    <span class="text-sm font-medium">Mon Profile</span>
+                    <span class="max-w-[120px] truncate text-xs text-gray-500">@DisplayName</span>
+                </span>
+            </button>
+
+            <div class="h-px bg-red-200"></div>
+
+            <button type="button"
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-gray-800">
+                <span class="flex items-center gap-2">
+                    <i class="fas fa-globe text-base text-gray-700"></i>
+                    <span>Langue</span>
+                </span>
+                <span class="font-semibold">FR</span>
+            </button>
+
+            <div class="h-px bg-red-200"></div>
+
+            <button type="button"
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    @onclick="LogoutAsync">
+                <span>Déconnexion</span>
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ClaimsPrincipal User { get; set; } = new();
+    [Parameter] public int? NotificationCount { get; set; }
+
+    private bool isMenuOpen;
+    private UserDto? profile;
+
+    private string? ResolvedAvatarUrl => NormalizeImagePath(FirstNotEmpty(
+        profile?.AvatarUrl,
+        GetClaimValue("avatarUrl"),
+        GetClaimValue("avatar"),
+        GetClaimValue("picture"),
+        GetClaimValue("image"),
+        GetClaimValue("profile_picture")
+    ));
+
+    private int ResolvedNotificationCount => NotificationCount ?? ParseNotificationCountFromClaims();
+
+    private string DisplayName => FirstNotEmpty(
+        profile?.FullName,
+        profile?.Username,
+        User.Identity?.Name,
+        GetClaimValue(ClaimTypes.Name),
+        GetClaimValue("name"),
+        GetClaimValue("unique_name"),
+        GetClaimValue("preferred_username"),
+        GetClaimValue("given_name"),
+        "Utilisateur"
+    )!;
+
+    private string Initials
+    {
+        get
+        {
+            var words = DisplayName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Take(2)
+                .ToArray();
+
+            if (words.Length == 0)
+                return "U";
+
+            return string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await ProfileService.GetProfileAsync();
+        }
+        catch
+        {
+            profile = null;
+        }
+    }
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    private void CloseMenu()
+    {
+        isMenuOpen = false;
+    }
+
+    private async Task NavigateToProfileAsync()
+    {
+        isMenuOpen = false;
+        await Task.Yield();
+        Navigation.NavigateTo("/admin/profile");
+    }
+
+    private async Task LogoutAsync()
+    {
+        isMenuOpen = false;
+        await Auth.LogoutAsync();
+        Navigation.NavigateTo("/");
+    }
+
+    private string? GetClaimValue(string claimType)
+        => User.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+
+    private int ParseNotificationCountFromClaims()
+    {
+        var raw = FirstNotEmpty(
+            GetClaimValue("notifications"),
+            GetClaimValue("notificationCount"),
+            GetClaimValue("notification_count"),
+            GetClaimValue("unreadNotifications"),
+            GetClaimValue("unread_notifications")
+        );
+
+        return int.TryParse(raw, out var count) ? Math.Max(0, count) : 0;
+    }
+
+    private static string? FirstNotEmpty(params string?[] values)
+        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
+    private static string? NormalizeImagePath(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/"))
+        {
+            return value;
+        }
+
+        return $"/{value.TrimStart('/')}";
+    }
+}

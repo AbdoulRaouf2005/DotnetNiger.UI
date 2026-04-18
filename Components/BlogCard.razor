@@ -1,0 +1,42 @@
+@using DotnetNiger.UI.Models.Responses
+@using System.Text.RegularExpressions
+@using System.Net
+
+<article class="overflow-hidden rounded-xl bg-white shadow-md">
+      <div class="h-44 bg-secondary">
+            <img @src='post?.CoverImageUrl || "https://via.placeholder.com/300x200"' alt="@post?.Title">
+      </div>
+      <div class="space-y-3 p-4">
+            <span class="inline-flex rounded-sm bg-[#e8e3f6] px-2 py-1 text-xs font-semibold text-secondary">@post?.Categories</span>
+                  <h3 class="text-xl font-bold leading-snug text-gray-900">@post?.Title</h3>
+                  <p class="text-sm leading-relaxed text-gray-600">@GetPreviewText()</p>
+
+                  <div class="flex items-center justify-between gap-3 text-xs text-gray-700">
+                        <span class="font-semibold text-gray-800">@post?.AuthorName</span>
+                        <span>@post?.PublishedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span>
+                              <i class="fas fa-eye"></i>
+                              <p>@post?.ViewCount</p>
+                        </span>
+                  </div>
+            </div>
+      </article>
+
+@code{
+       [Parameter]
+    public PostDto? post { get; set; }  
+    private string GetPreviewText()
+    {
+        var source = post?.ContentHTML;
+
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "Aucun aperçu disponible.";
+        }
+
+        var plainText = Regex.Replace(source, "<.*?>", string.Empty);
+        plainText = WebUtility.HtmlDecode(plainText).Trim();
+
+        return plainText.Length <= 256 ? plainText : $"{plainText[..256].Trim()}...";
+    }
+}

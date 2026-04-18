@@ -16,6 +16,7 @@ namespace DotnetNiger.UI.Services.Mock
                         Username = "Abdoul Raouf",
                         Email = "AbdoulRaoufHarouna@gmail.com",
                         FullName = "Abdoul Raouf Harouna Moussa",
+                        PhoneNumber = "+227 96 00 00 00",
                         Bio = "je suis un developpeur passionné par la tech",
                         AvatarUrl = "./Images/upload/user.png",
                         Country = "Niger",
@@ -36,11 +37,35 @@ namespace DotnetNiger.UI.Services.Mock
             public async Task<UserDto> GetProfileAsync() => await Task.FromResult(_User);
             public async Task<UserDto> UpdateProfileAsync(UpdateProfileRequest request) { 
                   var user = _User;
-                  user.FullName = request.FullName;
-                  user.Bio = request.Bio;
-                  user.AvatarUrl = request.AvatarUrl;
-                  user.Country = request.Country;
-                  user.City = request.City;
+                  if (request.FullName is not null)
+                  {
+                        user.FullName = request.FullName;
+                  }
+
+                  if (request.PhoneNumber is not null)
+                  {
+                        user.PhoneNumber = request.PhoneNumber;
+                  }
+
+                  if (request.Bio is not null)
+                  {
+                        user.Bio = request.Bio;
+                  }
+
+                  if (request.AvatarUrl is not null)
+                  {
+                        user.AvatarUrl = request.AvatarUrl;
+                  }
+
+                  if (request.Country is not null)
+                  {
+                        user.Country = request.Country;
+                  }
+
+                  if (request.City is not null)
+                  {
+                        user.City = request.City;
+                  }
                   return await Task.FromResult(user); 
             }
 

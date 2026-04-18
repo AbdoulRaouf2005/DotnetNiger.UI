@@ -3,6 +3,7 @@
 @inject NavigationManager Navigation
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
     <table class="w-full">
         <thead class="bg-gray-50 border-b">
             <tr>
@@ -77,9 +78,10 @@
                         </div>
                     </td>
                 </tr>
-            }
+            }   
         </tbody>
     </table>
+    </div>
 </div>
 @code{
     [Parameter] public List<EventDto> Event { get; set; } = new();

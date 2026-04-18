@@ -1,0 +1,86 @@
+@using System.Security.Claims
+@inject NavigationManager Navigation
+@inject AuthService Auth
+
+<AuthorizeView>
+    <Authorized Context="authState">
+        @if (Mobile)
+        {
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button"
+                        class="flex w-full items-center justify-center rounded-lg border border-secondary px-3 py-2 text-sm font-semibold text-secondary transition duration-150 ease-in-out hover:bg-secondary hover:text-white"
+                        @onclick="() => NavigateToProfileAsync(authState.User)">
+                    Mon Profile
+                </button>
+                <button type="button"
+                        class="flex w-full items-center justify-center rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out hover:bg-red-600"
+                        @onclick="LogoutAsync">
+                    Déconnexion
+                </button>
+            </div>
+        }
+        else
+        {
+            <TopBarProfileDropdown User="authState.User" NotificationCount="NotificationCount" />
+        }
+    </Authorized>
+    <NotAuthorized>
+        @if (Mobile)
+        {
+            <button type="button"
+                    class="flex w-full items-center justify-center rounded-lg bg-secondary px-3 py-2 text-white transition duration-150 ease-in-out hover:bg-hover"
+                    @onclick="NavigateToLoginAsync">
+                <span class="text-sm font-semibold text-white">Connexion</span>
+            </button>
+        }
+        else
+        {
+            <button type="button"
+                    class="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-white transition duration-150 ease-in-out hover:bg-hover"
+                    @onclick="NavigateToLoginAsync">
+                <i class="fas fa-sign-in-alt text-2xl"></i>
+                <span class="text-sm font-semibold text-white">Connexion</span>
+            </button>
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter] public bool Mobile { get; set; }
+    [Parameter] public int? NotificationCount { get; set; }
+    [Parameter] public EventCallback OnActionCompleted { get; set; }
+
+    private async Task NavigateToLoginAsync()
+    {
+        await NotifyActionCompletedAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    private async Task NavigateToProfileAsync(ClaimsPrincipal user)
+    {
+        await NotifyActionCompletedAsync();
+
+        var hasAdminRole = user.Claims.Any(claim =>
+            (claim.Type == ClaimTypes.Role || claim.Type == "roles" || claim.Type == "role")
+            && (string.Equals(claim.Value, "admin", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(claim.Value, "superadmin", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(claim.Value, "moderator", StringComparison.OrdinalIgnoreCase)));
+
+        Navigation.NavigateTo(hasAdminRole ? "/admin/profile" : "/");
+    }
+
+    private async Task LogoutAsync()
+    {
+        await Auth.LogoutAsync();
+        await NotifyActionCompletedAsync();
+        Navigation.NavigateTo("/");
+    }
+
+    private Task NotifyActionCompletedAsync()
+    {
+        if (!OnActionCompleted.HasDelegate)
+            return Task.CompletedTask;
+
+        return OnActionCompleted.InvokeAsync();
+    }
+}

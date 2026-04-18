@@ -8,10 +8,6 @@
 <div class="min-h-screen bg-[#F4F2F2] p-6">
     <div class="mb-6 flex items-center justify-between">
         <AdminBreadcrumb />
-        <button @onclick='() => NavigationManager.NavigateTo("/admin/blog")' class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2 transition">
-            <i class="fas fa-arrow-left"></i>
-            Retour
-        </button>
     </div>
 
     <div class="rounded-xl bg-white p-6 shadow">
@@ -21,7 +17,7 @@
                 <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" />
             </div>
             <div>
-                <label class="mb-2 block text-sm font-semibold text-gray-700">Catégorie</label>
+                <label class="mb-2 block text-sm font-semibold text-gray-700">Type d'article</label>
                 <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500">
                     <option value="">Sélectionner</option>
                     <option value="Tutorial">Tutorial</option>
@@ -45,6 +41,11 @@
         <div class="mt-6">
             <textarea id="blogDescription" class="w-full min-h-96"></textarea>
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <div class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
+        }
 
         <div class="mt-6 flex flex-wrap gap-4">
             <button @onclick="SaveDraft" class="flex items-center gap-2 rounded-lg bg-blue-500 px-6 py-3 text-white transition hover:bg-blue-600">
@@ -78,25 +79,62 @@
 
     private async Task SaveDraft()
     {
-        try
-        {
-            postRequest.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "blogDescription");
-            postRequest.IsPublished = false;
-            await PostService.CreatePostAsync(postRequest);
-            NavigationManager.NavigateTo("/admin/blog");
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
+        await SaveAsync(isPublished: false);
     }
 
     private async Task Publish()
     {
+        await SaveAsync(isPublished: true);
+    }
+
+    private async Task SaveAsync(bool isPublished)
+    {
         try
         {
+            errorMessage = string.Empty;
+
             postRequest.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "blogDescription");
-            postRequest.IsPublished = true;
+            postRequest.IsPublished = isPublished;
+
+            if (string.IsNullOrWhiteSpace(postRequest.Title))
+            {
+                errorMessage = "Le titre est obligatoire.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(postRequest.PostType))
+            {
+                errorMessage = "Le type d'article est obligatoire.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(postRequest.Content))
+            {
+                errorMessage = "Le contenu de l'article est obligatoire.";
+                return;
+            }
+
+            postRequest.Excerpt = BuildExcerpt(postRequest.Content);
+
             await PostService.CreatePostAsync(postRequest);
             NavigationManager.NavigateTo("/admin/blog");
         }
-        catch (Exception ex) { errorMessage = ex.Message; }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private static string BuildExcerpt(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return string.Empty;
+        }
+
+        var plainText = System.Text.RegularExpressions.Regex.Replace(content, "<.*?>", string.Empty);
+        plainText = System.Net.WebUtility.HtmlDecode(plainText).Trim();
+
+        return plainText.Length <= 180 ? plainText : $"{plainText[..180].Trim()}...";
     }
 }

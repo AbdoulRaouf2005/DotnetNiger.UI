@@ -4,14 +4,14 @@
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 
-<div class="min-h-screen p-6 bg-[#F4F2F2]">
+<div class="min-h-screen p-6">
     <div class="mb-8">
         <div class="mb-6 flex items-center justify-between">
             <AdminBreadcrumb />
             <button @onclick='() => NavigationManager.NavigateTo("/admin/blog/create")'
-                    class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg Button flex items-center gap-2 transition">
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-4 rounded-lg Button flex items-center gap-2 transition">
                 <i class="fas fa-plus text-xl"></i>
-                <span class="Button">Nouveau</span>
+                <span class="Button hidden sm:block">Nouveau</span> 
             </button>
         </div>
 
@@ -27,7 +27,7 @@
 
             <select @bind="selectedType"
                     class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
-                <option value="">Type de Post</option>
+                <option value="">Type d'article</option>
                 <option value="Tutorial">Tutorial</option>
                 <option value="Article">Article</option>
                 <option value="Interview">Interview</option>

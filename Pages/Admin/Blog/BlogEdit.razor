@@ -6,13 +6,9 @@
 @inject IJSRuntime JS
 @inject IPostService PostService
 
-<div class="min-h-screen bg-[#F4F2F2] p-6">
+<div class="min-h-screen p-6">
     <div class="mb-6 flex items-center justify-between">
           <AdminBreadcrumb />
-        <button @onclick='() => NavigationManager.NavigateTo("/admin/blog")' class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2 transition">
-            <i class="fas fa-arrow-left"></i>
-            Retour
-        </button>
     </div>
 
     <div class="rounded-xl bg-white p-6 shadow">
@@ -22,7 +18,7 @@
                 <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" />
             </div>
             <div>
-                <label class="mb-2 block text-sm font-semibold text-gray-700">Catégorie</label>
+                <label class="mb-2 block text-sm font-semibold text-gray-700">Type d'article</label>
                 <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500">
                     <option value="">Sélectionner</option>
                     <option value="Tutorial">Tutorial</option>
