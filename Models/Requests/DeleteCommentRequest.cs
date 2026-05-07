@@ -1,6 +1,6 @@
 
 using System.ComponentModel.DataAnnotations;
-
+namespace DotnetNiger.UI.Models.Requests;
 public class DeleteCommentRequest
 {
       [Required]

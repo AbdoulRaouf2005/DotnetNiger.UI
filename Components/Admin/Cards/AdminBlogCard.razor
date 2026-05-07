@@ -70,7 +70,7 @@
 
     private string GetPreviewText()
     {
-        var source = !string.IsNullOrWhiteSpace(post?.Excerpt) ? post.Excerpt : post?.ContentHTML;
+        var source = !string.IsNullOrWhiteSpace(post?.Excerpt) ? post.Excerpt : post?.Content;
 
         if (string.IsNullOrWhiteSpace(source))
         {

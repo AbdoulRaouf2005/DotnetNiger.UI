@@ -94,7 +94,7 @@
 
       private static string GetPreviewText(PostDto post)
       {
-            var source = !string.IsNullOrWhiteSpace(post.Excerpt) ? post.Excerpt : post.ContentHTML;
+            var source = !string.IsNullOrWhiteSpace(post.Excerpt) ? post.Excerpt : post.Content;
 
             if (string.IsNullOrWhiteSpace(source))
             {

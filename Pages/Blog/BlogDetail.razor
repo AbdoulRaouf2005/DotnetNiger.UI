@@ -76,10 +76,10 @@
 								@post.Excerpt
 							</div>
 						}
-						@if (!string.IsNullOrWhiteSpace(post.ContentHTML))
+						@if (!string.IsNullOrWhiteSpace(post.Content))
 						{
 							<div class="prose prose-sm max-w-none" @onmouseover="@(() => {})" @onmouseout="@(() => {})">
-								@((MarkupString)post.ContentHTML)
+								@((MarkupString)post.Content)
 							</div>
 						}
 						else
