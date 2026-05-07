@@ -1,0 +1,283 @@
+@namespace DotnetNiger.UI.Components
+@using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Models.Requests
+@using DotnetNiger.UI.Services.Contracts
+
+@inject ICommentService CommentService
+
+<div class="flex gap-4">
+    <!-- Avatar -->
+    <div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-[#e5edf9]">
+        @if (!string.IsNullOrWhiteSpace(Comment.AuthorAvatar))
+        {
+            <img src="@Comment.AuthorAvatar" alt="@Comment.AuthorName" class="h-full w-full object-cover" />
+        }
+        else
+        {
+            <div class="flex h-full w-full items-center justify-center text-sm font-bold text-[#5b4df5]">
+                @GetInitial(Comment.AuthorName)
+            </div>
+        }
+    </div>
+
+    <!-- Comment content -->
+    <div class="flex-1">
+        <!-- Header with author and timestamp -->
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-sm">
+                <p class="font-semibold text-gray-900">@Comment.AuthorName</p>
+                <span class="text-gray-500">@GetTimeLabel(Comment.CreatedAt)</span>
+                @if (Comment.UpdatedAt.HasValue)
+                {
+                    <span class="text-gray-400 text-xs">(modifié)</span>
+                }
+            </div>
+
+            <!-- Action buttons (visible only if current user is the author) -->
+            @if (Comment.UserId == CurrentUserId && !isEditing && !showDeleteConfirm)
+            {
+                <div class="flex items-center gap-2">
+                    <button 
+                        type="button" 
+                        class="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
+                        title="Modifier"
+                        @onclick="() => ToggleEdit()">
+                        <i class="fa-solid fa-edit text-sm"></i>
+                    </button>
+                    <button 
+                        type="button" 
+                        class="text-xs text-red-400 hover:text-red-600 px-2 py-1"
+                        title="Supprimer"
+                        @onclick="ShowDeleteConfirmation">
+                        <i class="fa-solid fa-trash text-sm"></i>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <!-- Edit form or content display -->
+        @if (isEditing)
+        {
+            <div class="mt-3 space-y-3">
+                <textarea 
+                    @bind="editedContent"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    rows="3"
+                    placeholder="Modifiez votre commentaire..."></textarea>
+                <div class="flex gap-2">
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5]"
+                        @onclick="HandleUpdate">
+                        Enregistrer
+                    </button>
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                        @onclick="() => ToggleEdit()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        }
+        else if (showDeleteConfirm)
+        {
+            <div class="mt-3 space-y-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                <p class="text-sm text-red-800 font-semibold">Confirmer la suppression ?</p>
+                <p class="text-xs text-red-600">Cette action est irréversible. Tous les commentaires de réponses seront également supprimés.</p>
+                <div class="flex gap-2">
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+                        @onclick="HandleDelete">
+                        Supprimer définitivement
+                    </button>
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                        @onclick="() => showDeleteConfirm = false">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p class="mt-2 text-sm leading-6 text-gray-700">@Comment.Content</p>
+        }
+
+        <!-- Action buttons -->
+        @if (!isEditing && !showDeleteConfirm)
+        {
+            <button 
+                type="button" 
+                class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
+                @onclick="() => ToggleReplyForm()">
+                @(showReplyForm ? "Annuler" : "Répondre")
+            </button>
+        }
+
+        <!-- Reply form -->
+        @if (showReplyForm && !isEditing && !showDeleteConfirm)
+        {
+            <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <textarea 
+                    @bind="replyContent"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    rows="3"
+                    placeholder="Écrivez votre réponse..."></textarea>
+                <div class="mt-3 flex gap-2">
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5] disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled="@string.IsNullOrWhiteSpace(replyContent)"
+                        @onclick="HandleReplySubmit">
+                        Envoyer la réponse
+                    </button>
+                    <button 
+                        type="button"
+                        class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                        @onclick="() => ToggleReplyForm()">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Nested replies -->
+        @if (Comment.Replies?.Any() == true)
+        {
+            <div class="mt-6 border-l-2 border-gray-200 pl-4 space-y-4">
+                @foreach (var reply in Comment.Replies)
+                {
+                    <CommentItem 
+                        Comment="reply"
+                        OnReplySubmitted="OnReplySubmitted"
+                        OnCommentUpdated="OnCommentUpdated"
+                        OnCommentDeleted="OnCommentDeleted"
+                        CurrentUserId="CurrentUserId"
+                        IsReply="true" />
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public CommentResponse Comment { get; set; } = new();
+
+    [Parameter]
+    public Guid CurrentUserId { get; set; }
+
+    [Parameter]
+    public bool IsReply { get; set; }
+
+    [Parameter]
+    public EventCallback OnReplySubmitted { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentUpdated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentDeleted { get; set; }
+
+    private bool showReplyForm;
+    private bool isEditing;
+    private bool showDeleteConfirm;
+    private string replyContent = string.Empty;
+    private string editedContent = string.Empty;
+
+    private void ToggleReplyForm() => showReplyForm = !showReplyForm;
+
+    private void ToggleEdit()
+    {
+        isEditing = !isEditing;
+        if (isEditing)
+        {
+            editedContent = Comment.Content;
+            showReplyForm = false;
+            showDeleteConfirm = false;
+        }
+    }
+
+    private void ShowDeleteConfirmation()
+    {
+        showDeleteConfirm = true;
+        showReplyForm = false;
+    }
+
+    private async Task HandleReplySubmit()
+    {
+        if (string.IsNullOrWhiteSpace(replyContent))
+            return;
+
+        var reply = await CommentService.CreateCommentAsync(new CreateCommentRequest
+        {
+            Content = replyContent,
+            PostId = Comment.PostId.ToString(),
+            EventId = Comment.EventId.ToString(),
+            ParentCommentId = Comment.Id.ToString()
+        });
+
+        Comment.Replies.Add(reply);
+        replyContent = string.Empty;
+        showReplyForm = false;
+
+        await OnReplySubmitted.InvokeAsync();
+    }
+
+    private async Task HandleUpdate()
+    {
+        if (string.IsNullOrWhiteSpace(editedContent))
+            return;
+
+        var updated = await CommentService.UpdateCommentAsync(new UpdateCommentRequest
+        {
+            Id = Comment.Id.ToString(),
+            Content = editedContent
+        });
+
+        if (updated != null)
+        {
+            Comment.Content = updated.Content;
+            Comment.UpdatedAt = updated.UpdatedAt;
+            isEditing = false;
+            await OnCommentUpdated.InvokeAsync();
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        var success = await CommentService.DeleteCommentAsync(new DeleteCommentRequest
+        {
+            Id = Comment.Id.ToString(),
+            DeleteAllReplies = true
+        });
+
+        if (success)
+        {
+            await OnCommentDeleted.InvokeAsync();
+        }
+    }
+
+    private string GetInitial(string? value)
+        => string.IsNullOrWhiteSpace(value) ? "?" : value.Trim()[0].ToString().ToUpperInvariant();
+
+    private string GetTimeLabel(DateTime createdAt)
+    {
+        var now = DateTime.Now;
+        var diff = now - createdAt;
+
+        if (diff.TotalMinutes < 1)
+            return "À l'instant";
+        if (diff.TotalMinutes < 60)
+            return $"Il y a {(int)diff.TotalMinutes} min";
+        if (diff.TotalHours < 24)
+            return $"Il y a {(int)diff.TotalHours}h";
+        if (diff.TotalDays < 30)
+            return $"Il y a {(int)diff.TotalDays}j";
+
+        return createdAt.ToString("dd MMM yyyy");
+    }
+}

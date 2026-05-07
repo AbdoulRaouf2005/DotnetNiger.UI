@@ -1,19 +1,78 @@
-﻿<div class="rounded-lg overflow-hidden shadow-lg hover\:shadow-xl hover:scale-110 transition">
-    <div class="h-48 bg-gradient-to-br from-blue-500 to-secondary"></div>
-
-    <div class="flex flex-col p-6 w-full">
-        <div class="flex items-center w-48 bg-orange-500 rounded-md  text-white p-3 text-sm font-semibold mb-3">
-            <i class="fas fa-calendar"></i> <p>14 Juin 2026 12:00</p>
-        </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-3">Conférence</h3>
-        <p class="text-gray-600 mb-6">
-            Découvrez les dernières tendances en développement .NET avec des speakers renommés et des discussions enrichissantes.
-        </p>
-        <button class="w-full bg-secondary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-            S'inscrire
-        </button>
+﻿
+<article class="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer transition hover:shadow-md" @onclick="NavigateToEventDetails">
+    <div class="h-44 bg-gray-900 flex items-center justify-center">
+        <img src="@(Event?.CoverImageUrl ?? "/Images/ImageBlog.jpg")" class="h-full w-full object-cover" alt="@Event?.Title">
     </div>
-</div>
-@code {
+    <div class="p-6">
+        <div class="flex items-start justify-between">
+            <span class="inline-block bg-pink-100 text-pink-600 text-xs px-3 py-1 rounded">@GetEventTypeLabel(Event?.EventType)</span>
+            <span class="text-sm text-gray-500">@Event?.StartDate.ToString("dd MMM yyyy")</span>
+        </div>
 
+        <h3 class="mt-4 text-lg font-semibold text-gray-700">@Event?.Title</h3>
+        <p class="mt-2 text-sm text-gray-600 line-clamp-2">@Event?.Description</p>
+        <div class="flex items-center justify-between mt-4">
+            <span class="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">@GetEventTypeLabel(Event?.EventType)</span>
+            <div class="flex items-center gap-1">
+                <i class="fa-solid fa-location-dot text-secondary"></i>
+                <span class="text-sm text-gray-500">@Event?.Location</span>
+            </div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-2">
+                    <div class="flex -space-x-2">
+                        <div class="w-7 h-7 bg-gradient-to-br from-secondary to-indigo-700 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold"></div>
+                        <div class="w-7 h-7 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold"></div>
+                        <div class="w-7 h-7 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold"></div>
+                    </div>
+                    <span class="text-sm text-gray-600"><strong>@Event?.RegisteredCount</strong> inscrits</span>
+                </div>
+                <button class="ml-3 bg-secondary text-white text-sm px-4 py-2 rounded-full shadow transition hover:brightness-110" 
+                        @onclick:stopPropagation="true" 
+                        @onclick="HandleRegisterClick">
+                    S'inscrire
+                </button>
+            </div>
+        </div>
+    </div>
+</article>
+
+@code {
+    [Inject]
+    private NavigationManager? NavigationManager { get; set; }
+
+    [Parameter]
+    public EventDto? Event { get; set; }
+
+    [Parameter]
+    public EventCallback OnRegisterClick { get; set; }
+
+    private void NavigateToEventDetails()
+    {
+        if (Event is null) return;
+
+        // Préférer le slug s'il est disponible, sinon utiliser l'ID
+        var route = !string.IsNullOrWhiteSpace(Event.Slug)
+            ? $"/evenements/{Event.Slug}"
+            : $"/evenements/{Event.Id}";
+
+        NavigationManager?.NavigateTo(route);
+    }
+
+    private async Task HandleRegisterClick()
+    {
+        await OnRegisterClick.InvokeAsync();
+    }
+
+    private static string GetEventTypeLabel(string? eventType)
+    {
+        return eventType?.ToLowerInvariant() switch
+        {
+            "online" => "En ligne",
+            "physical" => "Présentiel",
+            "hybrid" => "Hybride",
+            _ => string.IsNullOrWhiteSpace(eventType) ? "Événement" : eventType
+        };
+    }
 }

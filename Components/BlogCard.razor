@@ -1,42 +1,60 @@
 @using DotnetNiger.UI.Models.Responses
 @using System.Text.RegularExpressions
 @using System.Net
+@using System.Globalization
 
-<article class="overflow-hidden rounded-xl bg-white shadow-md">
-      <div class="h-44 bg-secondary">
-            <img @src='post?.CoverImageUrl || "https://via.placeholder.com/300x200"' alt="@post?.Title">
-      </div>
+<article class="group overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg">
+      <a href="@((!string.IsNullOrWhiteSpace(post?.Slug) ? $"/blog/{post.Slug}" : $"/blog/{post?.Id}"))" class="block h-44 overflow-hidden bg-secondary relative">
+            <img src="@(post?.CoverImageUrl ?? "https://via.placeholder.com/300x200")"
+                   alt="@post?.Title"
+                   class="h-full w-full object-cover transition group-hover:scale-105" />
+
+            @* Overlay compteur oeil en haut à droite *@
+            <span class="absolute top-3 right-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-800">
+                  <i class="fas fa-eye"></i>
+                  @post?.ViewCount
+            </span>
+      </a>
+
       <div class="space-y-3 p-4">
-            <span class="inline-flex rounded-sm bg-[#e8e3f6] px-2 py-1 text-xs font-semibold text-secondary">@post?.Categories</span>
-                  <h3 class="text-xl font-bold leading-snug text-gray-900">@post?.Title</h3>
-                  <p class="text-sm leading-relaxed text-gray-600">@GetPreviewText()</p>
+            @if (post?.Categories?.Any() == true)
+            {
+                  <span class="inline-flex rounded-sm bg-[#e8e3f6] px-2 py-1 text-xs font-semibold text-secondary">
+                        @post.Categories.FirstOrDefault()?.Name
+                  </span>
+            }
 
-                  <div class="flex items-center justify-between gap-3 text-xs text-gray-700">
-                        <span class="font-semibold text-gray-800">@post?.AuthorName</span>
-                        <span>@post?.PublishedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                        <span>
-                              <i class="fas fa-eye"></i>
-                              <p>@post?.ViewCount</p>
-                        </span>
-                  </div>
+            <h3 class="text-xl sm:text-2xl font-bold leading-snug text-gray-900">
+                  <a href="@($"/blog/{post?.Id}")" class="transition hover:text-secondary">
+                        @post?.Title
+                  </a>
+            </h3>
+
+            <p class="text-sm leading-relaxed text-gray-600">@GetPreviewText()</p>
+
+            <div class="flex items-center justify-between text-xs text-gray-700">
+                  <span class="text-sm text-gray-800">Par @post?.AuthorName</span>
+                  <span class="text-xs text-gray-600">@post?.PublishedAt.ToString("dd MMM. yyyy", CultureInfo.GetCultureInfo("fr-FR"))</span>
             </div>
-      </article>
+      </div>
+</article>
 
-@code{
-       [Parameter]
-    public PostDto? post { get; set; }  
-    private string GetPreviewText()
-    {
-        var source = post?.ContentHTML;
+@code {
+      [Parameter]
+      public PostDto? post { get; set; }
 
-        if (string.IsNullOrWhiteSpace(source))
-        {
-            return "Aucun aperçu disponible.";
-        }
+      private string GetPreviewText()
+      {
+            var source = post?.ContentHTML;
 
-        var plainText = Regex.Replace(source, "<.*?>", string.Empty);
-        plainText = WebUtility.HtmlDecode(plainText).Trim();
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                  return "Aucun aperçu disponible.";
+            }
 
-        return plainText.Length <= 256 ? plainText : $"{plainText[..256].Trim()}...";
-    }
+            var plainText = Regex.Replace(source, "<.*?>", string.Empty);
+            plainText = WebUtility.HtmlDecode(plainText).Trim();
+
+            return plainText.Length <= 256 ? plainText : $"{plainText[..256].Trim()}...";
+      }
 }

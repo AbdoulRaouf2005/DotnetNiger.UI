@@ -1,1 +1,307 @@
-@* TODO: Page publique "À propos" à implémenter. *@
+@page "/propos"
+
+@using DotnetNiger.UI.Components
+
+<PageTitle>À propos - .NET Niger</PageTitle>
+
+<div class="bg-[#F4F2F2] text-slate-800">
+	<!-- HERO -->
+	<section class="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+		<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(81,43,212,0.10),_transparent_36%),linear-gradient(180deg,_#fbfafc_0%,_#f4f2f2_100%)]"></div>
+		<div class="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#7c5cff]/10 blur-3xl"></div>
+
+		<div class="relative mx-auto flex max-w-4xl flex-col items-center text-center">
+			<h1 class="max-w-3xl text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
+				Qui sommes-nous ?
+			</h1>
+
+			<p class="mt-6 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
+				.NET Niger est plus qu’une simple communauté de développeurs : c’est un catalyseur de la
+				transformation numérique au Sahel. Fondée par des passionnés de l’écosystème Microsoft, notre
+				organisation s’est donnée pour mission de démocratiser l’accès aux technologies de pointe et de
+				former une nouvelle génération d’ingénieurs capables de relever les défis les plus complexes de
+				notre époque.
+			</p>
+
+			<div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+				<a href="#vision" class="inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.30)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+					Découvrir Notre Vision
+				</a>
+				<a href="#equipe" class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-6 py-3 text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-[#512BD4]/30 hover:bg-[#fbfaff]">
+					Rencontrer l’équipe
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- VISION -->
+	<section id="vision" class="bg-[#ECE7FF] px-4 py-20 sm:px-6 lg:px-8">
+		<div class="mx-auto max-w-5xl text-center">
+			<div class="mb-4 text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+				Notre mission
+			</div>
+			<h2 class="mx-auto max-w-3xl text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+				Propulser le Talent Local au Sommet de la Tech Mondiale.
+			</h2>
+			<p class="mx-auto mt-6 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
+				Nous croyons que le Niger possède un potentiel technologique inexploité. Notre mission est de
+				fournir les outils, les connaissances et le réseau nécessaires pour que chaque développeur .NET
+				puisse exceller, innover et contribuer au progrès numérique de notre nation.
+			</p>
+		</div>
+	</section>
+
+	<!-- VALUES -->
+	<section class="px-4 py-20 sm:px-6 lg:px-8">
+		<div class="mx-auto max-w-6xl">
+			<div class="text-center">
+				<div class="mb-4 text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+					Nos valeurs fondamentales
+				</div>
+				<h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+					Ce qui guide notre communauté
+				</h2>
+			</div>
+
+			<div class="mt-12 grid gap-6 md:grid-cols-3">
+				@foreach (var value in values)
+				{
+					<article class="rounded-2xl border border-white bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br @value.IconBackground text-lg @value.IconColor shadow-sm">
+							<i class="@value.Icon"></i>
+						</div>
+						<h3 class="mt-5 text-lg font-bold text-slate-900">@value.Title</h3>
+						<p class="mt-3 text-sm leading-7 text-slate-600">@value.Description</p>
+					</article>
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- TIMELINE -->
+	<section class="bg-[#F7F8FC] px-4 py-20 sm:px-6 lg:px-8">
+		<div class="mx-auto max-w-6xl">
+			<div class="text-center">
+				<div class="mb-4 text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+					Timeline
+				</div>
+				<h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+					Notre histoire
+				</h2>
+			</div>
+
+			<div class="mt-12 grid gap-6 lg:grid-cols-3">
+				@foreach (var milestone in milestones)
+				{
+					<article class="rounded-2xl border border-white bg-white p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
+						<div class="flex items-start justify-between gap-4">
+							<div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#ECE7FF] text-xl text-[#512BD4]">
+								<i class="@milestone.Icon"></i>
+							</div>
+							<span class="rounded-full @milestone.BadgeBackground px-3 py-1 text-xs font-bold text-white shadow-sm">
+								@milestone.Year
+							</span>
+						</div>
+						<h3 class="mt-5 text-xl font-bold @milestone.TitleColor">@milestone.Title</h3>
+						<p class="mt-3 text-sm leading-7 text-slate-600">@milestone.Description</p>
+					</article>
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- LEADERSHIP -->
+	<section id="equipe" class="px-4 py-20 sm:px-6 lg:px-8">
+		<div class="mx-auto max-w-6xl">
+			<div class="text-center">
+				<h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+					L’équipe de direction
+				</h2>
+				<p class="mt-3 text-sm text-slate-500">
+					Les visages derrière la communauté.
+				</p>
+			</div>
+
+			<div class="mt-12 grid gap-6 lg:grid-cols-3">
+				@foreach (var leader in leaders)
+				{
+					<article class="overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+						<div class="relative h-72 overflow-hidden bg-gradient-to-br @leader.HeaderBackground">
+							<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.20),_transparent_48%)]"></div>
+							<img src="/Images/upload/user.png" alt="@leader.Name" class="absolute inset-0 h-full w-full object-cover object-center opacity-90" />
+						</div>
+
+						<div class="space-y-4 p-5">
+							<div>
+								<h3 class="text-lg font-bold text-slate-900">@leader.Name</h3>
+								<p class="text-sm font-semibold text-[#F97316]">@leader.Role</p>
+							</div>
+
+							<p class="text-sm leading-7 text-slate-600">@leader.Description</p>
+						</div>
+					</article>
+				}
+			</div>
+		</div>
+	</section>
+
+	<!-- MEMBERS -->
+	<section class="bg-[#F7F8FC] px-4 py-16 sm:px-6 lg:px-8">
+		<div class="mx-auto max-w-6xl text-center">
+			<button type="button" @onclick="ToggleMembersSection" class="inline-flex items-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+				<i class="fa-solid @MembersToggleIconClass"></i>
+				<span>@(showMembersSection ? "Masquer les membres" : "Voir tous les membres")</span>
+			</button>
+
+			@if (showMembersSection)
+			{
+				<div class="mt-8 rounded-3xl border border-white bg-white p-4 text-left shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+					<div class="grid gap-3 lg:grid-cols-[auto,1fr,auto,auto,auto] lg:items-center">
+						<button class="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition hover:border-[#512BD4]/30 hover:text-[#512BD4]">
+							<i class="fa-solid fa-sliders"></i>
+						</button>
+
+						<label class="relative block">
+							<span class="sr-only">Rechercher un membre</span>
+							<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+							<input type="text" value="" placeholder="Rechercher un membre..." class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-[#512BD4]/40 focus:bg-white" />
+						</label>
+
+						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+							<option>Rôle</option>
+							<option>Développeur</option>
+							<option>Designer</option>
+							<option>Mentor</option>
+						</select>
+
+						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+							<option>Type</option>
+							<option>Senior</option>
+							<option>Junior</option>
+							<option>Lead</option>
+						</select>
+
+						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+							<option>Réseau</option>
+							<option>Niamey</option>
+							<option>Maradi</option>
+							<option>Zinder</option>
+						</select>
+					</div>
+
+					<div class="mt-10 flex items-center gap-3">
+						<h2 class="text-2xl font-extrabold text-slate-900">Membres</h2>
+						<span class="rounded-full bg-[#ECE7FF] px-3 py-1 text-xs font-bold text-[#512BD4]">@members.Count</span>
+					</div>
+
+					<div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+						@foreach (var member in members)
+						{
+							<DynamicComponent Type="@GetUserCardType()" Parameters="@GetUserCardParameters(member)" />
+						}
+					</div>
+
+					<div class="mt-8 flex items-center justify-center gap-3">
+						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm text-slate-400">
+							<i class="fa-solid fa-arrow-left"></i>
+							<span>Préc</span>
+						</button>
+						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-900 bg-white text-sm font-semibold text-slate-900">1</button>
+						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600">2</button>
+						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-900 bg-white px-4 text-sm font-semibold text-slate-900">
+							<span>Suiv</span>
+							<i class="fa-solid fa-arrow-right"></i>
+						</button>
+					</div>
+				</div>
+			}
+		</div>
+	</section>
+
+	<Footer />
+</div>
+
+@code {
+	private readonly IReadOnlyList<ValueItem> values = new[]
+	{
+		new ValueItem("Collaboration", "fa-solid fa-people-group", "bg-[#ECE7FF]", "text-[#512BD4]", "L’esprit de partage est au cœur de notre ADN. Ensemble, nous apprenons et grandissons à la fois."),
+		new ValueItem("Innovation", "fa-solid fa-lightbulb", "bg-[#FFF0F5]", "text-[#C13C76]", "Repousser les limites du possible avec .NET pour résoudre les défis locaux par le code."),
+		new ValueItem("Excellence", "fa-solid fa-graduation-cap", "bg-[#EAF2FF]", "text-[#2E5EA8]", "Nous visons la qualité technique et l’éthique professionnelle dans tous nos projets communautaires.")
+	};
+
+	private readonly IReadOnlyList<MilestoneItem> milestones = new[]
+	{
+		new MilestoneItem("2024", "La Fondation", "fa-solid fa-rocket", "bg-secondary", "text-[#5D48FF]", Description: "Un petit groupe de passionnés se réunit à Niamey pour poser les jalons de l’écosystème .NET au Niger, avec l’ambition de créer un pont vers l’innovation mondiale."),
+		new MilestoneItem("2025", "L’Expansion", "fa-solid fa-users", "bg-secondary", "text-[#4A78C2]", "Lancement du premier grand meetup communautaire réunissant plus de 100 développeurs et étudiants, marquant le début d’une dynamique de partage sans précédent."),
+		new MilestoneItem("2026", "La Reconnaissance", "fa-solid fa-award", "bg-secondary", "text-[#B94A8A]", "Signature de partenariats stratégiques avec des institutions locales et intégration officielle dans le réseau global des communautés .NET.")
+	};
+
+	private readonly IReadOnlyList<LeaderItem> leaders = new[]
+	{
+		new LeaderItem("Ahmed Moussa", "Community Lead", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]", "text-[#F97316]", "Porte la vision de la communauté et structure les initiatives pour faire grandir l’écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
+		new LeaderItem("Abdallah Ibrahim", "Technical Outreach", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]", "text-[#EC4899]", "Facilite les ateliers, les rencontres techniques et l’accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
+		new LeaderItem("Ibrahim Sani", "Content Strategy", "bg-gradient-to-br from-[#8A1E16] via-[#4B1711] to-[#1E0B0A]", "text-[#F59E0B]", "Expert en communication technique, il simplifie les concepts complexes et les rend utiles à tous.", new[] { "Editorial", "UX", "Culture" })
+	};
+
+	private readonly IReadOnlyList<UserDto> members = new[]
+	{
+		CreateMember("Amadou Diallo", "Senior .NET Developer", "Niamey", "Niger", new[] { "ASP.NET", "Microservices" }),
+		CreateMember("Fatima Ibrahim", "Fullstack Cloud Engineer", "Maradi", "Niger", new[] { "Blazor", "Azure Cloud" }),
+		CreateMember("Moussa Harouna", "Backend Mentor", "Zinder", "Niger", new[] { "C#", "Unity" }),
+		CreateMember("Issaka Salifou", "Software Architect", "Niamey", "Niger", new[] { "DDD", "DevOps" }),
+		CreateMember("Zalika Adamou", "Backend Developer", "Tahoua", "Niger", new[] { "Entity Framework", "PostgreSQL" }),
+		CreateMember("Amina Karim", "Junior Developer", "Agadez", "Niger", new[] { "C# Basics", ".NET MAUI" })
+	};
+
+	private bool showMembersSection;
+
+	private string MembersToggleIconClass => showMembersSection ? "fa-chevron-up" : "fa-users";
+
+	private void ToggleMembersSection()
+	{
+		showMembersSection = !showMembersSection;
+	}
+
+	private static Type? GetUserCardType()
+	{
+		return Type.GetType("DotnetNiger.UI.Components.UserCard, DotnetNiger.UI")
+			?? Type.GetType("DotnetNiger.UI.UserCard, DotnetNiger.UI")
+			?? Type.GetType("UserCard, DotnetNiger.UI");
+	}
+
+	private static IDictionary<string, object> GetUserCardParameters(UserDto member)
+	{
+		return new Dictionary<string, object>
+		{
+			["User"] = member
+		};
+	}
+
+	private static UserDto CreateMember(string fullName, string role, string city, string country, IEnumerable<string> skills)
+	{
+		return new UserDto
+		{
+			Id = Guid.NewGuid(),
+			FullName = fullName,
+			Username = fullName.Replace(" ", string.Empty).ToLowerInvariant(),
+			Email = string.Empty,
+			PhoneNumber = string.Empty,
+			Bio = string.Empty,
+			AvatarUrl = string.Empty,
+			Country = country,
+			City = city,
+			IsActive = true,
+			CreatedAt = DateTime.UtcNow,
+			LastLoginAt = null,
+			Roles = new List<string> { role },
+			Skills = skills.ToList(),
+			SocialLinks = new List<SocialLinkDto>()
+		};
+	}
+
+	private sealed record ValueItem(string Title, string Icon, string IconBackground, string IconColor, string Description);
+
+	private sealed record MilestoneItem(string Year, string Title, string Icon, string BadgeBackground, string TitleColor, string Description);
+
+	private sealed record LeaderItem(string Name, string Role, string HeaderBackground, string RoleColor, string Description, IReadOnlyList<string> Tags);
+}

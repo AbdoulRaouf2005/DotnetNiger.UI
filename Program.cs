@@ -42,6 +42,7 @@ if (useMock)
     builder.Services.AddScoped<IEventService, EventService>();
     builder.Services.AddScoped<IResourceService, ResourceService>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
+    builder.Services.AddScoped<ICommentService, CommentService>();
 }
 else
 {

@@ -1,0 +1,32 @@
+@namespace DotnetNiger.UI.Components
+@using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Models.Requests
+@using DotnetNiger.UI.Services.Contracts
+
+@inject ICommentService CommentService
+
+<div class="space-y-6">
+    @foreach (var comment in Comments)
+    {
+        <CommentItem 
+            Comment="comment" 
+            OnReplySubmitted="OnReplySubmitted"
+            OnCommentUpdated="OnCommentUpdated"
+            OnCommentDeleted="OnCommentDeleted"
+            CurrentUserId="CommentService.CurrentUserId" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<CommentResponse> Comments { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnReplySubmitted { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentUpdated { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentDeleted { get; set; }
+}

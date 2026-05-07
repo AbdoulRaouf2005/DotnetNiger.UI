@@ -1,5 +1,7 @@
 ﻿@page "/evenements"
+@using DotnetNiger.UI.Components
 @inject IEventService EventService
+@inject IJSRuntime JS
 
 <PageTitle>Événements - .NET Niger</PageTitle>
 
@@ -48,88 +50,9 @@
 		else
 		{
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-				@foreach (var upcomingEvent in UpcomingEvents)
+				@foreach (var evt in AllEvents)
 				{
-					<article class="overflow-hidden rounded-xl bg-white shadow-sm">
-						<div class="h-36 bg-secondary"></div>
-						<div class="space-y-3 p-5">
-							<span class="inline-flex items-center gap-2 rounded-md bg-orange-500 px-3 py-1 text-xs font-semibold text-white">
-								<i class="fa-solid fa-calendar-days text-xs"></i>
-								@upcomingEvent.StartDate.ToString("dd MMM yyyy HH:mm")
-							</span>
-
-							<h3 class="text-2xl font-bold text-secondary">@upcomingEvent.Title</h3>
-							<p class="text-sm leading-relaxed text-gray-600">@upcomingEvent.Description</p>
-
-							<a href="@BuildEventUrl(upcomingEvent)" class="mt-1 inline-flex h-10 w-full items-center justify-center rounded-md bg-secondary text-sm font-semibold text-white transition hover:brightness-110">S'inscrire</a>
-						</div>
-					</article>
-				}
-			</div>
-		}
-	</div>
-</section>
-
-<section class="bg-[#f5f5f7] px-4 py-14 sm:px-6 lg:px-10">
-	<div class="mx-auto w-full max-w-6xl">
-		<div class="mb-10 text-center">
-			<h2 class="text-3xl font-extrabold text-secondary sm:text-5xl">Événements Passés</h2>
-			<p class="mt-3 text-sm text-gray-700 sm:text-base">Revivez nos événements précédents et accédez aux ressources partagées</p>
-		</div>
-
-		<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
-			<button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary" aria-label="Filtrer les événements passés">
-				<i class="fa-solid fa-sliders text-base"></i>
-			</button>
-
-			<select class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-				<option>Année d’événement</option>
-				<option>2026</option>
-				<option>2025</option>
-				<option>2024</option>
-			</select>
-
-			<select class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-				<option>Type d’événement</option>
-				<option>Conférence</option>
-				<option>Atelier</option>
-				<option>Meetup</option>
-			</select>
-
-			<label class="relative w-full min-w-[220px] flex-1">
-				<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-					<i class="fa-solid fa-magnifying-glass text-sm"></i>
-				</span>
-				<input type="search" placeholder="Rechercher un événement..." class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-			</label>
-		</div>
-
-		@if (!IsLoading && string.IsNullOrWhiteSpace(LoadError))
-		{
-			<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-				@foreach (var pastEvent in PastEvents)
-				{
-					<article class="overflow-hidden rounded-xl bg-white shadow-sm">
-						<div class="relative flex h-52 items-center justify-center bg-secondary">
-							<span class="absolute left-3 top-3 inline-flex items-center rounded-sm bg-orange-500 px-2 py-1 text-[11px] font-semibold text-white">Passé</span>
-							<div class="flex h-14 w-14 items-center justify-center rounded-xl bg-white text-secondary shadow-sm">
-								<i class="fa-solid fa-play text-2xl"></i>
-							</div>
-						</div>
-
-						<div class="space-y-3 p-4">
-							<div class="flex items-center justify-between gap-4">
-								<h3 class="text-2xl font-bold text-secondary">@pastEvent.Title</h3>
-								<span class="inline-flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 text-xs font-semibold text-white">
-									<i class="fa-solid fa-calendar-days text-xs"></i>
-									@pastEvent.StartDate.ToString("dd MMM yyyy")
-								</span>
-							</div>
-
-							<p class="text-sm leading-relaxed text-gray-600">@pastEvent.Description</p>
-							<a href="@BuildEventUrl(pastEvent)" class="inline-flex text-sm font-semibold text-secondary hover:underline">Voir les détails</a>
-						</div>
-					</article>
+					<EventCard Event="@evt" />
 				}
 			</div>
 		}
@@ -139,24 +62,22 @@
 <Footer />
 
 @code {
-	private IReadOnlyList<EventDto> UpcomingEvents { get; set; } = Array.Empty<EventDto>();
-	private IReadOnlyList<EventDto> PastEvents { get; set; } = Array.Empty<EventDto>();
+	public List<EventDto> AllEvents = new();
 	private bool IsLoading { get; set; } = true;
 	private string? LoadError { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		try
 		{
-			var upcoming = await EventService.GetUpcomingEventsAsync();
-			var past = await EventService.GetPastEventsAsync();
-
-			UpcomingEvents = upcoming;
-			PastEvents = past;
+			AllEvents = await EventService.GetPublishedEventsAsync();
+			await JS.InvokeVoidAsync("console.log", AllEvents);
 		}
-		catch
+		catch (Exception ex)
 		{
-			LoadError = "Impossible de charger les événements pour le moment.";
+			LoadError = "Impossible de charger les événements.";
+			await JS.InvokeVoidAsync("console.error", ex.ToString());
 		}
 		finally
 		{
@@ -164,6 +85,7 @@
 		}
 	}
 
+ 
 	private static string BuildEventUrl(EventDto eventDto)
 	{
 		if (!string.IsNullOrWhiteSpace(eventDto.Slug))
@@ -172,5 +94,12 @@
 		}
 
 		return $"/evenements/{eventDto.Id}";
+	}
+
+	private async Task NavigateToEvent(EventDto eventDto)
+	{
+		var url = BuildEventUrl(eventDto);
+		// Navigation will be handled through normal link navigation
+		// This method is called from EventCard on button click
 	}
 }

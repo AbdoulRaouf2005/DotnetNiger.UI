@@ -1,1 +1,96 @@
-@* TODO: Page publique "Partenaires" à implémenter. *@
+@page "/partners"
+
+<main class="bg-white">
+	<section class="bg-purple-50 py-16">
+		<div class="max-w-6xl mx-auto px-6">
+			<h2 class="text-3xl md:text-4xl font-extrabold text-center text-secondary">Nos Partenaires Locaux</h2>
+			<p class="mt-2 text-center text-gray-600">Partenaires qui soutiennent et collaborent avec notre communauté</p>
+
+			<div class="mt-10 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+				@for (var i = 0; i < 3; i++)
+				{
+					<div class="bg-white rounded-xl p-6 shadow-md">
+						<div class="flex justify-center">
+							<div class="w-24 h-24 bg-gray-200 rounded-md"></div>
+						</div>
+						<div class="mt-4 text-center">
+							<div class="text-xs text-gray-500 uppercase">Education</div>
+							<a class="block mt-2 text-secondary font-semibold hover:underline">Université Abdou Moumouni</a>
+							<p class="mt-2 text-sm text-gray-600">Plateforme innovante offrant des espaces de travail collaboratifs pour les startups et développeurs</p>
+							<div class="mt-4 flex items-center justify-center space-x-4">
+								<a class="text-secondary hover:text-[#512BD4]/50" aria-label="Facebook">
+									<i class="fa-brands fa-facebook"></i>
+								</a>
+								<a class="text-secondary hover:text-[#512BD4]/50" aria-label="LinkedIn">
+									<i class="fa-brands fa-linkedlin"></i>
+								</a>
+								<a class="text-secondary hover:text-[#512BD4]/50" aria-label="X">
+									<i class="fa-brands fa-x-twitter"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<div class="mt-8 flex justify-center">
+				<button class="bg-secondary text-white px-6 py-2 rounded-full shadow">VOIR TOUS</button>
+			</div>
+		</div>
+	</section>
+
+	<section class="py-16">
+		<div class="max-w-6xl mx-auto px-6">
+			<h2 class="text-2xl md:text-3xl font-extrabold text-center text-secondary">Nos sponsors</h2>
+			<p class="mt-2 text-center text-gray-600">Sponsors qui soutiennent nos événements et initiatives communautaires</p>
+
+			<div class="mt-8 grid gap-8 grid-cols-1 md:grid-cols-2"> 
+				@for (var i = 0; i < 2; i++)
+				{
+					<div class="bg-white rounded-xl p-6 shadow-md flex items-start gap-6">
+						<div class="w-28 h-20 bg-gray-200 rounded-md flex-shrink-0"></div>
+						<div class="flex-1">
+							<div class="font-semibold">Université Abdou Moumouni</div>
+							<div class="text-sm text-orange-500 mt-1">Principal - Conférence .NET 2026</div>
+							<div class="text-xs text-gray-400">Sponsor depuis 2024</div>
+							<p class="mt-3 text-sm text-gray-600">Sponsors qui soutiennent nos événements et initiatives communautaires,description du sponsors</p>
+							<div class="mt-4 flex gap-3">
+								<button class="bg-secondary text-white px-4 py-2 rounded">Visiter</button>
+								<button class="border border-secondary text-secondary px-4 py-2 rounded">En savoir plus</button>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<div class="mt-8 flex justify-center">
+				<button class="border border-secondary text-secondary px-6 py-2 rounded-full">Devenir Sponsor</button>
+			</div>
+		</div>
+	</section>
+
+	<section class="bg-gray-100 py-12">
+		<div class="max-w-6xl mx-auto px-6">
+			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+				<div class="bg-white rounded-lg shadow p-6 text-center">
+					<div class="text-3xl md:text-4xl font-extrabold text-secondary">12+</div>
+					<div class="text-xs text-gray-500 mt-2">Partenaires Locaux</div>
+				</div>
+				<div class="bg-white rounded-lg shadow p-6 text-center">
+					<div class="text-3xl md:text-4xl font-extrabold text-secondary">8</div>
+					<div class="text-xs text-gray-500 mt-2">Sponsors Actifs</div>
+				</div>
+				<div class="bg-white rounded-lg shadow p-6 text-center">
+					<div class="text-3xl md:text-4xl font-extrabold text-secondary">500+</div>
+					<div class="text-xs text-gray-500 mt-2">Développeurs dans la Communauté</div>
+				</div>
+				<div class="bg-white rounded-lg shadow p-6 text-center">
+					<div class="text-3xl md:text-4xl font-extrabold text-secondary">24</div>
+					<div class="text-xs text-gray-500 mt-2">Événements cette Année</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<Footer/> 
+</main>
+

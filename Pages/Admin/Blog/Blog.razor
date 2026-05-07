@@ -62,7 +62,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             @foreach (var post in pagedPosts)
             {
-                <BlogCard post="@post" OnPostDeleted="() => HandleDeletePost(post.Id)" />
+                <AdminBlogCard post="@post" OnPostDeleted="() => HandleDeletePost(post.Id)" />
             }
         </div>
     }
@@ -73,7 +73,7 @@
     </div>
     
 </div>
-
+ 
 @code {
     private string viewMode = "list";
     private string searchQueryValue = string.Empty;

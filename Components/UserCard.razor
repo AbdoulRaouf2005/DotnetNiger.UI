@@ -1,0 +1,78 @@
+@namespace DotnetNiger.UI.Components
+
+@using DotnetNiger.UI.Models.Responses
+
+<article class="rounded-3xl border border-white bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_14px_34px_rgba(15,23,42,0.10)]">
+      <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+                  <img src="@GetAvatarUrl()" alt="@GetDisplayName()" class="h-12 w-12 rounded-full border-2 border-[#ECE7FF] object-cover" />
+                  <div>
+                        <h3 class="text-sm font-bold text-slate-900">@GetDisplayName()</h3>
+                        <p class="text-xs font-semibold text-[#F97316]">@GetRole()</p>
+                  </div>
+            </div>
+            <div class="flex items-center gap-2 text-slate-400">
+                  <i class="fa-solid fa-link text-xs"></i>
+            </div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-2 text-xs text-slate-500">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>@GetLocation()</span>
+      </div>
+
+      @if (User?.Skills?.Any() == true)
+      {
+            <div class="mt-4 flex flex-wrap gap-2">
+                  @foreach (var skill in User!.Skills)
+                  {
+                        <span class="rounded-lg bg-green-500/25 px-3 py-1 text-[11px] font-bold text-green-500">@skill</span>
+                  }
+            </div>
+      }
+</article>
+
+@code {
+      [Parameter]
+      public UserDto? User { get; set; }
+
+      private string GetDisplayName()
+      {
+            if (string.IsNullOrWhiteSpace(User?.FullName))
+            {
+                  return string.IsNullOrWhiteSpace(User?.Username) ? "Membre" : User!.Username;
+            }
+
+            return User!.FullName;
+      }
+
+      private string GetRole()
+      {
+            return User?.Roles?.FirstOrDefault() ?? "Membre";
+      }
+
+      private string GetLocation()
+      {
+            if (!string.IsNullOrWhiteSpace(User?.City) && !string.IsNullOrWhiteSpace(User?.Country))
+            {
+                  return $"{User.City}, {User.Country}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(User?.City))
+            {
+                  return User.City;
+            }
+
+            if (!string.IsNullOrWhiteSpace(User?.Country))
+            {
+                  return User.Country;
+            }
+
+            return "Localisation indisponible";
+      }
+
+      private string GetAvatarUrl()
+      {
+            return string.IsNullOrWhiteSpace(User?.AvatarUrl) ? "/Images/upload/user.png" : User.AvatarUrl;
+      }
+}

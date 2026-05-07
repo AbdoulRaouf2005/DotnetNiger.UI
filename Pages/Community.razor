@@ -1,3 +1,46 @@
 @page "/Community"
-@* Page publique : espace communauté (placeholder actuel). *@
-<h1>Bienvenu sur la page community</h1>
+@using DotnetNiger.UI.Components
+@* Page publique : espace communauté — implémentation fidèle au design fourni *@
+
+<div class="bg-gray-50 text-gray-800">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+		<header class="text-center mb-12">
+			<h2 class="text-3xl lg:text-4xl font-extrabold text-secondary">Meetups et Evenements</h2>
+			<p class="mt-3 text-sm text-gray-600">Les plus populaires des evenements</p>
+		</header>
+
+		<section class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+			@for (int i = 0; i < 6; i++)
+			{
+				<EventCard/>
+			}
+		</section>
+
+		<div class="mt-10 text-center">
+			<button class="bg-secondary text-white px-6 py-3 rounded-md shadow">Voir d'autres événements</button>
+		</div>
+	</div>
+
+	<section class="bg-purple-50 py-16">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+			<header class="text-center mb-8">
+				<h2 class="text-2xl font-extrabold">Projets Open Source de la Communauté</h2>
+				<p class="mt-2 text-sm text-gray-600">Découvrez et contribuez aux projets créés par les développeurs .NET Niger</p>
+			</header>
+
+			<div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+				@for (int j = 0; j < 2; j++)
+				{
+					<ProjectCard/>	
+				}
+			</div>
+
+			<div class="mt-8 text-center">
+				<button class="bg-secondary text-white px-5 py-3 rounded-md inline-flex items-center space-x-2">
+					<i class="fa-brands fa-github"></i>
+					<span>Soumettre un Projet</span>
+				</button>
+			</div>
+		</div>
+	</section>
+</div>
