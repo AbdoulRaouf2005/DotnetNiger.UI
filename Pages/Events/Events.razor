@@ -7,15 +7,21 @@
 
 <section class="bg-[#e8e3f6] px-4 py-14 sm:px-6 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl">
-		<div class="mb-10 text-center">
-			<h1 class="text-3xl font-extrabold text-secondary sm:text-5xl">Événements et Meetups .NET Niger</h1>
-			<p class="mt-3 text-sm text-gray-700 sm:text-base">Découvrez tous nos événements en ligne et en personne</p>
+		<div class="mb-8 sm:mb-10 text-center">
+			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Événements et Meetups .NET Niger</h1>
+			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700">Découvrez tous nos événements en ligne et en personne</p>
 		</div>
 
 		<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
 			<button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary" aria-label="Filtrer les événements">
 				<i class="fa-solid fa-sliders text-base"></i>
 			</button>
+			<label class="relative w-full min-w-[220px] flex-1">
+				<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
+					<i class="fa-solid fa-magnifying-glass text-sm"></i>
+				</span>
+				<input type="search" placeholder="Rechercher un événement..." class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
+			</label>
 
 			<select class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
 				<option>Lieu d’événement</option>
@@ -31,25 +37,20 @@
 				<option>Ce trimestre</option>
 			</select>
 
-			<label class="relative w-full min-w-[220px] flex-1">
-				<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-					<i class="fa-solid fa-magnifying-glass text-sm"></i>
-				</span>
-				<input type="search" placeholder="Rechercher un événement..." class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-			</label>
+			
 		</div>
 
 		@if (IsLoading)
 		{
-			<div class="rounded-xl bg-white p-6 text-sm text-gray-600 shadow-sm">Chargement des événements...</div>
+			<div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm md:text-base text-gray-600 shadow-sm">Chargement des événements...</div>
 		}
 		else if (!string.IsNullOrWhiteSpace(LoadError))
 		{
-			<div class="rounded-xl bg-red-50 p-6 text-sm text-red-600 shadow-sm">@LoadError</div>
+			<div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm md:text-base text-red-600 shadow-sm">@LoadError</div>
 		}
 		else
 		{
-			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
 				@foreach (var evt in AllEvents)
 				{
 					<EventCard Event="@evt" />
