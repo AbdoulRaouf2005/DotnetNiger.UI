@@ -73,6 +73,15 @@ else
                 sp.GetRequiredService<CustomAuthStateProvider>(),
                 sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
             sp.GetRequiredService<CustomAuthStateProvider>()));
+
+    builder.Services.AddScoped<ICommentService>(sp =>
+        new ApiCommentService(
+            CreateGatewayHttpClient(
+                apiBaseUrl,
+                sp.GetRequiredService<ClientIdentifierProvider>(),
+                sp.GetRequiredService<CustomAuthStateProvider>(),
+                sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>()));
 }
 
 await builder.Build().RunAsync();
