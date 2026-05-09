@@ -57,7 +57,11 @@ public class ApiPostService : IPostService
 
     public async Task<PostDto?> GetPostByIdAsync(Guid id)
     {
-        return await _http.GetFromJsonAsync<PostDto>($"{PublicBase}/{id}");
+        var response = await _http.GetAsync($"{PublicBase}/{id}");
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await ApiResponseReader.ReadAsync<PostDto>(response);
     }
 
     public async Task<PostDto?> GetPostBySlugAsync(string slug)
