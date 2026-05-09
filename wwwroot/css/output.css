@@ -1164,10 +1164,6 @@ video {
   min-width: 1rem;
 }
 
-.min-w-\[120px\]{
-  min-width: 120px;
-}
-
 .min-w-\[170px\]{
   min-width: 170px;
 }
@@ -1253,11 +1249,6 @@ video {
 
 .translate-x-0{
   --tw-translate-x: 0px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.rotate-45{
-  --tw-rotate: 45deg;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
