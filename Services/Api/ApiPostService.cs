@@ -8,8 +8,8 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiPostService : IPostService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/posts";
-    private const string SearchBase = "api/search";
+    private const string PublicBase = "api/v1/posts";
+    private const string SearchBase = "api/v1/search";
 
     public ApiPostService(HttpClient http)
     {

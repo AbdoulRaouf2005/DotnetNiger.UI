@@ -21,7 +21,7 @@ public class ApiCommentService : ICommentService
 
     public async Task<List<CommentResponse>> GetCommentsByPostIdAsync(Guid postId)
     {
-        var response = await _http.GetAsync($"api/comments/post/{postId}");
+        var response = await _http.GetAsync($"api/v1/comments/post/{postId}");
         if (!response.IsSuccessStatusCode)
             return [];
 
@@ -30,7 +30,7 @@ public class ApiCommentService : ICommentService
 
     public async Task<List<CommentResponse>> GetCommentsByEventIdAsync(Guid eventId)
     {
-        var response = await _http.GetAsync($"api/comments/event/{eventId}");
+        var response = await _http.GetAsync($"api/v1/comments/event/{eventId}");
         if (!response.IsSuccessStatusCode)
             return [];
 
@@ -39,7 +39,7 @@ public class ApiCommentService : ICommentService
 
     public async Task<CommentResponse?> GetCommentByIdAsync(Guid id)
     {
-        var response = await _http.GetAsync($"api/comments/{id}");
+        var response = await _http.GetAsync($"api/v1/comments/{id}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -56,7 +56,7 @@ public class ApiCommentService : ICommentService
             parentCommentId = ParseGuidOrNull(request.ParentCommentId)
         };
 
-        var response = await _http.PostAsJsonAsync("api/comments", payload);
+        var response = await _http.PostAsJsonAsync("api/v1/comments", payload);
         response.EnsureSuccessStatusCode();
 
         return await ApiResponseReader.ReadAsync<CommentResponse>(response)
@@ -69,7 +69,7 @@ public class ApiCommentService : ICommentService
             return null;
 
         var payload = new { content = request.Content };
-        var response = await _http.PutAsJsonAsync($"api/comments/{commentId}", payload);
+        var response = await _http.PutAsJsonAsync($"api/v1/comments/{commentId}", payload);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -82,8 +82,8 @@ public class ApiCommentService : ICommentService
             return false;
 
         var url = request.DeleteAllReplies
-            ? $"api/comments/{commentId}?deleteAllReplies=true"
-            : $"api/comments/{commentId}";
+            ? $"api/v1/comments/{commentId}?deleteAllReplies=true"
+            : $"api/v1/comments/{commentId}";
 
         var response = await _http.DeleteAsync(url);
         return response.IsSuccessStatusCode;

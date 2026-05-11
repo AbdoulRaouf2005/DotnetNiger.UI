@@ -8,9 +8,9 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiEventService : IEventService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/events";
-    private const string AdminBase = "api/community/admin/events";
-    private const string SearchBase = "api/search";
+    private const string PublicBase = "api/v1/events";
+    private const string AdminBase = "api/v1/admin/events";
+    private const string SearchBase = "api/v1/search";
 
     public ApiEventService(HttpClient http)
     {
