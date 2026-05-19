@@ -3,8 +3,6 @@
 @using DotnetNiger.UI.Services.Contracts
 
 @inject ICommentService CommentService
-
-<div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
     <div class="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <!-- User avatar -->
         <div class="h-9 w-9 flex-shrink-0 rounded-full bg-[#e5edf9] flex items-center justify-center text-sm font-bold text-[#5b4df5]">
@@ -14,58 +12,19 @@
         <div class="flex-1">
             <input 
                 type="text" 
-                @onfocus="FocusInput"
                 placeholder="Tapez votre commentaire..." 
                 class="w-full border-0 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
+                @onclick="async () => { if (!string.IsNullOrWhiteSpace(commentContent)) await HandleSubmit(); }"
                 @bind="commentContent" />
         </div>
-
-        @if (!isExpanded)
-        {
             <button 
                 type="button" 
                 class="flex h-10 w-10 items-center justify-center rounded-full bg-[#5b4df5] text-white shadow-lg shadow-[#5b4df5]/30 hover:bg-[#4a3cd5] transition"
                 @onclick="async () => { if (!string.IsNullOrWhiteSpace(commentContent)) await HandleSubmit(); }">
                 <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
-        }
+        
     </div>
-
-    @if (isExpanded)
-    {
-        <div class="mt-4 space-y-3">
-            <textarea 
-                @ref="textareaRef"
-                @bind="commentContent"
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5] resize-none"
-                rows="4"
-                placeholder="Partagez votre avis sur cet article..."></textarea>
-
-            <div class="flex gap-2 justify-end">
-                <button 
-                    type="button"
-                    class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition"
-                    @onclick="() => { isExpanded = false; commentContent = string.Empty; }">
-                    Annuler
-                </button>
-                <button 
-                    type="button"
-                    class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5] transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled="@string.IsNullOrWhiteSpace(commentContent)"
-                    @onclick="HandleSubmit">
-                    @if (isSubmitting)
-                    {
-                        <span>Envoi...</span>
-                    }
-                    else
-                    {
-                        <span>Publier le commentaire</span>
-                    }
-                </button>
-            </div>
-        </div>
-    }
-</div>
 
 @code {
     [Parameter]
@@ -77,12 +36,9 @@
     [Parameter]
     public EventCallback OnCommentAdded { get; set; }
 
-    private bool isExpanded;
     private bool isSubmitting;
     private string commentContent = string.Empty;
     private ElementReference textareaRef;
-
-    private void FocusInput() => isExpanded = true;
 
     private async Task HandleSubmit()
     {
@@ -103,7 +59,6 @@
 
             await CommentService.CreateCommentAsync(request);
             commentContent = string.Empty;
-            isExpanded = false;
             await OnCommentAdded.InvokeAsync();
         }
         finally

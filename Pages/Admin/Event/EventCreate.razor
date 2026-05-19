@@ -1,5 +1,5 @@
 @page "/admin/events/nouveau"
-@page "/admin/events/{Id:guid}"
+@* @page "/admin/events/{Id:guid}" *@
 @* Page admin : création d'un nouvel événement. *@
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
@@ -20,7 +20,7 @@
 
     <!-- Form -->
     <div class="bg-white rounded-lg shadow p-6">
-        <EditForm Model="@eventRequest" OnValidSubmit="HandleSubmit">
+        <EditForm Model="@eventRequest">
             <DataAnnotationsValidator />
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -146,25 +146,14 @@
 
             <!-- Action Buttons -->
             <div class="flex gap-4">
-                <button type="button" 
-                       @onclick="SaveDraft"
-                       class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
-                    <i class="fas fa-save"></i>
-                    En attente
-                </button>
                 <button type="submit" 
                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
-                    <i class="fas fa-bullhorn"></i>
+                    <i class="fas fa-paper-plane"></i>
                     Publier
                 </button>
+               
                 <button type="button" 
-                       @onclick="ArchiveEvent"
-                       class="bg-gray-700 hover:bg-gray-800 text-white px-6 py-3 rounded-lg flex items-center gap-2">
-                    <i class="fas fa-box-archive"></i>
-                    Archiver
-                </button>
-                <button type="button" 
-                       @onclick="Preview"
+                       
                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
                     <i class="fas fa-eye"></i>
                     Aperçu
@@ -243,75 +232,6 @@
         }
     }
 
-    private async Task SaveDraft()
-    {
-        try
-        {
-            eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
-            eventRequest.IsPublished = false;
-            eventRequest.IsArchived = false;
-            await SaveOrUpdateAsync();
-            await JS.InvokeVoidAsync("alert", "Événement mis en attente avec succès !");
-            GoBack();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error saving draft: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", "Erreur lors de la sauvegarde.");
-        }
-    }
-
-    private async Task HandleSubmit()
-    {
-        try
-        {
-            eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
-            eventRequest.IsPublished = true;
-            eventRequest.IsArchived = false;
-            await SaveOrUpdateAsync();
-            await JS.InvokeVoidAsync("alert", "Événement publié avec succès !");
-            GoBack();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error publishing event: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", "Erreur lors de la publication.");
-        }
-    }
-
-    private async Task Preview()
-    {
-        try
-        {
-            // Get content from TinyMCE
-            eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
-            
-            // TODO: Open preview in modal or new page
-            await JS.InvokeVoidAsync("alert", $"Aperçu de: {eventRequest.Title}\n\n{eventRequest.Description}");
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error showing preview: {ex.Message}");
-        }
-    }
-
-    private async Task ArchiveEvent()
-    {
-        try
-        {
-            eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
-            eventRequest.IsPublished = false;
-            eventRequest.IsArchived = true;
-            await SaveOrUpdateAsync();
-            await JS.InvokeVoidAsync("alert", "Événement archivé avec succès !");
-            GoBack();
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error archiving event: {ex.Message}");
-            await JS.InvokeVoidAsync("alert", "Erreur lors de l'archivage.");
-        }
-    }
 
     private async Task SaveOrUpdateAsync()
     {

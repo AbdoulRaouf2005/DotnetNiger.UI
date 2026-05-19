@@ -3,10 +3,11 @@ using System.Text;
 using System.Text.Json;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Auth;
 
-public class AuthService
+public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
@@ -143,31 +144,70 @@ public class AuthService
 
     public async Task<ApiSuccessResponse<AuthDto>> RegisterAsync(RegisterRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/auth/register", request);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            var errorMessage = await TryReadErrorMessageAsync(response.Content);
+            var response = await _http.PostAsJsonAsync("api/auth/register", request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await TryReadErrorMessageAsync(response.Content);
 
+                return new ApiSuccessResponse<AuthDto>
+                {
+                    Success = false,
+                    Message = !string.IsNullOrWhiteSpace(errorMessage)
+                        ? errorMessage
+                        : $"Inscription impossible (HTTP {(int)response.StatusCode})."
+                };
+            }
+
+            var wrapped = await response.Content.ReadFromJsonAsync<ApiSuccessResponse<AuthDto>>();
+            var result = wrapped ?? new ApiSuccessResponse<AuthDto>
+            {
+                Success = false,
+                Message = "Erreur lors de l'inscription."
+            };
+
+            if (result.Success && result.Data?.Token is not null)
+                await _authProvider.SaveTokensAsync(result.Data.Token.AccessToken, result.Data.Token.RefreshToken);
+
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
             return new ApiSuccessResponse<AuthDto>
             {
                 Success = false,
-                Message = !string.IsNullOrWhiteSpace(errorMessage)
-                    ? errorMessage
-                    : $"Inscription impossible (HTTP {(int)response.StatusCode})."
+                Message = ex.Message
+            };
+        }
+        catch (TaskCanceledException)
+        {
+            return new ApiSuccessResponse<AuthDto>
+            {
+                Success = false,
+                Message = "Le serveur a mis trop de temps à répondre."
+            };
+        }
+    }
+
+    public async Task<ApiSuccessResponse<Guid>> RegisterStep1Async(RegisterRequest request)
+    {
+        var result = await RegisterAsync(request);
+        if (!result.Success || result.Data?.User is null)
+        {
+            return new ApiSuccessResponse<Guid>
+            {
+                Success = false,
+                Message = result.Message ?? "Erreur lors de l'étape d'inscription."
             };
         }
 
-        var wrapped = await response.Content.ReadFromJsonAsync<ApiSuccessResponse<AuthDto>>();
-        var result = wrapped ?? new ApiSuccessResponse<AuthDto>
+        return new ApiSuccessResponse<Guid>
         {
-            Success = false,
-            Message = "Erreur lors de l'inscription."
+            Success = true,
+            Message = result.Message ?? "Étape 1 validée.",
+            Data = result.Data.User.Id
         };
-
-        if (result.Success && result.Data?.Token is not null)
-            await _authProvider.SaveTokensAsync(result.Data.Token.AccessToken, result.Data.Token.RefreshToken);
-
-        return result;
     }
 
     public async Task LogoutAsync()

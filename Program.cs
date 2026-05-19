@@ -38,14 +38,17 @@ var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
+    builder.Services.AddScoped<IAuthService, MockAuthService>();
     builder.Services.AddScoped<IPostService, PostService>();
     builder.Services.AddScoped<IEventService, EventService>();
     builder.Services.AddScoped<IResourceService, ResourceService>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
     builder.Services.AddScoped<ICommentService, CommentService>();
+    builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
 }
 else
 {
+    builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
     builder.Services.AddScoped<IPostService>(sp =>
         new ApiPostService(CreateGatewayHttpClient(
             apiBaseUrl,
@@ -73,6 +76,8 @@ else
                 sp.GetRequiredService<CustomAuthStateProvider>(),
                 sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
             sp.GetRequiredService<CustomAuthStateProvider>()));
+
+    builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
 }
 
 await builder.Build().RunAsync();

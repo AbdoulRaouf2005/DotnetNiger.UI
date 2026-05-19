@@ -1,0 +1,279 @@
+@page "/admin/events/{Id:guid}"
+@* Page admin : détail d'événement avec le même rendu visuel que la partie utilisateur. *@
+@using Microsoft.AspNetCore.Components.Web
+@using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Services.Contracts
+@using System.Globalization
+@inject IEventService EventService
+@inject NavigationManager NavigationManager
+
+<section class="min-h-screen bg-[#ececef] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
+	<div class="mx-auto w-full max-w-6xl space-y-4">
+		<div class="flex items-center justify-between gap-4">
+			<nav aria-label="Fil d'ariane" class="text-xs sm:text-sm text-slate-500">
+				<ol class="flex flex-wrap items-center gap-2">
+					<li><a href="/admin/dashboard" class="transition-colors hover:text-slate-700">Admin</a></li>
+					<li><i class="fas fa-angle-right text-[10px] text-slate-400" aria-hidden="true"></i></li>
+					<li><a href="/admin/events" class="transition-colors hover:text-slate-700">Événements</a></li>
+					<li><i class="fas fa-angle-right text-[10px] text-slate-400" aria-hidden="true"></i></li>
+					<li class="font-semibold text-slate-700">Détail</li>
+				</ol>
+			</nav>
+
+			<button @onclick="GoBack"
+					class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-black/5 transition hover:bg-gray-50">
+				<i class="fas fa-arrow-left text-sm"></i>
+				<span>Retour</span>
+			</button>
+		</div>
+
+		@if (IsLoading)
+		{
+			<div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement de l'événement...</div>
+		}
+		else if (!string.IsNullOrWhiteSpace(LoadError))
+		{
+			<div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@LoadError</div>
+		}
+		else if (CurrentEvent is not null)
+		{
+			<article class="overflow-hidden rounded-xl bg-white shadow-sm">
+				<div class="relative h-64 bg-secondary bg-cover bg-center sm:h-80" style="@BuildCoverStyle(CurrentEvent.CoverImageUrl)">
+					<div class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></div>
+					<div class="absolute bottom-0 left-0 right-0 p-4 sm:p-8">
+						<div class="flex flex-wrap items-center gap-2">
+							<span class="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
+								<i class="fa-solid fa-satellite-dish text-[9px] sm:text-[10px]"></i>
+								@GetEventTypeLabel(CurrentEvent.EventType)
+							</span>
+							<span class="inline-flex items-center gap-1 rounded-md bg-white/90 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-gray-700">
+								@(CurrentEvent.IsArchived ? "Archivé" : CurrentEvent.IsPublished ? "Publié" : "En attente")
+							</span>
+						</div>
+						<h1 class="mt-3 text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-white">@CurrentEvent.Title</h1>
+					</div>
+				</div>
+
+				<div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
+					<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+						<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
+							<span class="inline-flex items-center gap-1.5 sm:gap-2">
+								<i class="fa-regular fa-calendar text-secondary"></i>
+								@CurrentEvent.StartDate.ToString("dd MMMM yyyy HH:mm", FrCulture)
+							</span>
+							<span class="inline-flex items-center gap-1.5 sm:gap-2">
+								<i class="fa-solid fa-location-dot text-secondary"></i>
+								@CurrentEvent.Location
+							</span>
+						</div>
+
+						<div class="flex flex-wrap items-center gap-2">
+							<button @onclick="EditEvent"
+								class="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-xs sm:text-sm font-semibold text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50">
+								Modifier
+							</button>
+							@if (CurrentEvent.IsPublished && !CurrentEvent.IsArchived)
+							{
+								<button @onclick="ArchiveEvent"
+									class="inline-flex h-10 items-center justify-center rounded-lg bg-amber-500 px-4 text-xs sm:text-sm font-semibold text-white transition hover:brightness-95">
+									Archiver
+								</button>
+							}
+							else if (CurrentEvent.IsArchived)
+							{
+								<button @onclick="PublishEvent"
+									class="inline-flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-xs sm:text-sm font-semibold text-white transition hover:brightness-95">
+									Publier
+								</button>
+							}
+							else
+							{
+								<button @onclick="PublishEvent"
+									class="inline-flex h-10 items-center justify-center rounded-lg bg-secondary px-4 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110">
+									Publier
+								</button>
+							}
+							<button @onclick="DeleteEvent"
+								class="inline-flex h-10 items-center justify-center rounded-lg bg-red-600 px-4 text-xs sm:text-sm font-semibold text-white transition hover:brightness-95">
+								Supprimer
+							</button>
+						</div>
+					</div>
+
+					<div class="flex flex-wrap items-center gap-3 pt-1">
+						<div>
+							<p class="text-xs sm:text-sm font-semibold text-gray-700">@CurrentEvent.RegisteredCount inscrits</p>
+							<p class="text-[11px] sm:text-xs text-gray-500">Capacité : @CurrentEvent.Capacity</p>
+						</div>
+						<div>
+							<p class="text-xs sm:text-sm font-semibold text-gray-700">Organisateur</p>
+							<p class="text-[11px] sm:text-xs text-gray-500">@CurrentEvent.OrganizerName</p>
+						</div>
+					</div>
+				</div>
+			</article>
+
+			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 relative">
+				<article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+					<h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">À propos de l'événement</h2>
+					<p class="mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed text-gray-600">@CurrentEvent.Description</p>
+				</article>
+
+				<aside class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+					<div class="flex items-start justify-between gap-4">
+						<div>
+							<p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">Détails</p>
+							<h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">Informations admin</h2>
+							<p class="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">Consultation rapide des métadonnées de l'événement.</p>
+						</div>
+						<div class="flex h-11 w-11 items-center justify-center rounded-md bg-indigo-50 text-secondary">
+							<i class="fa-solid fa-circle-info"></i>
+						</div>
+					</div>
+
+					<div class="mt-5 space-y-3 text-xs sm:text-sm text-gray-600">
+						<div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2">
+							<span>Slug</span>
+							<span class="font-mono text-gray-900">@CurrentEvent.Slug</span>
+						</div>
+						<div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2">
+							<span>Début</span>
+							<span class="font-mono text-gray-900">@CurrentEvent.StartDate.ToString("dd/MM/yyyy HH:mm")</span>
+						</div>
+						<div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2">
+							<span>Fin</span>
+							<span class="font-mono text-gray-900">@CurrentEvent.EndDate.ToString("dd/MM/yyyy HH:mm")</span>
+						</div>
+						<div class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2">
+							<span>Type</span>
+							<span class="font-mono text-gray-900">@CurrentEvent.EventType</span>
+						</div>
+						<div class="flex items-center justify-between gap-3">
+							<span>État</span>
+							<span class="font-mono text-gray-900">@(CurrentEvent.IsArchived ? "Archivé" : CurrentEvent.IsPublished ? "Publié" : "En attente")</span>
+						</div>
+					</div>
+				</aside>
+			</div>
+
+			@if (CurrentEvent.Medias?.Any() == true)
+			{
+				<div class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+					<h2 class="text-lg sm:text-xl font-bold text-gray-700">Médias</h2>
+					<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+						@foreach (var media in CurrentEvent.Medias)
+						{
+							<div class="overflow-hidden rounded-lg bg-gray-100">
+								<img src="@media.Url" alt="@CurrentEvent.Title" class="h-32 w-full object-cover" />
+							</div>
+						}
+					</div>
+				</div>
+			}
+		}
+	</div>
+</section>
+
+@code {
+	[Parameter] public Guid Id { get; set; }
+
+	private static readonly CultureInfo FrCulture = CultureInfo.GetCultureInfo("fr-FR");
+	private EventDto? CurrentEvent { get; set; }
+	private bool IsLoading { get; set; } = true;
+	private string? LoadError { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (Id == Guid.Empty)
+		{
+			IsLoading = false;
+			LoadError = "Identifiant d'événement invalide.";
+			return;
+		}
+
+		try
+		{
+			CurrentEvent = await EventService.GetEventByIdAsync(Id);
+			if (CurrentEvent is null)
+			{
+				LoadError = "L'événement demandé n'existe pas.";
+			}
+		}
+		catch (Exception ex)
+		{
+			LoadError = ex.Message;
+		}
+		finally
+		{
+			IsLoading = false;
+		}
+	}
+
+	private static string GetEventTypeLabel(string? eventType)
+	{
+		return string.IsNullOrWhiteSpace(eventType) ? "Événement" : eventType;
+	}
+
+	private static string BuildCoverStyle(string? coverImageUrl)
+	{
+		var url = string.IsNullOrWhiteSpace(coverImageUrl) ? "/Images/ImageBlog.jpg" : coverImageUrl;
+		return $"background-image: url('{url}');";
+	}
+
+	private void GoBack()
+	{
+		NavigationManager.NavigateTo("/admin/events");
+	}
+
+	private void EditEvent()
+	{
+		if (CurrentEvent is null)
+		{
+			return;
+		}
+
+		NavigationManager.NavigateTo($"/admin/events/edit/{CurrentEvent.Id}");
+	}
+
+	private async Task PublishEvent()
+	{
+		if (CurrentEvent is null)
+		{
+			return;
+		}
+
+		await EventService.TogglePublishAsync(CurrentEvent.Id);
+		CurrentEvent.IsPublished = true;
+		CurrentEvent.IsArchived = false;
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task ArchiveEvent()
+	{
+		if (CurrentEvent is null)
+		{
+			return;
+		}
+
+		if (!CurrentEvent.IsPublished || CurrentEvent.IsArchived)
+		{
+			return;
+		}
+
+		await EventService.TogglePublishAsync(CurrentEvent.Id);
+		CurrentEvent.IsPublished = false;
+		CurrentEvent.IsArchived = true;
+		await InvokeAsync(StateHasChanged);
+	}
+
+	private async Task DeleteEvent()
+	{
+		if (CurrentEvent is null)
+		{
+			return;
+		}
+
+		await EventService.DeleteEventAsync(CurrentEvent.Id);
+		NavigationManager.NavigateTo("/admin/events");
+	}
+}

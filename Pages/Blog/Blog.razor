@@ -9,7 +9,7 @@
 	<div class="mx-auto w-full max-w-6xl">
 		<div class="mb-6 sm:mb-8 text-center">
 			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">DotnetBlog</h1>
-			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-secondary/80">un espace ouvert à tous les acteurs du numérique : technologies, actualités, projets, événements, partage d'expérience.</p>
+			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base leading-6 sm:leading-7 text-secondary/80">un espace ouvert à tous les acteurs du numérique : technologies, actualités, projets, événements, partage d'expérience.</p>
 		</div>
 
 			<div class="mb-8 sm:mb-10 flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 rounded-md bg-white p-3 sm:p-4 shadow-sm">
@@ -23,7 +23,7 @@
 					<span class="pointer-events-none absolute inset-y-0 left-3 sm:left-4 flex items-center text-gray-400">
 						<i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
 					</span>
-					<input type="search" placeholder="Rechercher un événement..."
+					<input type="search" placeholder="Rechercher un article..."
 						class="h-10 sm:h-12 w-full rounded-md border border-gray-100 bg-white pl-10 sm:pl-12 pr-3 sm:pr-4 text-xs sm:text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
 				</label>
 
@@ -36,7 +36,7 @@
 				</select>
 			</div>
 
-			<h2 class="mb-6 sm:mb-8 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Nouveauté .NET</h2>
+			<h2 class="mb-6 sm:mb-8 text-center text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Nouveauté .NET</h2>
 
 			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
 				@if (IsLoading)
@@ -68,8 +68,6 @@
 				}
 			</div>
 		</section>
-
-<Footer /> 
 
 @code {
 	private List<PostDto>? allPosts;

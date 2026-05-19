@@ -5,10 +5,6 @@ namespace DotnetNiger.UI.Models.Requests;
 
 public class RegisterRequest
 {
-    [Required(ErrorMessage = "Le nom d'utilisateur est requis")]
-    [StringLength(50, MinimumLength = 3)]
-    public string Username { get; set; } = string.Empty;
-
     [Required]
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
@@ -21,6 +17,5 @@ public class RegisterRequest
     [StringLength(100)]
     public string FullName { get; set; } = string.Empty;
 
-    public string Country { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
+    public string Provider { get; set; } = "Email"; // "Email", "Google", "GitHub", "Microsoft"
 }

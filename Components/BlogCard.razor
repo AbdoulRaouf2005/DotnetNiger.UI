@@ -3,9 +3,13 @@
 @using System.Net
 @using System.Globalization
 
-<article class="group overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg">
-      <a href="@((!string.IsNullOrWhiteSpace(post?.Slug) ? $"/blog/{post.Slug}" : $"/blog/{post?.Id}"))" class="block h-32 sm:h-40 md:h-44 overflow-hidden bg-secondary relative">
-            <img src="@(post?.CoverImageUrl ?? "https://via.placeholder.com/300x200")"
+@{
+      var postUrl = !string.IsNullOrWhiteSpace(post?.Slug) ? $"/blog/{post.Slug}" : $"/blog/{post?.Id}";
+}
+
+<a href="@postUrl" class="group block overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg">
+      <div class="block h-32 sm:h-40 md:h-44 overflow-hidden bg-secondary relative">
+                 <img src="@(post?.CoverImageUrl ?? "/Images/ImageBlog.jpg")"
                    alt="@post?.Title"
                    class="h-full w-full object-cover transition group-hover:scale-105" />
 
@@ -14,7 +18,7 @@
                   <i class="fas fa-eye"></i>
                   @post?.ViewCount
             </span>
-      </a>
+      </div>
 
       <div class="space-y-2 sm:space-y-3 p-3 sm:p-4">
             @if (post?.Categories?.Any() == true)
@@ -25,9 +29,7 @@
             }
 
             <h3 class="text-sm sm:text-base md:text-lg lg:text-xl font-bold leading-snug text-gray-900">
-                  <a href="@($"/blog/{post?.Id}")" class="transition hover:text-secondary">
-                        @post?.Title
-                  </a>
+                  <span class="transition hover:text-secondary">@post?.Title</span>
             </h3>
 
             <p class="text-xs sm:text-sm leading-relaxed text-gray-600">@GetPreviewText()</p>
@@ -37,7 +39,7 @@
                   <span class="text-[10px] sm:text-xs text-gray-600">@post?.PublishedAt.ToString("dd MMM. yyyy", CultureInfo.GetCultureInfo("fr-FR"))</span>
             </div>
       </div>
-</article>
+</a>
 
 @code {
       [Parameter]

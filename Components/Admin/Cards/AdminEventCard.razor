@@ -1,65 +1,44 @@
-@* Composant carte : affichage d'un post avec menu d'actions contextuelles. *@
+@* Carte admin des événements avec menu d'actions harmonisé. *@
 @using DotnetNiger.UI.Models.Responses
-@inject NavigationManager NavigationManager 
+@inject NavigationManager NavigationManager
 
-<div class="relative h-full overflow-hidden rounded-xl bg-white shadow-lg">
-    <div class="relative h-40 sm:h-48 md:h-56 w-full">
-        <img src="@(Event?.CoverImageUrl ?? "/Images/ImageBlog.jpg")" class="h-full w-full object-cover" alt="@Event?.Title">
+<div class="group overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+    <div class="relative h-44 w-full overflow-hidden">
+        <img src="@(Event?.CoverImageUrl ?? "/Images/ImageBlog.jpg")" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" alt="@Event?.Title">
     </div>
-    <div class="p-4 sm:p-5 md:p-6">
-        <div class="mb-2 flex items-center justify-between">
-            <span class="H5 text-text">@Event?.Title</span>
-            <div class="relative inline-block">
-                <button @onclick="ToggleMenu" class="rounded-full p-2 transition hover:bg-gray-200">
-                    <i class="fas fa-ellipsis-vertical text-2xl text-gray-600"></i>
-                </button>
-                @if (isOpen)
-                {
-                    <div
-                        class="absolute right-0 z-50 mt-2 w-40 p-2 border border-[#D9D9D9] rounded-lg bg-white shadow-lg transition duration-1000 ease-in transform origin-top-right">
-                        <button @onclick="EditEvent" class="flex w-full gap-2 px-4 py-2 text-[#3498DB]">
-                            <i class="fas fa-pen text-xl text-[#3498DB]"></i> <span class="Link">Modifier</span>
-                        </button>
-                        @if (!IsPublished)
-                        {
-                            <button @onclick="SetPublished" class="flex w-full gap-2 px-4 py-2 text-green-600">
-                                <i class="fas fa-circle-check text-xl text-green-600"></i> <span class="Link">Publier</span>
-                            </button>
-                        }
-                        @if (!IsPending)
-                        {
-                            <button @onclick="SetPending" class="flex w-full gap-2 px-4 py-2 text-amber-500">
-                                <i class="fas fa-clock text-xl text-amber-500"></i> <span class="Link">En attente</span>
-                            </button>
-                        }
-                        @if (!IsArchived)
-                        {
-                            <button @onclick="SetArchived" class="flex w-full gap-2 px-4 py-2 text-gray-600">
-                                <i class="fas fa-box-archive text-xl text-gray-600"></i> <span class="Link">Archiver</span>
-                            </button>
-                        }
-                        <button @onclick="DeleteEvent" class="flex w-full gap-2 px-4 py-2 text-[#F0483E]">
-                            <i class="fas fa-trash text-xl text-[#F0483E]"></i> <span class="Link">Supprimer</span>
-                        </button>
-                    </div>
-                }
+
+    <div class="p-5">
+        <div class="mb-3 flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h3 class="truncate text-lg font-semibold text-[#111827]">@Event?.Title</h3>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="rounded-full px-3 py-1 text-xs font-semibold @StatusCssClass">
+                        <span class="mr-1 inline-block h-2 w-2 rounded-full @StatusDotCssClass"></span>
+                        @StatusLabel
+                    </span>
+                    <span class="rounded-full bg-[#F4F2F2] px-3 py-1 text-xs font-semibold text-gray-700">@Event?.EventType</span>
+                </div>
             </div>
-        </div>
-        <div class="mb-2">
-            <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold @StatusCssClass">
-                <span class="h-2 w-2 rounded-full @StatusDotCssClass"></span>
-                @StatusLabel
-            </span>
-        </div>
-        <div class="mb-2">
-            <span class="body-small text-text">
-                @Event?.Description
-            </span>
+
+            <AdminActionDropdown ItemId="@(Event?.Id ?? Guid.Empty)"
+                                 Status="@(IsPending ? "Pending" : "Published")"
+                                 ViewLabel="Voir l'événement"
+                                 EditLabel="Modifier"
+                                 DeleteLabel="Supprimer"
+                                 ApproveLabel="Publier"
+                                 RejectLabel="Rejeter"
+                                 OnView="OpenEvent"
+                                 OnEdit="EditEvent"
+                                 OnDelete="DeleteEvent"
+                                 OnApprove="SetPublished"
+                                 OnReject="DeleteEvent" />
         </div>
 
-        <div class="flex justify-between">
-            <span class="Button text-text">@Event?.OrganizerName</span>
-            <span class="Button text-text">@Event?.StartDate.ToString("dd/MM/yyyy HH:mm")</span>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-[#4b5563]">@Event?.Description</p>
+
+        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-[#4b5563]">
+            <span class="truncate font-medium">@Event?.OrganizerName</span>
+            <span class="whitespace-nowrap">@Event?.StartDate.ToString("dd/MM/yyyy HH:mm")</span>
         </div>
     </div>
 </div>
@@ -79,8 +58,6 @@
 
     [Parameter]
     public EventCallback<Guid> OnSetArchived { get; set; }
-
-    private bool isOpen = false;
 
     private bool IsArchived => Event?.IsArchived == true;
     private bool IsPublished => Event?.IsPublished == true && !IsArchived;
@@ -104,50 +81,41 @@
             ? "bg-green-500"
             : "bg-amber-500";
 
-    [JSInvokable]
-    public void CloseMenu()
+    private Task OpenEvent(Guid id)
     {
-        isOpen = false;
-        StateHasChanged();
+        if (Event is null) return Task.CompletedTask;
+        NavigationManager.NavigateTo($"/admin/events/{Event.Id}");
+        return Task.CompletedTask;
     }
 
-    void ToggleMenu()
-    {
-        isOpen = !isOpen;
-    }
-
-    Task EditEvent()
+    private Task EditEvent(Guid id)
     {
         if (Event is null) return Task.CompletedTask;
         NavigationManager.NavigateTo($"/admin/events/edit/{Event.Id}");
         return Task.CompletedTask;
     }
 
-    async Task DeleteEvent()
+    private async Task DeleteEvent(Guid id)
     {
         if (Event is null) return;
         await OnEventDeleted.InvokeAsync();
-        isOpen = false;
     }
 
-    async Task SetPending()
+    private async Task SetPending(Guid id)
     {
         if (Event is null) return;
         await OnSetPending.InvokeAsync(Event.Id);
-        isOpen = false;
     }
 
-    async Task SetPublished()
+    private async Task SetPublished(Guid id)
     {
         if (Event is null) return;
         await OnSetPublished.InvokeAsync(Event.Id);
-        isOpen = false;
     }
 
-    async Task SetArchived()
+    private async Task SetArchived(Guid id)
     {
         if (Event is null) return;
         await OnSetArchived.InvokeAsync(Event.Id);
-        isOpen = false;
     }
 }

@@ -11,11 +11,11 @@
 		<div class="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#7c5cff]/10 blur-3xl"></div>
 
 		<div class="relative mx-auto flex max-w-4xl flex-col items-center text-center">
-			<h1 class="max-w-3xl text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
+			<h1 class="max-w-3xl text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl md:text-4xl lg:text-5xl">
 				Qui sommes-nous ?
 			</h1>
 
-			<p class="mt-6 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
+			<p class="mt-4 sm:mt-6 max-w-3xl text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7 md:text-base lg:text-lg">
 				.NET Niger est plus qu’une simple communauté de développeurs : c’est un catalyseur de la
 				transformation numérique au Sahel. Fondée par des passionnés de l’écosystème Microsoft, notre
 				organisation s’est donnée pour mission de démocratiser l’accès aux technologies de pointe et de
@@ -23,11 +23,11 @@
 				notre époque.
 			</p>
 
-			<div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-				<a href="#vision" class="inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.30)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+			<div class="mt-7 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+				<a href="#vision" class="inline-flex items-center justify-center rounded-lg bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.30)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
 					Découvrir Notre Vision
 				</a>
-				<a href="#equipe" class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-6 py-3 text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-[#512BD4]/30 hover:bg-[#fbfaff]">
+				<a href="#equipe" class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-[#512BD4]/30 hover:bg-[#fbfaff]">
 					Rencontrer l’équipe
 				</a>
 			</div>
@@ -40,10 +40,10 @@
 			<div class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
 				Notre mission
 			</div>
-			<h2 class="mx-auto max-w-3xl text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold leading-tight text-slate-900">
+				<h2 class="mx-auto max-w-3xl text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl font-extrabold leading-tight text-slate-900">
 				Propulser le Talent Local au Sommet de la Tech Mondiale.
 			</h2>
-			<p class="mx-auto mt-4 sm:mt-6 max-w-3xl text-xs sm:text-sm md:text-base lg:text-lg leading-7 text-slate-600">
+				<p class="mx-auto mt-4 sm:mt-6 max-w-3xl text-xs sm:text-sm md:text-base lg:text-lg leading-6 sm:leading-7 text-slate-600">
 				Nous croyons que le Niger possède un potentiel technologique inexploité. Notre mission est de
 				fournir les outils, les connaissances et le réseau nécessaires pour que chaque développeur .NET
 				puisse exceller, innover et contribuer au progrès numérique de notre nation.
@@ -58,7 +58,7 @@
 				<div class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
 					Nos valeurs fondamentales
 				</div>
-				<h2 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-slate-900">
+				<h2 class="text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-slate-900">
 					Ce qui guide notre communauté
 				</h2>
 			</div>
@@ -111,33 +111,33 @@
 	</section>
 
 	<!-- LEADERSHIP -->
-	<section id="equipe" class="px-4 py-20 sm:px-6 lg:px-8">
+		<section id="equipe" class="px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-6xl">
 			<div class="text-center">
-				<h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+				<h2 class="text-2xl font-extrabold text-slate-900 sm:text-3xl md:text-4xl">
 					L’équipe de direction
 				</h2>
-				<p class="mt-3 text-sm text-slate-500">
+				<p class="mt-3 text-xs sm:text-sm text-slate-500">
 					Les visages derrière la communauté.
 				</p>
 			</div>
 
-			<div class="mt-12 grid gap-6 lg:grid-cols-3">
+			<div class="mt-8 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
 				@foreach (var leader in leaders)
 				{
 					<article class="overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
-						<div class="relative h-72 overflow-hidden bg-gradient-to-br @leader.HeaderBackground">
+						<div class="relative h-56 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-br @leader.HeaderBackground">
 							<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.20),_transparent_48%)]"></div>
 							<img src="/Images/upload/user.png" alt="@leader.Name" class="absolute inset-0 h-full w-full object-cover object-center opacity-90" />
 						</div>
 
-						<div class="space-y-4 p-5">
+						<div class="space-y-3 p-4 sm:space-y-4 sm:p-5">
 							<div>
-								<h3 class="text-lg font-bold text-slate-900">@leader.Name</h3>
-								<p class="text-sm font-semibold text-[#F97316]">@leader.Role</p>
+								<h3 class="text-base sm:text-lg font-bold text-slate-900">@leader.Name</h3>
+								<p class="text-xs sm:text-sm font-semibold text-[#F97316]">@leader.Role</p>
 							</div>
 
-							<p class="text-sm leading-7 text-slate-600">@leader.Description</p>
+							<p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600">@leader.Description</p>
 						</div>
 					</article>
 				}
@@ -146,42 +146,42 @@
 	</section>
 
 	<!-- MEMBERS -->
-	<section class="bg-[#F7F8FC] px-4 py-16 sm:px-6 lg:px-8">
+		<section class="bg-[#F7F8FC] px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
 		<div class="mx-auto max-w-6xl text-center">
-			<button type="button" @onclick="ToggleMembersSection" class="inline-flex items-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+			<button type="button" @onclick="ToggleMembersSection" class="inline-flex items-center gap-2 rounded-full bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
 				<i class="fa-solid @MembersToggleIconClass"></i>
 				<span>@(showMembersSection ? "Masquer les membres" : "Voir tous les membres")</span>
 			</button>
 
 			@if (showMembersSection)
 			{
-				<div class="mt-8 rounded-3xl border border-white bg-white p-4 text-left shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+				<div class="mt-6 sm:mt-8 rounded-3xl border border-white bg-white p-4 text-left shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
 					<div class="grid gap-3 lg:grid-cols-[auto,1fr,auto,auto,auto] lg:items-center">
-						<button class="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition hover:border-[#512BD4]/30 hover:text-[#512BD4]">
+						<button class="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition hover:border-[#512BD4]/30 hover:text-[#512BD4]">
 							<i class="fa-solid fa-sliders"></i>
 						</button>
 
 						<label class="relative block">
 							<span class="sr-only">Rechercher un membre</span>
 							<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-							<input type="text" value="" placeholder="Rechercher un membre..." class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none transition focus:border-[#512BD4]/40 focus:bg-white" />
+							<input type="text" value="" placeholder="Rechercher un membre..." class="h-11 sm:h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-xs sm:text-sm outline-none transition focus:border-[#512BD4]/40 focus:bg-white" />
 						</label>
 
-						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+						<select class="h-11 sm:h-12 rounded-2xl border border-slate-200 bg-white px-4 text-xs sm:text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
 							<option>Rôle</option>
 							<option>Développeur</option>
 							<option>Designer</option>
 							<option>Mentor</option>
 						</select>
 
-						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+						<select class="h-11 sm:h-12 rounded-2xl border border-slate-200 bg-white px-4 text-xs sm:text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
 							<option>Type</option>
 							<option>Senior</option>
 							<option>Junior</option>
 							<option>Lead</option>
 						</select>
 
-						<select class="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
+						<select class="h-11 sm:h-12 rounded-2xl border border-slate-200 bg-white px-4 text-xs sm:text-sm text-slate-600 outline-none transition focus:border-[#512BD4]/40">
 							<option>Réseau</option>
 							<option>Niamey</option>
 							<option>Maradi</option>
@@ -189,26 +189,26 @@
 						</select>
 					</div>
 
-					<div class="mt-10 flex items-center gap-3">
-						<h2 class="text-2xl font-extrabold text-slate-900">Membres</h2>
+					<div class="mt-8 sm:mt-10 flex items-center gap-3">
+						<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Membres</h2>
 						<span class="rounded-full bg-[#ECE7FF] px-3 py-1 text-xs font-bold text-[#512BD4]">@members.Count</span>
 					</div>
 
-					<div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+					<div class="mt-5 sm:mt-6 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
 						@foreach (var member in members)
 						{
 							<DynamicComponent Type="@GetUserCardType()" Parameters="@GetUserCardParameters(member)" />
 						}
 					</div>
 
-					<div class="mt-8 flex items-center justify-center gap-3">
-						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm text-slate-400">
+					<div class="mt-6 sm:mt-8 flex items-center justify-center gap-3">
+						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 sm:px-4 text-xs sm:text-sm text-slate-400">
 							<i class="fa-solid fa-arrow-left"></i>
 							<span>Préc</span>
 						</button>
-						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-900 bg-white text-sm font-semibold text-slate-900">1</button>
-						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-600">2</button>
-						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-900 bg-white px-4 text-sm font-semibold text-slate-900">
+						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-900 bg-white text-xs sm:text-sm font-semibold text-slate-900">1</button>
+						<button class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600">2</button>
+						<button class="flex h-10 items-center gap-2 rounded-xl border border-slate-900 bg-white px-3 sm:px-4 text-xs sm:text-sm font-semibold text-slate-900">
 							<span>Suiv</span>
 							<i class="fa-solid fa-arrow-right"></i>
 						</button>
@@ -217,8 +217,6 @@
 			}
 		</div>
 	</section>
-
-	<Footer />
 </div>
 
 @code {

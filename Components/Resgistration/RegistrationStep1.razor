@@ -1,0 +1,91 @@
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+            @ErrorMessage
+        </div>
+    }
+
+    <div class="grid grid-cols-1 gap-4 mb-4">
+        <div class="flex gap-3">
+            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                <i class="fab fa-google text-lg"></i>
+                Google
+            </button>
+            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                <i class="fab fa-github text-lg"></i>
+                GitHub
+            </button>
+            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                <i class="fab fa-microsoft text-lg"></i>
+                Microsoft
+            </button>
+        </div>
+
+        <div class="flex items-center justify-center text-xs text-gray-400">ou</div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+            <InputText @bind-Value="Model.FullName" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Votre nom complet" />
+            <ValidationMessage For="@(() => Model.FullName)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
+            <InputText @bind-Value="Model.Email" type="email" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="vous@exemple.com" />
+            <ValidationMessage For="@(() => Model.Email)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+            <div class="relative">
+                <InputText @bind-Value="Model.Password" type="@(showPassword ? "text" : "password")" class="w-full rounded-lg border border-gray-200 px-4 py-3 pr-10 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Minimum 8 caractères" />
+                <button type="button" @onclick="TogglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    @if (showPassword)
+                    {
+                        <i class="fas fa-eye"></i>
+                    }
+                    else
+                    {
+                        <i class="fas fa-eye-slash"></i>
+                    }
+                </button>
+            </div>
+            <ValidationMessage For="@(() => Model.Password)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <div class="bg-green-50 border border-green-100 rounded-lg p-4 text-sm text-green-700">
+            <strong>Action requise :</strong> Pour valider votre adhésion, vous devez détenir le certificat Foundational C# with Microsoft.
+        </div>
+
+        <button type="submit" disabled="@IsLoading" class="w-full rounded-full bg-purple-700 text-white py-3 font-semibold hover:bg-purple-800 shadow-md disabled:opacity-70">
+            @(IsLoading ? "Inscription en cours..." : "Créer mon compte")
+        </button>
+
+        <p class="text-center text-sm text-gray-500">
+            Déjà membre ? <a href="/login" class="text-orange-500 font-medium">Se connecter</a>
+        </p>
+    </div>
+</EditForm>
+
+@code {
+    private bool showPassword;
+
+    [Parameter, EditorRequired]
+    public RegisterRequest Model { get; set; } = default!;
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public EventCallback<RegisterRequest> OnSubmit { get; set; }
+
+    private Task HandleValidSubmit() => OnSubmit.InvokeAsync(Model);
+
+    private void TogglePassword() => showPassword = !showPassword;
+}

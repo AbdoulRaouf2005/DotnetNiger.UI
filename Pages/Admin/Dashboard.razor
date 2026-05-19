@@ -6,142 +6,520 @@
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
 
-<div class="px-4 py-6 md:px-8 md:py-8 bg-[#F4F2F2]">
-	<AdminBreadcrumb />
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
+	<div class="mx-auto max-w-7xl">
+		<AdminBreadcrumb />
 
-	@* En-tête principal du dashboard *@
-	<section>
-		<p class="body-regular text-text">Aperçu rapide des performances et activités clés du site.</p>
-	</section>
+		<section class="mt-2 flex flex-col gap-3">
+			<div class="inline-flex items-center gap-2 text-sm font-semibold text-[#5b4df5]">
+				<span class="h-2.5 w-2.5 rounded-full bg-[#5b4df5]"></span>
+				Administration
+			</div>
+			<div>
+				<h1 class="text-3xl font-bold tracking-tight text-[#111827] md:text-4xl">Tableau de bord</h1>
+				<p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Aperçu rapide des performances, des validations en attente et des activités clés du site.</p>
+			</div>
+		</section>
 
-	@* Cartes de synthèse (KPI) *@
-	<section class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-		@foreach (var metric in Metrics)
-		{
-			<article class="overflow-hidden rounded-md bg-white shadow-lg">
-				<div class="flex flex-col items-center justify-center gap-2 px-6 py-7">
-					<i class="@metric.IconClass text-2xl text-indigo-700"></i>
-					<p class="H3 leading-none text-text">@metric.Value</p>
-					<p class="body-small text-text">@metric.Label</p>
+		<section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+			@foreach (var metric in Metrics)
+			{
+				<article class="overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+					<div class="flex min-h-[150px] flex-col items-center justify-center gap-3 px-6 py-7 text-center">
+						<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+							<i class="@metric.IconClass text-2xl"></i>
+						</div>
+						<p class="text-4xl font-semibold leading-none text-[#111827]">@metric.Value</p>
+						<p class="text-sm font-medium text-[#4b5563]">@metric.Label</p>
+					</div>
+					<button type="button" class="flex w-full items-center justify-center gap-2 border-t border-[#EEEAFE] bg-[#EEEAFE] px-4 py-3 text-sm font-semibold text-[#111827] transition hover:brightness-95" @onclick='() => Navigation.NavigateTo(metric.Url)'>
+						Voir Les Détails <i class="fas fa-angle-double-right text-xs"></i>
+					</button>
+				</article>
+			}
+		</section>
+
+		<section class="mt-8 grid gap-6 xl:grid-cols-2">
+			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+							<i class="fas fa-user-plus text-lg"></i>
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold text-[#111827]">File de validation</h2>
+							<p class="text-sm text-[#6b7280]">Articles en attente</p>
+						</div>
+					</div>
+					<span class="rounded-full bg-[#EEEAFE] px-3 py-1 text-xs font-semibold text-[#5b4df5]">@PendingPosts.Count</span>
 				</div>
-				<button type="button" class="w-full bg-[#EEEAFE] hover:bg-hover py-2 Button text-text transition hover:brightness-95" @onclick='() => Navigation.NavigateTo(metric.Url)'>
-					Voir Les Détails <i class="fas fa-angle-double-right ml-1"></i>
-				</button>
+
+				<div class="mt-5 space-y-3">
+					@if (PendingPosts.Count == 0)
+					{
+						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun article en attente de validation.</p>
+					}
+					else
+					{
+						@foreach (var item in PendingPosts)
+						{
+							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-3">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 text-[#5b4df5]">
+										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
+										{
+											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
+										}
+										else
+										{
+											<i class="fas fa-pen-nib text-base"></i>
+										}
+									</div>
+									<div class="min-w-0">
+										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
+										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+									</div>
+								</div>
+								<AdminActionDropdown ItemId="item.Id"
+												Status="Pending"
+												ViewLabel="Voir"
+												EditLabel="Modifier"
+												DeleteLabel="Supprimer"
+												ApproveLabel="Approuver"
+												RejectLabel="Rejeter"
+												OnView="HandleViewAsync"
+												OnEdit="HandleEditAsync"
+												OnDelete="HandleDeleteAsync"
+												OnApprove="HandleApproveAsync"
+												OnReject="HandleRejectAsync" />
+							</div>
+						}
+					}
+				</div>
 			</article>
-		}
-	</section>
 
-	@* Listes récentes : événements et articles *@
-	<section class="mt-10 grid gap-8 lg:grid-cols-2">
-		<article class="rounded-lg bg-white p-4 shadow-lg md:p-5">
-			<h2 class="H4 text-black">Evènements</h2>
-			<div class="mt-4 space-y-3">
-				@foreach (var item in Events)
-				{
-					<div class="flex items-center justify-between gap-3 bg-gray-100 px-3 py-2 rounded-md">
-						<div class="flex min-w-0 items-center gap-3">
-							<div class="h-12 w-12 flex-shrink-0 bg-blue-700"></div>
-							<div class="min-w-0">
-								<p class="truncate Badge text-black">@item.Title</p>
-								<p class="text-xs font-semibold text-[#666666]">@item.Author &nbsp; &nbsp; @item.Date</p>
-							</div>
+			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF6FF] text-[#2563eb]">
+							<i class="fas fa-calendar-check text-lg"></i>
 						</div>
-						<span class="rounded-md bg-[#73F8AB] px-3 py-1.5 Badge text-[#27AE60]">Publié</span>
+						<div>
+							<h2 class="text-lg font-semibold text-[#111827]">File de validation</h2>
+							<p class="text-sm text-[#6b7280]">Événements en attente</p>
+						</div>
 					</div>
-				}
-				@if (Events.Count == 0)
-				{
-					<p class="py-4 text-lg text-text">Aucun évènement disponible.</p>
-				}
-			</div>
-		</article>
+					<span class="rounded-full bg-[#EEF6FF] px-3 py-1 text-xs font-semibold text-[#2563eb]">@PendingEvents.Count</span>
+				</div>
 
-		<article class="rounded-lg bg-white p-4 shadow-lg md:p-5">
-			<h2 class="H4 text-black">Articles</h2>
-			<div class="mt-4 space-y-3">
-				@foreach (var item in Articles)
-				{
-					<div class="flex items-center justify-between gap-3 bg-gray-100 px-3 py-2 rounded-md">
-						<div class="flex min-w-0 items-center gap-3">
-							<div class="h-12 w-12 flex-shrink-0 bg-blue-700"></div>
-							<div class="min-w-0">
-								<p class="truncate Badge text-black">@item.Title</p>
-								<p class="text-xs font-semibold text-[#666666]">@item.Author &nbsp; &nbsp; @item.Date</p>
+				<div class="mt-5 space-y-3">
+					@if (PendingEvents.Count == 0)
+					{
+						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun événement en attente de validation.</p>
+					}
+					else
+					{
+						@foreach (var item in PendingEvents)
+						{
+							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-3">
+									<div class="h-11 w-11 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
+										{
+											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
+										}
+										else
+										{
+											<div class="flex h-full w-full items-center justify-center text-[#5b4df5]"><i class="fas fa-pen-nib"></i></div>
+										}
+									</div>
+									<div class="min-w-0">
+										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
+										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+									</div>
+								</div>
+								<AdminActionDropdown ItemId="item.Id"
+												Status="Pending"
+												ViewLabel="Voir"
+												EditLabel="Modifier"
+												DeleteLabel="Supprimer"
+												ApproveLabel="Approuver"
+												RejectLabel="Rejeter"
+												OnView="HandleViewAsync"
+												OnEdit="HandleEditAsync"
+												OnDelete="HandleDeleteAsync"
+												OnApprove="HandleApproveAsync"
+												OnReject="HandleRejectAsync" />
 							</div>
+						}
+					}
+				</div>
+			</article>
+
+			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F0FDF4] text-[#16a34a]">
+							<i class="fas fa-folder-open text-lg"></i>
 						</div>
-						<span class="rounded-md bg-[#73F8AB] px-3 py-1.5 Badge text-[#27AE60]">Publié</span>
+						<div>
+							<h2 class="text-lg font-semibold text-[#111827]">Ressources récentes</h2>
+							<p class="text-sm text-[#6b7280]">Documents les plus consultés</p>
+						</div>
 					</div>
-				}
-				@if (Articles.Count == 0)
-				{
-					<p class="py-4 text-lg text-text">Aucun article disponible.</p>
-				}
-			</div>
-		</article>
-	</section>
+					<span class="rounded-full bg-[#F0FDF4] px-3 py-1 text-xs font-semibold text-[#16a34a]">@RecentResources.Count</span>
+				</div>
+
+				<div class="mt-5 space-y-3">
+					@if (RecentResources.Count == 0)
+					{
+						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune ressource disponible.</p>
+					}
+					else
+					{
+						@foreach (var item in RecentResources)
+						{
+							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-3">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F3F4F6] text-[#111827]">
+										<i class="fas fa-folder-open text-base"></i>
+									</div>
+									<div class="min-w-0">
+										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
+										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+									</div>
+								</div>
+								<AdminActionDropdown ItemId="item.Id"
+												Status="Published"
+												ViewLabel="Voir"
+												EditLabel="Modifier"
+												DeleteLabel="Supprimer"
+												OnView="HandleViewAsync"
+												OnEdit="HandleEditAsync"
+												OnDelete="HandleDeleteAsync" />
+							</div>
+						}
+					}
+				</div>
+			</article>
+
+			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6 xl:col-span-2">
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF7ED] text-[#ea580c]">
+							<i class="fas fa-calendar-days text-lg"></i>
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold text-[#111827]">Événements récents</h2>
+							<p class="text-sm text-[#6b7280]">Dernières publications visibles</p>
+						</div>
+					</div>
+					<button type="button" class="text-sm font-semibold text-[#5b4df5] transition hover:text-[#4837e0]" @onclick='() => Navigation.NavigateTo("/admin/events")'>Voir tout</button>
+				</div>
+
+				<div class="mt-5 space-y-3">
+					@if (RecentEvents.Count == 0)
+					{
+						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun évènement récent disponible.</p>
+					}
+					else
+					{
+						@foreach (var item in RecentEvents)
+						{
+							<div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-3">
+									<div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
+										{
+											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
+										}
+										else
+										{
+											<div class="flex h-full w-full items-center justify-center text-[#5b4df5]"><i class="fas fa-calendar"></i></div>
+										}
+									</div>
+									<div class="min-w-0">
+										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
+										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+									</div>
+								</div>
+								<div class="flex items-center gap-3">
+									<span class="rounded-md px-3 py-1.5 text-xs font-semibold @GetEventStatusClass(item)">@GetEventStatusLabel(item)</span>
+									<AdminActionDropdown ItemId="item.Id"
+												Status="@(item.IsPublished ? "Published" : "Pending")"
+												ViewLabel="Voir l'article"
+												EditLabel="Modifier"
+												DeleteLabel="Supprimer"
+												ApproveLabel="Publier"
+												RejectLabel="Supprimer"
+												OnView="HandleViewAsync"
+												OnEdit="HandleEditAsync"
+												OnDelete="HandleDeleteAsync"
+												OnApprove="HandleApproveAsync"
+												OnReject="HandleRejectAsync" />
+								</div>
+							</div>
+						}
+					}
+				</div>
+			</article>
+		</section>
+	</div>
 </div>
 
 @code {
 	// Données affichées dans les cartes KPI.
 	private List<DashboardMetric> Metrics { get; set; } =
 	[
-		new() { IconClass = "fas fa-users", Value = 0, Label = "Utilisateurs" ,Url = "/admin/Users" },
-		new() { IconClass = "fas fa-calendar-alt", Value = 0, Label = "Événements" ,Url = "/admin/events"},
-		new() { IconClass = "fas fa-newspaper", Value = 0, Label = "Blogs" ,Url = "/admin/blog" },
-		new() { IconClass = "fas fa-newspaper", Value = 0, Label = "Ressources" ,Url = "/admin/ressources" }
+		new() { IconClass = "fas fa-users", Value = 0, Label = "Utilisateurs", Url = "/admin/Users" },
+		new() { IconClass = "fas fa-calendar-alt", Value = 0, Label = "Événements", Url = "/admin/events" },
+		new() { IconClass = "fas fa-newspaper", Value = 0, Label = "Blogs", Url = "/admin/blog" },
+		new() { IconClass = "fas fa-folder-open", Value = 0, Label = "Ressources", Url = "/admin/ressources" }
 	];
 
-	private List<DashboardItem> Events { get; set; } = [];
-	private List<DashboardItem> Articles { get; set; } = [];
+	private List<DashboardItem> PendingPosts { get; set; } = [];
+	private List<DashboardItem> PendingEvents { get; set; } = [];
+	private List<DashboardItem> RecentResources { get; set; } = [];
+	private List<DashboardItem> RecentEvents { get; set; } = [];
+	private UserDto? CurrentProfile { get; set; }
 
 	protected override async Task OnInitializedAsync()
+	{
+		await LoadDashboardAsync();
+	}
+
+	private async Task LoadDashboardAsync()
 	{
 		try
 		{
 			// Chargement via services (mock ou API selon Program.cs / appsettings.json).
-			var posts = await PostService.GetPublishedPostsAsync();
-			var events = await EventService.GetPublishedEventsAsync();
+			var posts = await PostService.GetAllPostsAsync();
+			var events = await EventService.GetAllEventsAsync();
 			var resources = await ResourceService.GetAllResourcesAsync();
-			var profile = await ProfileService.GetProfileAsync();
+			CurrentProfile = await ProfileService.GetProfileAsync();
 
 			// Mise à jour des compteurs KPI.
 			Metrics =
 			[
-				new() { IconClass = "fas fa-users", Value = profile is null ? 0 : 1, Label = "Utilisateurs",Url = "/admin/Users" },
-				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "Événements",Url = "/admin/events" },
-				new() { IconClass = "fas fa-newspaper", Value = posts.Count, Label = "Blogs",Url = "/admin/blog" },
-				new() { IconClass = "fas fa-newspaper", Value = resources.Count, Label = "Ressources",Url = "/admin/ressources" }
+				new() { IconClass = "fas fa-users", Value = CurrentProfile is null ? 0 : 1, Label = "Utilisateurs", Url = "/admin/Users" },
+				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "Événements", Url = "/admin/events" },
+				new() { IconClass = "fas fa-newspaper", Value = posts.Count, Label = "Blogs", Url = "/admin/blog" },
+				new() { IconClass = "fas fa-folder-open", Value = resources.Count, Label = "Ressources", Url = "/admin/ressources" }
 			];
 
-			// Données récentes affichées dans les deux colonnes.
-			Events = events
-				.OrderByDescending(e => e.StartDate)
-				.Take(6)
-				.Select(e => new DashboardItem
-				{
-					Title = e.Title,
-					Author = e.OrganizerName,
-					Date = e.StartDate.ToString("dd/MM/yyyy HH:mm")
-				})
-				.ToList();
-
-			Articles = posts
-				.OrderByDescending(p => p.PublishedAt)
-				.Take(6)
+			PendingPosts = posts
+				.Where(p => p.PublishedAt == DateTime.MinValue)
+				.OrderByDescending(p => p.Title)
+				.Take(4)
 				.Select(p => new DashboardItem
 				{
+					Kind = DashboardItemKind.Post,
+					Id = p.Id,
 					Title = p.Title,
-					Author = p.AuthorName,
-					Date = p.PublishedAt.ToString("dd/MM/yyyy HH:mm")
-				})
-				.ToList();
+					Subtitle = string.IsNullOrWhiteSpace(p.AuthorName) ? "Article en attente de publication" : $"{p.AuthorName} · {GetPublishLabel(p.PublishedAt)}",
+					CoverImageUrl = p.CoverImageUrl,
+					ViewRoute = $"/admin/blog/edit/{p.Id}",
+					EditRoute = $"/admin/blog/edit/{p.Id}",
+					ManageRoute = "/admin/blog",
+					IsPublished = false
+					}).ToList();
+
+			PendingEvents = events
+				.Where(e => !e.IsPublished && !e.IsArchived)
+				.OrderByDescending(e => e.StartDate)
+				.Take(4)
+				.Select(e => new DashboardItem
+				{
+					Kind = DashboardItemKind.Event,
+					Id = e.Id,
+					Title = e.Title,
+					Subtitle = $"{e.OrganizerName} · {e.StartDate:dd/MM/yyyy HH:mm}",
+					CoverImageUrl = e.CoverImageUrl,
+					ViewRoute = $"/admin/events/edit/{e.Id}",
+					EditRoute = $"/admin/events/edit/{e.Id}",
+					ManageRoute = "/admin/events",
+					IsPublished = e.IsPublished,
+					IsArchived = e.IsArchived
+				}).ToList();
+
+			RecentResources = resources
+				.OrderByDescending(r => r.ViewCount)
+				.Take(4)
+				.Select(r => new DashboardItem
+				{
+					Kind = DashboardItemKind.Resource,
+					Id = r.Id,
+					Title = r.Title,
+					Subtitle = string.IsNullOrWhiteSpace(r.ResourceType) ? r.Level : $"{r.ResourceType} · {r.Level}",
+					ViewRoute = "/admin/ressources",
+					EditRoute = "/admin/ressources",
+					ManageRoute = "/admin/ressources"
+				}).ToList();
+
+			RecentEvents = events
+				.OrderByDescending(e => e.StartDate)
+				.Take(4)
+				.Select(e => new DashboardItem
+				{
+					Kind = DashboardItemKind.Event,
+					Id = e.Id,
+					Title = e.Title,
+					Subtitle = $"{e.OrganizerName} · {e.StartDate:dd/MM/yyyy HH:mm}",
+					CoverImageUrl = e.CoverImageUrl,
+					ViewRoute = $"/admin/events/edit/{e.Id}",
+					EditRoute = $"/admin/events/edit/{e.Id}",
+					ManageRoute = "/admin/events",
+					IsPublished = e.IsPublished,
+					IsArchived = e.IsArchived
+				}).ToList();
 		}
 		catch
 		{
-			// Fallback simple si un service échoue.
-			Events = [];
-			Articles = [];
+			PendingPosts = [];
+			PendingEvents = [];
+			RecentResources = [];
+			RecentEvents = [];
 		}
+	}
+
+	private static string GetPublishLabel(DateTime publishedAt)
+	{
+		return publishedAt == DateTime.MinValue ? "En attente" : publishedAt.ToString("dd/MM/yyyy HH:mm");
+	}
+
+	private static string GetEventStatusLabel(DashboardItem item)
+	{
+		if (item.IsArchived)
+		{
+			return "Archivé";
+		}
+
+		return item.IsPublished ? "Publié" : "En attente";
+	}
+
+	private static string GetEventStatusClass(DashboardItem item)
+	{
+		if (item.IsArchived)
+		{
+			return "bg-gray-100 text-gray-700";
+		}
+
+		return item.IsPublished ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700";
+	}
+
+	private DashboardItem? FindItem(Guid id)
+	{
+		return PendingPosts.FirstOrDefault(item => item.Id == id)
+			?? PendingEvents.FirstOrDefault(item => item.Id == id)
+			?? RecentResources.FirstOrDefault(item => item.Id == id)
+			?? RecentEvents.FirstOrDefault(item => item.Id == id);
+	}
+
+	private async Task HandleViewAsync(Guid id)
+	{
+		var item = FindItem(id);
+		Navigation.NavigateTo(item?.ViewRoute ?? item?.EditRoute ?? "/admin/dashboard");
+		await Task.CompletedTask;
+	}
+
+	private async Task HandleEditAsync(Guid id)
+	{
+		var item = FindItem(id);
+		Navigation.NavigateTo(item?.EditRoute ?? item?.ManageRoute ?? "/admin/dashboard");
+		await Task.CompletedTask;
+	}
+
+	private async Task HandleDeleteAsync(Guid id)
+	{
+		var item = FindItem(id);
+
+		if (item is null)
+		{
+			return;
+		}
+
+		switch (item.Kind)
+		{
+			case DashboardItemKind.Post:
+				await PostService.DeletePostAsync(id);
+				break;
+			case DashboardItemKind.Event:
+				await EventService.DeleteEventAsync(id);
+				break;
+			case DashboardItemKind.Resource:
+				await ResourceService.DeleteResourceAsync(id);
+				break;
+		}
+
+		await LoadDashboardAsync();
+	}
+
+	private async Task HandleApproveAsync(Guid id)
+	{
+		var item = FindItem(id);
+
+		if (item is null)
+		{
+			return;
+		}
+
+		switch (item.Kind)
+		{
+			case DashboardItemKind.Post:
+				await PublishPostAsync(id);
+				break;
+			case DashboardItemKind.Event:
+				await EventService.TogglePublishAsync(id);
+				break;
+		}
+
+		await LoadDashboardAsync();
+	}
+
+	private async Task HandleRejectAsync(Guid id)
+	{
+		var item = FindItem(id);
+
+		if (item is null)
+		{
+			return;
+		}
+
+		switch (item.Kind)
+		{
+			case DashboardItemKind.Post:
+				await PostService.DeletePostAsync(id);
+				break;
+			case DashboardItemKind.Event:
+				await EventService.DeleteEventAsync(id);
+				break;
+		}
+
+		await LoadDashboardAsync();
+	}
+
+	private async Task PublishPostAsync(Guid id)
+	{
+		var post = await PostService.GetPostByIdAsync(id);
+		if (post is null)
+		{
+			return;
+		}
+
+		var updateRequest = new UpdatePostRequest
+		{
+			Title = post.Title,
+			Content = post.Content,
+			Excerpt = post.Excerpt,
+			CoverImageUrl = post.CoverImageUrl,
+			PostType = post.PostType,
+			SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
+			CategoryIds = post.Categories.Select(category => category.Id).ToList(),
+			TagNames = post.Tags.Select(tag => tag.Name).ToList(),
+			IsPublished = true
+		};
+
+		await PostService.UpdatePostAsync(id, updateRequest);
 	}
 
 	private sealed class DashboardMetric
@@ -149,13 +527,28 @@
 		public required string IconClass { get; set; }
 		public int Value { get; set; }
 		public required string Label { get; set; }
-		public required string Url {get;set;}
+		public required string Url { get; set; }
 	}
 
 	private sealed class DashboardItem
 	{
+		public DashboardItemKind Kind { get; set; }
+		public Guid Id { get; set; }
 		public required string Title { get; set; }
-		public required string Author { get; set; }
-		public required string Date { get; set; }
+		public string Subtitle { get; set; } = string.Empty;
+		public string AvatarUrl { get; set; } = string.Empty;
+		public string CoverImageUrl { get; set; } = string.Empty;
+		public string ViewRoute { get; set; } = string.Empty;
+		public string EditRoute { get; set; } = string.Empty;
+		public string ManageRoute { get; set; } = string.Empty;
+		public bool IsPublished { get; set; }
+		public bool IsArchived { get; set; }
+	}
+
+	private enum DashboardItemKind
+	{
+		Post,
+		Event,
+		Resource
 	}
 }

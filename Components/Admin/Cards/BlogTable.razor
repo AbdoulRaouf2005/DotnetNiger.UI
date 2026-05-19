@@ -1,109 +1,152 @@
-﻿@* Composant tableau : affichage des posts avec actions voir/éditer/supprimer. *@
+@* Tableau admin des articles avec actions harmonisées. *@
 @using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Models.Requests
 @using System.Net
 @using System.Text.RegularExpressions
+@inject IPostService PostService
 @inject NavigationManager NavigationManager
 
-<div class="overflow-hidden rounded-lg bg-white shadow">
-      <div class="overflow-x-auto">
-            <table class="w-full">
-                  <thead class="border-b border-gray-200">
-                        <tr>
-                              <th class="Button px-6 py-4 text-left text-text">Titre</th>
-                              <th class="Button px-6 py-4 text-left text-text">Auteur</th>
-                              <th class="Button px-6 py-4 text-left text-text">Catégories liées</th>
-                              <th class="Button px-6 py-4 text-left text-text">Type</th>
-                              <th class="Button px-6 py-4 text-left text-text">Aperçu</th>
-                              <th class="Button px-6 py-4 text-left text-text">Vue</th>
-                              <th class="Button px-6 py-4 text-left text-text">Statut</th>
-                              <th class="Button px-6 py-4 text-left text-text">Date</th>
-                              <th class="Button px-6 py-4 text-left text-text">Actions</th>
+<div class="overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="border-b border-gray-100 bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Titre</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Auteur</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Aperçu</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Statut</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @if (Posts is null || Posts.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">Aucun article disponible.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var post in Posts)
+                    {
+                        <tr class="transition hover:bg-gray-50/80">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+                                        <img src="@(post.CoverImageUrl ?? "/Images/ImageBlog.jpg")" alt="@post.Title" class="h-full w-full object-cover" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-[#111827]">@post.Title</p>
+                                        <p class="truncate text-xs text-[#6b7280]">@post.PostType</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@post.AuthorName</td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@GetPostTypeLabel(post.PostType)</td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">
+                                <p class="max-w-md truncate">@GetPreviewText(post)</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(IsPublished(post) ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700")">
+                                    @(IsPublished(post) ? "Publié" : "Brouillon")
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@GetDateLabel(post)</td>
+                            <td class="px-6 py-4 text-sm">
+                                <AdminActionDropdown ItemId="post.Id"
+                                                     Status="@(IsPublished(post) ? "Published" : "Pending")"
+                                                     ViewLabel="Voir l'article"
+                                                     EditLabel="Modifier"
+                                                     DeleteLabel="Supprimer"
+                                                     ApproveLabel="Publier"
+                                                     RejectLabel="Rejeter"
+                                                     OnView="OpenPost"
+                                                     OnEdit="EditPost"
+                                                     OnDelete="DeletePost"
+                                                     OnApprove="PublishPost"
+                                                     OnReject="DeletePost" />
+                            </td>
                         </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-200">
-                        @if (Posts is null || Posts.Count == 0)
-                        {
-                              <tr>
-                                    <td colspan="9" class="px-6 py-10 text-center text-sm text-gray-500">
-                                          Aucun article disponible.
-                                    </td>
-                              </tr>
-                        }
-                        else
-                        {
-                        foreach (var post in Posts)
-                        {
-                              <tr class="transition hover:bg-gray-50">
-                                    <td class="px-6 py-4 text-sm font-medium text-text">@post.Title</td>
-                                    <td class="px-6 py-4 text-sm text-text">@post.AuthorName</td>
-                                    <td class="px-6 py-4 text-sm text-text">@GetCategoryLabel(post)</td>
-                                    <td class="px-6 py-4 text-sm text-text">@GetPostTypeLabel(post.PostType)</td>
-                                    <td class="px-6 py-4 text-sm text-text">@GetPreviewText(post)</td>
-                                    <td class="px-6 py-4 text-sm text-text">
-                                          <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800">@post.ViewCount</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm">
-                                          @if (post.PublishedAt != DateTime.MinValue)
-                                          {
-                                                <span class="inline-flex items-center rounded-md bg-[#73F8AB] px-3 py-1.5 text-xs font-semibold text-[#27AE60]">Publié</span>
-                                          }
-                                          else
-                                          {
-                                                <span class="inline-flex items-center rounded-md bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">En attente</span>
-                                          }
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-text">@post.PublishedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td class="px-6 py-4 text-sm">
-                                          <div class="flex gap-3">
-                                                <button @onclick='() => NavigationManager.NavigateTo($"/admin/blog/edit/{post.Id}")'
-                                                        class="text-text transition hover:text-yellow-600" title="Editer">
-                                                      <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button @onclick="() => OnDelete.InvokeAsync(post.Id)"
-                                                        class="text-text transition hover:text-red-600" title="Supprimer">
-                                                      <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                          </div>
-                                    </td>
-                              </tr>
-                        }
-                        }
-                  </tbody>
-            </table>
-      </div>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @code {
-      [Parameter] public List<PostDto> Posts { get; set; } = new();
-      [Parameter] public EventCallback<Guid> OnDelete { get; set; }
+    [Parameter] public List<PostDto> Posts { get; set; } = new();
+    [Parameter] public EventCallback OnChanged { get; set; }
 
-      private static string GetPostTypeLabel(string? postType)
-      {
-            return string.IsNullOrWhiteSpace(postType) ? "Sans catégorie" : postType;
-      }
+    private static bool IsPublished(PostDto post) => post.PublishedAt != DateTime.MinValue;
 
-      private static string GetCategoryLabel(PostDto post)
-      {
-            if (post.Categories is { Count: > 0 })
-            {
-                  return string.Join(", ", post.Categories.Select(c => c.Name));
-            }
+    private static string GetPostTypeLabel(string? postType)
+    {
+        return string.IsNullOrWhiteSpace(postType) ? "Sans catégorie" : postType;
+    }
 
-            return "Aucune catégorie liée";
-      }
+    private static string GetPreviewText(PostDto post)
+    {
+        var source = !string.IsNullOrWhiteSpace(post.Excerpt) ? post.Excerpt : post.Content;
 
-      private static string GetPreviewText(PostDto post)
-      {
-            var source = !string.IsNullOrWhiteSpace(post.Excerpt) ? post.Excerpt : post.Content;
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "Aucun aperçu";
+        }
 
-            if (string.IsNullOrWhiteSpace(source))
-            {
-                  return "Aucun aperçu";
-            }
+        var plainText = Regex.Replace(source, "<.*?>", string.Empty);
+        plainText = WebUtility.HtmlDecode(plainText).Trim();
 
-            var plainText = Regex.Replace(source, "<.*?>", string.Empty);
-            plainText = WebUtility.HtmlDecode(plainText).Trim();
+        return plainText.Length <= 90 ? plainText : $"{plainText[..90].Trim()}...";
+    }
 
-            return plainText.Length <= 90 ? plainText : $"{plainText[..90].Trim()}...";
-      }
+    private static string GetDateLabel(PostDto post)
+    {
+        return IsPublished(post) ? post.PublishedAt.ToString("dd/MM/yyyy HH:mm") : "En attente";
+    }
+
+    private Task OpenPost(Guid id)
+    {
+        NavigationManager.NavigateTo($"/admin/blog/{id}");
+        return Task.CompletedTask;
+    }
+
+    private Task EditPost(Guid id)
+    {
+        NavigationManager.NavigateTo($"/admin/blog/edit/{id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task DeletePost(Guid id)
+    {
+        await PostService.DeletePostAsync(id);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task PublishPost(Guid id)
+    {
+        var post = Posts.FirstOrDefault(item => item.Id == id);
+        if (post is null)
+        {
+            return;
+        }
+
+        var request = new UpdatePostRequest
+        {
+            Title = post.Title,
+            Content = post.Content,
+            Excerpt = post.Excerpt,
+            CoverImageUrl = post.CoverImageUrl,
+            PostType = post.PostType,
+            SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
+            CategoryIds = post.Categories.Select(category => category.Id).ToList(),
+            TagNames = post.Tags.Select(tag => tag.Name).ToList(),
+            IsPublished = true
+        };
+
+        await PostService.UpdatePostAsync(id, request);
+        await OnChanged.InvokeAsync();
+    }
 }

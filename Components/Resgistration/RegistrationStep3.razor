@@ -1,0 +1,43 @@
+<div class="py-8 text-center">
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm text-left">
+            @ErrorMessage
+        </div>
+    }
+
+    <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-clock text-purple-600 text-2xl"></i>
+    </div>
+    <h2 class="text-xl font-bold text-gray-800">Certification en attente</h2>
+
+    <p class="text-gray-500 mt-2 max-w-xl mx-auto">
+        Votre soumission est bien enregistrée. Statut actuel : <span class="font-semibold text-gray-700">@Model.Status</span>
+    </p>
+
+    <div class="mt-4 text-sm text-gray-600">
+        <p>Soumis le : @Model.SubmissionDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+        <p>Délai estimé : @Model.EstimatedWaitTime</p>
+        <p>Support : @Model.SupportEmail</p>
+    </div>
+
+    <button class="mt-6 rounded-full bg-purple-700 text-white py-3 px-6 text-sm disabled:opacity-70" disabled="@IsLoading" @onclick="ContinueToLogin">
+        @(IsLoading ? "Redirection..." : "Aller à la connexion")
+    </button>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CertificateStatusDto Model { get; set; } = new();
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public EventCallback OnContinue { get; set; }
+
+    private Task ContinueToLogin() => OnContinue.InvokeAsync();
+}

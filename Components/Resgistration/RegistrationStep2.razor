@@ -1,0 +1,65 @@
+<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="py-6">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-shield-check text-purple-600 text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">Valider votre expertise</h2>
+            <p class="text-gray-500 mt-2">Renseignez le lien et le type de votre certification C# pour finaliser l'inscription.</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+                @ErrorMessage
+            </div>
+        }
+
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-500 mb-2">URL de la certification</label>
+            <InputText @bind-Value="Model.CertificateUrl" placeholder="https://www.freecodecamp.org/certification/..." class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm" />
+            <ValidationMessage For="@(() => Model.CertificateUrl)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-xs font-medium text-gray-500 mb-2">Type de certificat</label>
+            <InputSelect @bind-Value="Model.CertificateType" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm bg-white">
+                <option value="">Sélectionnez un type</option>
+                <option value="Foundational C# with Microsoft">Foundational C# with Microsoft</option>
+                <option value="C# Data and Web">C# Data and Web</option>
+                <option value="Autre">Autre</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.CertificateType)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" class="flex-1 rounded-full bg-white border py-3 text-sm" @onclick="GoBack">← Retour</button>
+            <button type="submit" disabled="@IsLoading" class="flex-1 rounded-full bg-purple-700 text-white py-3 text-sm disabled:opacity-70">
+                @(IsLoading ? "Soumission en cours..." : "Soumettre pour vérification")
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public CertificateSubmissionDto Model { get; set; } = default!;
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public bool IsLoading { get; set; }
+
+    [Parameter]
+    public EventCallback<CertificateSubmissionDto> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    private Task HandleValidSubmit() => OnSubmit.InvokeAsync(Model);
+
+    private Task GoBack() => OnBack.InvokeAsync();
+}

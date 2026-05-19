@@ -4,79 +4,85 @@
 @inject NavigationManager NavigationManager
 @inject IEventService EventService
 
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <AdminBreadcrumb />
-        <button @onclick='() => NavigationManager.NavigateTo("/admin/events/nouveau")'
-                class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-4 rounded-lg flex items-center gap-2">
-            <i class="fas fa-plus text-xl"></i>
-            <span class="Button hidden sm:block">Nouveau</span>
-        </button>
-    </div>
-
-    <div class="flex gap-4 mb-6 flex-col items-stretch md:flex-row md:items-center">
-        <div class="flex-1 relative bg-white">
-            <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" placeholder="Rechercher un évènement..."
-                   @bind="searchQuery" @bind:event="oninput"
-                   class="w-full py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none" />
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-8 flex items-center justify-between gap-4">
+            <AdminBreadcrumb />
+            <button @onclick='() => NavigationManager.NavigateTo("/admin/events/nouveau")'
+                    class="inline-flex items-center gap-2 rounded-2xl bg-[#5b4df5] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
+                <i class="fas fa-plus text-sm"></i>
+                <span class="hidden sm:block">Nouveau</span>
+            </button>
         </div>
-        <select @bind="selectedStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none bg-white">
-            <option value="">Tous</option>
-            <option value="published">Publié</option>
-            <option value="pending">En attente</option>
-            <option value="archived">Archivé</option>
-        </select>
-        <select @bind="selectedType" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none bg-white">
-            <option value="">Type</option>
-            <option value="Online">En ligne</option>
-            <option value="Physical">Presentiel</option>
-            <option value="Hybrid">Hybride</option>
-        </select>
-        <select @bind="selectedPeriod" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none bg-white">
-            <option value="">Periode</option>
-            <option value="today">Aujourd'hui</option>
-            <option value="week">Cette semaine</option>
-            <option value="month">Ce mois</option>
-            <option value="year">Cette année</option>
-        </select>
-    </div>
 
-    <div class="flex gap-2 mb-6">
-        <button @onclick="() => isListView = true"
-                class="@(isListView ? "bg-black text-white" : "bg-white text-black border border-gray-300") px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-list text-2xl"></i>
-        </button>
-        <button @onclick="() => isListView = false"
-                class="@(!isListView ? "bg-black text-white" : "bg-white text-black border border-gray-300") px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-th text-2xl"></i>
-        </button>
-    </div>
+        <section class="mb-8">
+            <h1 class="text-3xl font-bold tracking-tight text-[#111827] md:text-4xl">Gestion des évènements</h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Filtrez, modérez et consultez les événements avec une interface cohérente avec le dashboard.</p>
+        </section>
 
-    @if (isListView)
-    {
-        <EventTable OnDelete="DeleteEvent"
-                    OnSetPending="SetPending"
-                    OnSetPublished="SetPublished"
-                    OnSetArchived="SetArchived"
-                    Event="@pagedEvents" />
-    }
-    else
-    {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var ev in pagedEvents)
-            {
-                <AdminEventCard Event="@ev"
-                           OnEventDeleted="() => DeleteEvent(ev.Id)"
-                           OnSetPending="SetPending"
-                           OnSetPublished="SetPublished"
-                           OnSetArchived="SetArchived" />
-            }
+        <section class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
+            <div class="flex-1 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-0 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Rechercher un évènement..."
+                           @bind="searchQuery" @bind:event="oninput"
+                           class="w-full border-0 bg-transparent pl-7 text-sm text-[#111827] outline-none placeholder:text-gray-400" />
+                </div>
+            </div>
+
+            <select @bind="selectedStatus" class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                <option value="">Tous</option>
+                <option value="published">Publié</option>
+                <option value="pending">En attente</option>
+                <option value="archived">Archivé</option>
+            </select>
+            <select @bind="selectedType" class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                <option value="">Type</option>
+                <option value="Online">En ligne</option>
+                <option value="Physical">Présentiel</option>
+                <option value="Hybrid">Hybride</option>
+            </select>
+            <select @bind="selectedPeriod" class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                <option value="">Période</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="year">Cette année</option>
+            </select>
+        </section>
+
+        <div class="mb-6 flex gap-2">
+            <button @onclick="() => isListView = true"
+                    class="@(isListView ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm">
+                <i class="fas fa-list text-lg"></i>
+            </button>
+            <button @onclick="() => isListView = false"
+                    class="@(!isListView ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm">
+                <i class="fas fa-th text-lg"></i>
+            </button>
         </div>
-    }
 
-    <div class="mt-6">
-        <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
+        @if (isListView)
+        {
+            <EventTable Event="@pagedEvents" OnChanged="LoadEventsAsync" />
+        }
+        else
+        {
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5 lg:gap-6">
+                @foreach (var ev in pagedEvents)
+                {
+                    <AdminEventCard Event="@ev"
+                               OnEventDeleted="LoadEventsAsync"
+                               OnSetPending="SetPending"
+                               OnSetPublished="SetPublished"
+                               OnSetArchived="SetArchived" />
+                }
+            </div>
+        }
+
+        <div class="mt-6">
+            <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
+        </div>
     </div>
 </div>
 
@@ -163,13 +169,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadEventsAsync();
+    }
+
+    private async Task LoadEventsAsync()
+    {
         allEvents = await EventService.GetAllEventsAsync();
     }
 
     private async Task DeleteEvent(Guid id)
     {
         await EventService.DeleteEventAsync(id);
-        allEvents = await EventService.GetAllEventsAsync();
+        await LoadEventsAsync();
     }
 
     private async Task TogglePublish(Guid id)
@@ -226,6 +237,6 @@
         if (updated is null)
             return;
 
-        allEvents = await EventService.GetAllEventsAsync();
+        await LoadEventsAsync();
     }
 }

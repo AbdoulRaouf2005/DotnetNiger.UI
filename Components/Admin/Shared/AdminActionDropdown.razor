@@ -1,0 +1,148 @@
+<div class="relative inline-block text-left">
+    <button type="button"
+            class="inline-flex items-center justify-center rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+            aria-haspopup="menu"
+            aria-expanded="@isOpen"
+            aria-label="@AriaLabel"
+            @onclick="ToggleMenu"
+            @onclick:stopPropagation="true">
+        <i class="fas fa-ellipsis-vertical text-xl"></i>
+    </button>
+
+    @if (isOpen)
+    {
+        <div class="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_18px_35px_rgba(15,23,42,0.18)]">
+            <div class="py-2">
+                @if (IsReviewState)
+                {
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-emerald-600 transition hover:bg-emerald-50"
+                            @onclick="ApproveAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-check text-base"></i>
+                        <span class="text-sm font-medium">@ApproveLabel</span>
+                    </button>
+
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-rose-600 transition hover:bg-rose-50"
+                            @onclick="RejectAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-xmark text-base"></i>
+                        <span class="text-sm font-medium">@RejectLabel</span>
+                    </button>
+
+                    <div class="my-2 border-t border-gray-100"></div>
+
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-gray-700 transition hover:bg-gray-50"
+                            @onclick="EditAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-pen text-base text-gray-500"></i>
+                        <span class="text-sm font-medium">@EditLabel</span>
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-gray-700 transition hover:bg-gray-50"
+                            @onclick="ViewAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-eye text-base text-gray-500"></i>
+                        <span class="text-sm font-medium">@ViewLabel</span>
+                    </button>
+
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-gray-700 transition hover:bg-gray-50"
+                            @onclick="EditAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-pen text-base text-gray-500"></i>
+                        <span class="text-sm font-medium">@EditLabel</span>
+                    </button>
+
+                    <div class="my-2 border-t border-gray-100"></div>
+
+                    <button type="button"
+                            class="flex w-full items-center gap-3 px-4 py-3 text-left text-rose-600 transition hover:bg-rose-50"
+                            @onclick="DeleteAsync"
+                            @onclick:stopPropagation="true">
+                        <i class="fas fa-trash text-base"></i>
+                        <span class="text-sm font-medium">@DeleteLabel</span>
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid ItemId { get; set; }
+
+    [Parameter]
+    public string Status { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ReviewStatusValue { get; set; } = "Pending";
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "Ouvrir le menu d'actions";
+
+    [Parameter]
+    public string ViewLabel { get; set; } = "Voir l'article";
+
+    [Parameter]
+    public string EditLabel { get; set; } = "Modifier";
+
+    [Parameter]
+    public string DeleteLabel { get; set; } = "Supprimer";
+
+    [Parameter]
+    public string ApproveLabel { get; set; } = "Approuver";
+
+    [Parameter]
+    public string RejectLabel { get; set; } = "Rejeter";
+
+    [Parameter]
+    public EventCallback<Guid> OnView { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnEdit { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnDelete { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnApprove { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnReject { get; set; }
+
+    private bool isOpen;
+
+    private bool IsReviewState => string.Equals(Status, ReviewStatusValue, StringComparison.OrdinalIgnoreCase);
+
+    private void ToggleMenu()
+    {
+        isOpen = !isOpen;
+    }
+
+    private async Task ViewAsync() => await InvokeAndCloseAsync(OnView);
+
+    private async Task EditAsync() => await InvokeAndCloseAsync(OnEdit);
+
+    private async Task DeleteAsync() => await InvokeAndCloseAsync(OnDelete);
+
+    private async Task ApproveAsync() => await InvokeAndCloseAsync(OnApprove);
+
+    private async Task RejectAsync() => await InvokeAndCloseAsync(OnReject);
+
+    private async Task InvokeAndCloseAsync(EventCallback<Guid> callback)
+    {
+        if (ItemId != Guid.Empty && callback.HasDelegate)
+        {
+            await callback.InvokeAsync(ItemId);
+        }
+
+        isOpen = false;
+    }
+}

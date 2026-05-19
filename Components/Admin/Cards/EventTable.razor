@@ -1,93 +1,125 @@
-@using DotnetNiger.UI.Components.Admin.Cards
+@* Tableau admin des événements avec actions harmonisées. *@
 @using DotnetNiger.UI.Models.Responses
+@inject IEventService EventService
 @inject NavigationManager Navigation
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
+<div class="overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
     <div class="overflow-x-auto">
-    <table class="w-full">
-        <thead class="bg-gray-50 border-b">
-            <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Evènement</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Organisateur</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date début</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Statut</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Inscrits</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var ev in Event)
-            {
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm font-medium">@ev.Title</td>
-                    <td class="px-6 py-4 text-sm">@ev.OrganizerName</td>
-                    <td class="px-6 py-4 text-sm">@ev.EventType</td>
-                    <td class="px-6 py-4 text-sm whitespace-nowrap">@ev.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td class="px-6 py-4 text-sm">
-                        @if (ev.IsArchived)
-                        {
-                            <span class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">Archivé</span>
-                        }
-                        else if (ev.IsPublished)
-                        {
-                            <span class="inline-flex items-center rounded-md bg-[#73F8AB] px-3 py-1.5 text-xs font-semibold text-[#27AE60]">Publié</span>
-                        }
-                        else
-                        {
-                            <span class="inline-flex items-center rounded-md bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">En attente</span>
-                        }
-                    </td>
-                    <td class="px-6 py-4 text-sm">@ev.RegisteredCount / @ev.Capacity</td>
-                    <td class="px-6 py-4 text-sm">
-                        @{ 
-                            var isArchived = ev.IsArchived;
-                            var isPublished = ev.IsPublished && !isArchived;
-                            var isPending = !isPublished && !isArchived;
-                        }
-                        <div class="flex gap-2">
-                            <button @onclick='() => Navigation.NavigateTo($"/admin/events/edit/{ev.Id}")'
-                                    class="text-gray-600 hover:text-blue-600" title="Voir">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            @if (!isPublished)
-                            {
-                                <button @onclick="() => OnSetPublished.InvokeAsync(ev.Id)"
-                                        class="text-gray-600 hover:text-green-600" title="Publier">
-                                    <i class="fas fa-circle-check"></i>
-                                </button>
-                            }
-                            @if (!isPending)
-                            {
-                                <button @onclick="() => OnSetPending.InvokeAsync(ev.Id)"
-                                        class="text-gray-600 hover:text-amber-500" title="Mettre en attente">
-                                    <i class="fas fa-clock"></i>
-                                </button>
-                            }
-                            @if (!isArchived)
-                            {
-                                <button @onclick="() => OnSetArchived.InvokeAsync(ev.Id)"
-                                        class="text-gray-600 hover:text-gray-900" title="Archiver">
-                                    <i class="fas fa-box-archive"></i>
-                                </button>
-                            }
-                            <button @onclick="() => OnDelete.InvokeAsync(ev.Id)"
-                                    class="text-gray-600 hover:text-red-600" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+        <table class="w-full">
+            <thead class="border-b border-gray-100 bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Évènement</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Organisateur</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date début</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Statut</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Inscrits</th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
-            }   
-        </tbody>
-    </table>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @if (Event is null || Event.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">Aucun évènement disponible.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var ev in Event)
+                    {
+                        <tr class="transition hover:bg-gray-50/80">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+                                        <img src="@(ev.CoverImageUrl ?? "/Images/ImageBlog.jpg")" alt="@ev.Title" class="h-full w-full object-cover" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-[#111827]">@ev.Title</p>
+                                        <p class="truncate text-xs text-[#6b7280]">@ev.Location</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.OrganizerName</td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.EventType</td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563] whitespace-nowrap">@ev.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @GetStatusClass(ev)">
+                                    @GetStatusLabel(ev)
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.RegisteredCount / @ev.Capacity</td>
+                            <td class="px-6 py-4 text-sm">
+                                <AdminActionDropdown ItemId="ev.Id"
+                                                     Status="@(IsPending(ev) ? "Pending" : "Published")"
+                                                     ViewLabel="Voir l'événement"
+                                                     EditLabel="Modifier"
+                                                     DeleteLabel="Supprimer"
+                                                     ApproveLabel="Publier"
+                                                     RejectLabel="Rejeter"
+                                                     OnView="OpenEvent"
+                                                     OnEdit="EditEvent"
+                                                     OnDelete="DeleteEvent"
+                                                     OnApprove="PublishEvent"
+                                                     OnReject="DeleteEvent" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-@code{
-    [Parameter] public List<EventDto> Event { get; set; } = new();
-    [Parameter] public EventCallback<Guid> OnDelete { get; set; }
-    [Parameter] public EventCallback<Guid> OnSetPending { get; set; }
-    [Parameter] public EventCallback<Guid> OnSetPublished { get; set; }
-    [Parameter] public EventCallback<Guid> OnSetArchived { get; set; }
 
+@code {
+    [Parameter] public List<EventDto> Event { get; set; } = new();
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private static bool IsPublished(EventDto ev) => ev.IsPublished && !ev.IsArchived;
+    private static bool IsPending(EventDto ev) => !ev.IsPublished && !ev.IsArchived;
+    private static bool IsArchived(EventDto ev) => ev.IsArchived;
+
+    private static string GetStatusLabel(EventDto ev)
+    {
+        if (IsArchived(ev))
+        {
+            return "Archivé";
+        }
+
+        return IsPublished(ev) ? "Publié" : "En attente";
+    }
+
+    private static string GetStatusClass(EventDto ev)
+    {
+        if (IsArchived(ev))
+        {
+            return "bg-gray-100 text-gray-700";
+        }
+
+        return IsPublished(ev) ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700";
+    }
+
+    private Task OpenEvent(Guid id)
+    {
+        Navigation.NavigateTo($"/admin/events/{id}");
+        return Task.CompletedTask;
+    }
+
+    private Task EditEvent(Guid id)
+    {
+        Navigation.NavigateTo($"/admin/events/edit/{id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteEvent(Guid id)
+    {
+        await EventService.DeleteEventAsync(id);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task PublishEvent(Guid id)
+    {
+        await EventService.TogglePublishAsync(id);
+        await OnChanged.InvokeAsync();
+    }
 }

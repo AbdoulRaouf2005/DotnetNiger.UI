@@ -1,6 +1,6 @@
 @using System.Security.Claims
 @inject NavigationManager Navigation
-@inject AuthService Auth
+@inject IAuthService Auth
 @inject IProfileService ProfileService
 
 <div class="relative">
@@ -36,23 +36,45 @@
 
     @if (isMenuOpen)
     {
-        <button type="button" class="fixed inset-0 z-20 cursor-default bg-transparent" @onclick="CloseMenu" aria-label="Fermer le menu"></button>
+        <button type="button"
+                class="fixed inset-0 z-20 cursor-default bg-black/25 backdrop-blur-[2px] md:bg-transparent"
+                @onclick="CloseMenu"
+                aria-label="Fermer le menu"></button>
 
-        <div class="absolute right-0 top-[52px] z-30 w-48 overflow-hidden rounded-xl border border-red-400 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+        <div class="absolute right-0 top-[52px] z-30 hidden w-72 overflow-hidden rounded-xl border border-white bg-[#F9F9F9] shadow-[0_14px_40px_rgba(15,23,42,0.12)] ring-1 ring-white/80 md:block">
+            <div class="border-b border-white px-4 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-11 w-11 overflow-hidden rounded-full border border-white bg-white shadow-sm">
+                        @if (!string.IsNullOrWhiteSpace(ResolvedAvatarUrl))
+                        {
+                            <img src="@ResolvedAvatarUrl" alt="Avatar de @DisplayName" class="h-full w-full object-cover" />
+                        }
+                        else
+                        {
+                            <span class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-secondary">@Initials</span>
+                        }
+                    </div>
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-bold text-gray-900">@DisplayName</p>
+                        <p class="truncate text-xs text-gray-500">Niger DotNet Core</p>
+                    </div>
+                </div>
+            </div>
+
             <button type="button"
-                    class="flex w-full items-start gap-2 px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-gray-50"
+                    class="flex w-full items-start gap-3 px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-white"
                     @onclick="NavigateToProfileAsync">
-                <i class="far fa-user text-base text-gray-700"></i>
+                <i class="far fa-user mt-0.5 text-base text-gray-700"></i>
                 <span class="flex flex-col leading-tight">
                     <span class="text-sm font-medium">Mon Profile</span>
-                    <span class="max-w-[120px] truncate text-xs text-gray-500">@DisplayName</span>
+                    <span class="max-w-[160px] truncate text-xs text-gray-500">Gérer mon compte</span>
                 </span>
             </button>
 
-            <div class="h-px bg-red-200"></div>
+            <div class="h-px bg-white"></div>
 
             <button type="button"
-                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-gray-800">
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-white">
                 <span class="flex items-center gap-2">
                     <i class="fas fa-globe text-base text-gray-700"></i>
                     <span>Langue</span>
@@ -60,15 +82,91 @@
                 <span class="font-semibold">FR</span>
             </button>
 
-            <div class="h-px bg-red-200"></div>
+            <div class="h-px bg-white"></div>
 
             <button type="button"
-                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-[#BE185D] transition hover:bg-[#FCE7F3]"
                     @onclick="LogoutAsync">
                 <span>Déconnexion</span>
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
+
+        <section class="fixed inset-0 z-30 flex flex-col bg-[#F3F4F6]/95 px-5 py-5 text-[#4B5563] shadow-2xl ring-1 ring-white/70 backdrop-blur-sm md:hidden"
+                 style="font-family: 'Segoe UI', sans-serif;"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-label="Menu utilisateur mobile">
+            <div class="flex justify-end">
+                <button type="button"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-white/70 text-[#4B5563] shadow-sm ring-1 ring-white/80 transition hover:bg-white hover:text-[#1E40AF]"
+                        @onclick="CloseMenu"
+                        aria-label="Fermer le menu">
+                    <iconify-icon icon="material-symbols:close-rounded" class="text-2xl"></iconify-icon>
+                </button>
+            </div>
+
+            <div class="flex flex-1 flex-col">
+                <div class="flex flex-col items-center text-center">
+                    <div class="h-[100px] w-[100px] overflow-hidden rounded-full border border-white bg-white shadow-[0_12px_30px_rgba(15,23,42,0.12)] ring-1 ring-white/80">
+                        @if (!string.IsNullOrWhiteSpace(ResolvedAvatarUrl))
+                        {
+                            <img src="@ResolvedAvatarUrl" alt="Avatar de @DisplayName" class="h-full w-full object-cover" />
+                        }
+                        else
+                        {
+                            <span class="flex h-full w-full items-center justify-center bg-gradient-to-br from-white to-[#E5E7EB] text-2xl font-semibold text-[#512BD4]">@Initials</span>
+                        }
+                    </div>
+
+                    <h1 class="mt-4 text-[20px] font-bold leading-tight text-[#111827]">@DisplayName</h1>
+
+                    <div class="mt-3 inline-flex flex-wrap items-center justify-center gap-2 rounded-full bg-white/80 px-4 py-2 text-[13px] font-semibold text-[#4B5563] shadow-sm ring-1 ring-white/80">
+                        <span class="inline-flex items-center gap-1.5 text-[#512BD4]">
+                            <iconify-icon icon="material-symbols:verified-rounded" class="text-base"></iconify-icon>
+                            <span>Pro Member</span>
+                        </span>
+                        <span class="text-[#9CA3AF]">•</span>
+                        <span class="text-[12px] font-normal text-[#6B7280]">Niger DotNet Core</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex-1">
+                    <div class="space-y-4">
+                        @foreach (var item in MobileNavigationItems)
+                        {
+                            <NavLink href="@item.Href"
+                                     Match="@item.Match"
+                                     ActiveClass="bg-[#DBEAFE] text-[#1E40AF]"
+                                     class="group flex items-center gap-4 rounded-lg px-4 py-3 text-base font-semibold text-[#4B5563] shadow-sm ring-1 ring-white/70 transition duration-200 hover:bg-white hover:text-[#1E40AF]"
+                                     @onclick="CloseMenu">
+                                <span class="relative flex h-11 w-11 items-center justify-center rounded-lg bg-white/90 text-inherit shadow-sm ring-1 ring-white/80 transition group-hover:bg-[#EFF6FF]">
+                                    <iconify-icon icon="@item.Icon" class="text-2xl"></iconify-icon>
+                                    @if (item.HasNotification)
+                                    {
+                                        <span class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-[#F3F4F6] bg-[#DC2626]"></span>
+                                    }
+                                </span>
+                                <span class="flex-1">@item.Label</span>
+                            </NavLink>
+                        }
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-6">
+                    <button type="button"
+                            class="flex w-full items-center justify-center gap-3 rounded-lg bg-[#FCE7F3] px-5 py-4 text-sm font-semibold text-[#BE185D] shadow-sm ring-1 ring-[#F9A8D4]/40 transition hover:bg-[#FBCFE8]"
+                            @onclick="LogoutAsync">
+                        <iconify-icon icon="material-symbols:logout-rounded" class="text-xl"></iconify-icon>
+                        <span>Déconnexion</span>
+                    </button>
+
+                    <p class="pt-1 text-center text-[11px] font-medium tracking-[0.18em] text-[#9CA3AF]">
+                        © 2024 .NET NIGER COMMUNITY
+                    </p>
+                </div>
+            </div>
+        </section>
     }
 </div>
 
@@ -78,6 +176,17 @@
 
     private bool isMenuOpen;
     private UserDto? profile;
+
+    private MobileNavItem[] MobileNavigationItems { get; } =
+    [
+        new MobileNavItem("/", "Accueil", "material-symbols:home-rounded", NavLinkMatch.All),
+        new MobileNavItem("/community", "Communauté", "material-symbols:groups-rounded"),
+        new MobileNavItem("/evenements", "Événements", "material-symbols:event-rounded"),
+        new MobileNavItem("/ressources", "Ressources", "material-symbols:folder-open-rounded"),
+        new MobileNavItem("/projets/soumettre", "Projets Open Source", "material-symbols:code-rounded"),
+        new MobileNavItem("/profile", "Mon Profil", "material-symbols:person-rounded"),
+        new MobileNavItem("/contact", "Messagerie", "material-symbols:mail-rounded", HasNotification: true)
+    ];
 
     private string? ResolvedAvatarUrl => NormalizeImagePath(FirstNotEmpty(
         profile?.AvatarUrl,
@@ -144,7 +253,7 @@
     {
         isMenuOpen = false;
         await Task.Yield();
-        Navigation.NavigateTo(HasAdminAccess() ? "/admin/profile" : "/profile");
+        Navigation.NavigateTo("/profile");
     }
 
     private async Task LogoutAsync()
@@ -170,13 +279,6 @@
         return int.TryParse(raw, out var count) ? Math.Max(0, count) : 0;
     }
 
-    private bool HasAdminAccess()
-        => User.Claims.Any(claim =>
-            (claim.Type == ClaimTypes.Role || claim.Type == "roles" || claim.Type == "role")
-            && (string.Equals(claim.Value, "admin", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(claim.Value, "superadmin", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(claim.Value, "moderator", StringComparison.OrdinalIgnoreCase)));
-
     private static string? FirstNotEmpty(params string?[] values)
         => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
 
@@ -194,4 +296,6 @@
 
         return $"/{value.TrimStart('/')}";
     }
+
+    private sealed record MobileNavItem(string Href, string Label, string Icon, NavLinkMatch Match = NavLinkMatch.Prefix, bool HasNotification = false);
 }

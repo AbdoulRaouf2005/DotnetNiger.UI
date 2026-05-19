@@ -10,4 +10,5 @@ public class LoginRequest
 
     [Required]
     public string Password { get; set; } = string.Empty;
+    public string Provider { get; set; } = "Email"; // "Email", "Google", "GitHub", "Microsoft"
 }

@@ -4,29 +4,34 @@
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 
-<div class="min-h-screen p-6">
-    <div class="mb-8">
-        <div class="mb-6 flex items-center justify-between">
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-8 flex items-center justify-between gap-4">
             <AdminBreadcrumb />
             <button @onclick='() => NavigationManager.NavigateTo("/admin/blog/create")'
-                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-4 rounded-lg Button flex items-center gap-2 transition">
-                <i class="fas fa-plus text-xl"></i>
-                <span class="Button hidden sm:block">Nouveau</span> 
+                    class="inline-flex items-center gap-2 rounded-2xl bg-[#5b4df5] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
+                <i class="fas fa-plus text-sm"></i>
+                <span class="hidden sm:block">Nouveau</span>
             </button>
         </div>
 
-        <div class="mb-6 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
-            <div class="flex-1 bg-white">
+        <section class="mb-8">
+            <h1 class="text-3xl font-bold tracking-tight text-[#111827] md:text-4xl">Gestion des articles</h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Consultez, filtrez et modérez les articles dans une interface plus claire et plus rapide.</p>
+        </section>
+
+        <section class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
+            <div class="flex-1 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
                 <div class="relative">
-                    <i class="fas fa-search absolute left-4 top-4 transform text-gray-400"></i>
+                    <i class="fas fa-search absolute left-0 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" placeholder="Rechercher un article..."
                            @bind="searchQuery" @bind:event="oninput"
-                           class="w-full rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:outline-none" />
+                           class="w-full border-0 bg-transparent pl-7 text-sm text-[#111827] outline-none placeholder:text-gray-400" />
                 </div>
             </div>
 
             <select @bind="selectedType"
-                    class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
+                    class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Type d'article</option>
                 <option value="Tutorial">Tutorial</option>
                 <option value="Article">Article</option>
@@ -34,44 +39,43 @@
             </select>
 
             <select @bind="selectedStatus"
-                    class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
+                    class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Statut</option>
-                <option value="published">Publi&#233;</option>
-                <option value="draft">Brouillon</option>
+                <option value="published">Publié</option>
             </select>
-        </div>
 
-        <div class="mb-6 flex gap-3">
-            <button @onclick='() => viewMode = "list"'
-                    class='@(viewMode == "list" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300") px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition hover:shadow-md'>
-                <i class="fas fa-list text-2xl"></i>
-            </button>
-            <button @onclick='() => viewMode = "grid"'
-                    class='@(viewMode == "grid" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300") px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition hover:shadow-md'>
-                <i class="fas fa-th text-2xl"></i>
-            </button>
-        </div>
-    </div>
-    <div class="overflow-y-hidden">
-        @if (viewMode == "list")
-    {
-        <BlogTable Posts="@pagedPosts" OnDelete="HandleDeletePost" />
-    }
-    else
-    {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-            @foreach (var post in pagedPosts)
+            <div class="flex gap-2">
+                <button @onclick='() => viewMode = "list"'
+                        class='@(viewMode == "list" ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm'>
+                    <i class="fas fa-list text-lg"></i>
+                </button>
+                <button @onclick='() => viewMode = "grid"'
+                        class='@(viewMode == "grid" ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm'>
+                    <i class="fas fa-th text-lg"></i>
+                </button>
+            </div>
+        </section>
+
+        <div class="overflow-y-hidden">
+            @if (viewMode == "list")
             {
-                <AdminBlogCard post="@post" OnPostDeleted="() => HandleDeletePost(post.Id)" />
+                <BlogTable Posts="@pagedPosts" OnChanged="LoadPostsAsync" />
+            }
+            else
+            {
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 md:gap-6">
+                    @foreach (var post in pagedPosts)
+                    {
+                        <AdminBlogCard post="@post" OnPostDeleted="LoadPostsAsync" />
+                    }
+                </div>
             }
         </div>
-    }
+
+        <div class="mt-6">
+            <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
+        </div>
     </div>
-    
-    <div>
-        <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
-    </div>
-    
 </div>
  
 @code {
@@ -137,12 +141,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        allPosts = await PostService.GetAllPostsAsync();
+        await LoadPostsAsync();
     }
 
-    private async Task HandleDeletePost(Guid id)
+    private async Task LoadPostsAsync()
     {
-        await PostService.DeletePostAsync(id);
         allPosts = await PostService.GetAllPostsAsync();
     }
 }
