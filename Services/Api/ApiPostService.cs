@@ -8,8 +8,8 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiPostService : IPostService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/posts";
-    private const string SearchBase = "api/search";
+    private const string PublicBase = "api/v1/posts";
+    private const string SearchBase = "api/v1/search";
 
     public ApiPostService(HttpClient http)
     {
@@ -57,7 +57,11 @@ public class ApiPostService : IPostService
 
     public async Task<PostDto?> GetPostByIdAsync(Guid id)
     {
-        return await _http.GetFromJsonAsync<PostDto>($"{PublicBase}/{id}");
+        var response = await _http.GetAsync($"{PublicBase}/{id}");
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        return await ApiResponseReader.ReadAsync<PostDto>(response);
     }
 
     public async Task<PostDto?> GetPostBySlugAsync(string slug)

@@ -11,8 +11,8 @@ public class ApiProfileService : IProfileService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
-    private const string ProfileBase = "api/me";
-    private const string SocialLinksBase = "api/social-links";
+    private const string ProfileBase = "api/v1/me";
+    private const string SocialLinksBase = "api/v1/social-links";
 
     public ApiProfileService(HttpClient http, CustomAuthStateProvider authProvider)
     {

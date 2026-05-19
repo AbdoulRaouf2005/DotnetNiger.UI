@@ -8,9 +8,9 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiEventService : IEventService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/events";
-    private const string AdminBase = "api/community/admin/events";
-    private const string SearchBase = "api/search";
+    private const string PublicBase = "api/v1/events";
+    private const string AdminBase = "api/v1/admin/events";
+    private const string SearchBase = "api/v1/search";
 
     public ApiEventService(HttpClient http)
     {
@@ -165,13 +165,13 @@ public class ApiEventService : IEventService
 
     public async Task<bool> CancelRegistrationAsync(Guid eventId, Guid userId)
     {
-        var response = await _http.DeleteAsync($"api/events/{eventId}/registrations");
+        var response = await _http.DeleteAsync($"{PublicBase}/{eventId}/registrations");
         return response.IsSuccessStatusCode;
     }
 
     public async Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId)
     {
-        var response = await _http.GetAsync($"api/events/{eventId}/registrations");
+        var response = await _http.GetAsync($"{PublicBase}/{eventId}/registrations");
         if (!response.IsSuccessStatusCode)
             return new List<EventRegistrationDto>();
 
