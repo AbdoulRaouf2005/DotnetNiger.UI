@@ -75,7 +75,7 @@ public class ApiPostService : IPostService
         return posts.FirstOrDefault(p => p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
     }
 
-    public async Task<PostDto> CreatePostAsync(CreatePostRequest request)
+    public async Task<PostDto> CreatePostAsync(CreatePostRequest request , Guid currentId)
     {
         var response = await _http.PostAsJsonAsync(PublicBase, request);
         response.EnsureSuccessStatusCode();

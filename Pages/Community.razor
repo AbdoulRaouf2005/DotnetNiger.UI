@@ -79,7 +79,7 @@
 			
 			// Filtrer et trier par date de début (ascendant)
 			upcomingEvents = allEvents
-				?.Where(e => !e.IsArchived && e.StartDate >= DateTime.UtcNow)
+				?.Where(e => e.StartDate >= DateTime.UtcNow)
 				.OrderBy(e => e.StartDate)
 				.ToList() ?? new();
 		}

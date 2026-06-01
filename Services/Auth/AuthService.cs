@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using DotnetNiger.UI.Models.Requests;
@@ -11,6 +12,8 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
+
+    public event Action? OnAuthStateChanged;
 
     public AuthService(HttpClient http, CustomAuthStateProvider authProvider)
     {
@@ -250,6 +253,53 @@ public class AuthService : IAuthService
         return result;
     }
 
+    public async Task<UserDto?> GetCurrentUserAsync()
+    {
+        var token = await _authProvider.GetAccessTokenAsync();
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var claims = ParseClaimsFromJwt(token).ToList();
+        var userIdClaim = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier || claim.Type == "sub");
+
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            return null;
+
+        var email = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email || claim.Type == "email")?.Value ?? string.Empty;
+        var fullName = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name || claim.Type == "name")?.Value ?? string.Empty;
+        var roles = claims
+            .Where(claim => claim.Type == ClaimTypes.Role)
+            .Select(claim => claim.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new UserDto
+        {
+            Id = userId,
+            Email = email,
+            FullName = fullName,
+            Username = string.IsNullOrWhiteSpace(fullName) ? email : fullName,
+            IsActive = true,
+            Roles = roles
+        };
+    }
+
+    public async Task<bool> IsAuthenticatedAsync()
+        => !string.IsNullOrWhiteSpace(await _authProvider.GetAccessTokenAsync());
+
+    public async Task<bool> IsAdminAsync()
+    {
+        var token = await _authProvider.GetAccessTokenAsync();
+        var role = GetRoleFromAccessToken(token);
+
+        return string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(role, "superadmin", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(role, "moderator", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public Task<string?> GetAccessTokenAsync()
+        => _authProvider.GetAccessTokenAsync();
+
     public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
         var response = await _http.PostAsJsonAsync("api/auth/forgot-password", request);
@@ -363,5 +413,24 @@ public class AuthService : IAuthService
         {
             return null;
         }
+    }
+
+    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    {
+        var payload = jwt.Split('.')[1];
+        var jsonBytes = ParseBase64WithoutPadding(payload);
+        var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
+
+        return kvs.SelectMany(kv =>
+        {
+            if (kv.Key is "roles" or "role")
+            {
+                if (kv.Value.ValueKind == JsonValueKind.Array)
+                    return kv.Value.EnumerateArray().Select(r => new Claim(ClaimTypes.Role, r.GetString()!));
+                return new[] { new Claim(ClaimTypes.Role, kv.Value.GetString()!) };
+            }
+
+            return new[] { new Claim(kv.Key, kv.Value.ToString()) };
+        });
     }
 }

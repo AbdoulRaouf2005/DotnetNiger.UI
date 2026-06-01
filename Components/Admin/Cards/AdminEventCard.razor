@@ -59,25 +59,19 @@
     [Parameter]
     public EventCallback<Guid> OnSetArchived { get; set; }
 
-    private bool IsArchived => Event?.IsArchived == true;
-    private bool IsPublished => Event?.IsPublished == true && !IsArchived;
-    private bool IsPending => !IsPublished && !IsArchived;
+   
+    private bool IsPublished => Event?.IsPublished == true;
+    private bool IsPending => !IsPublished ;
 
-    private string StatusLabel => IsArchived
-        ? "Archivé"
-        : IsPublished
+    private string StatusLabel =>  IsPublished
             ? "Publié"
             : "En attente";
 
-    private string StatusCssClass => IsArchived
-        ? "bg-gray-100 text-gray-700"
-        : IsPublished
+    private string StatusCssClass =>  IsPublished
             ? "bg-green-100 text-green-700"
             : "bg-amber-100 text-amber-700";
 
-    private string StatusDotCssClass => IsArchived
-        ? "bg-gray-500"
-        : IsPublished
+    private string StatusDotCssClass => IsPublished
             ? "bg-green-500"
             : "bg-amber-500";
 

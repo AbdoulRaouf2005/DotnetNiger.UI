@@ -1,16 +1,25 @@
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Mock;
 
 public class EventService : IEventService
 {
+    private readonly IAuthService _authService;
+    private readonly CustomAuthStateProvider _authStateProvider;
     private List<EventDto> _events;
     private List<EventRegistrationDto> _registrations;
 
-    public EventService()
+    private readonly INotificationService _notificationService;
+
+    public EventService(IAuthService authService, CustomAuthStateProvider authStateProvider, INotificationService notificationService)
     {
+        _authService = authService;
+        _authStateProvider = authStateProvider;
+        _notificationService = notificationService;
+
         _events = new List<EventDto>
         {
             new EventDto
@@ -27,9 +36,13 @@ public class EventService : IEventService
                 OrganizerName = "Équipe .NET Niger",
                 Capacity = 50,
                 RegisteredCount = 18,
-                IsPublished = true,
+                IsPublished = false,
                 MeetupLink = "",
-                Medias = new List<EventMediaDto>()
+                Medias = new List<EventMediaDto>(),
+
+                SubmittedBy = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            SubmittedAt = DateTime.Now.AddDays(-10),
+            PublishedAt = DateTime.Now.AddDays(-10)
             },
             new EventDto
             {
@@ -47,7 +60,10 @@ public class EventService : IEventService
                 RegisteredCount = 42,
                 IsPublished = true,
                 MeetupLink = "https://meet.example.com/blazor-workshop",
-                Medias = new List<EventMediaDto>()
+                Medias = new List<EventMediaDto>(),
+                SubmittedBy = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            SubmittedAt = DateTime.Now.AddDays(-10),
+            PublishedAt = DateTime.Now.AddDays(-10),
             },
             new EventDto
             {
@@ -141,33 +157,139 @@ public class EventService : IEventService
 
     // ── Création / Mise à jour / Suppression ───────────────────
 
-    public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
+    // public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
+    // {
+    //     var newEvent = new EventDto
+    //     {
+    //         Id = Guid.NewGuid(),
+    //         Title = request.Title,
+    //         Slug = GenerateSlug(request.Title),
+    //         Description = request.Description,
+    //         Location = request.Location,
+    //         EventType = request.EventType,
+    //         StartDate = request.StartDate,
+    //         EndDate = request.EndDate,
+    //         CoverImageUrl = string.IsNullOrEmpty(request.CoverImageUrl)
+    //             ? "/Images/evenement.jpg"
+    //             : request.CoverImageUrl,
+    //         OrganizerName = "Admin",
+    //         Capacity = request.Capacity,
+    //         RegisteredCount = 0,
+    //         MeetupLink = request.MeetupLink,
+    //         Medias = new List<EventMediaDto>()
+    //     };
+
+    //     _events.Add(newEvent);
+    //     return await Task.FromResult(newEvent);
+    // }
+
+    public async Task<EventDto> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
     {
+        await Task.Delay(500); // simuler appel API
+
+        var resolvedIsAdmin = isAdmin || await IsAdminCurrentUserAsync();
+
+        var slug = request.Title.ToLower().Replace(" ", "-");
+        var now = DateTime.Now;
+
         var newEvent = new EventDto
         {
             Id = Guid.NewGuid(),
             Title = request.Title,
-            Slug = GenerateSlug(request.Title),
+            Slug = slug,
             Description = request.Description,
             Location = request.Location,
             EventType = request.EventType,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            CoverImageUrl = string.IsNullOrEmpty(request.CoverImageUrl)
-                ? "/Images/evenement.jpg"
-                : request.CoverImageUrl,
-            OrganizerName = "Admin",
+            CoverImageUrl = request.CoverImageUrl ?? "/images/events/default.jpg",
             Capacity = request.Capacity,
+            MeetupLink = request.MeetupLink ?? "",
+            // Medias = request.Medias,
+            CreatedBy = currentUserId,
+            OrganizerName = "À déterminer", // on pourrait compléter après
             RegisteredCount = 0,
-            IsPublished = request.IsPublished,
-            IsArchived = request.IsArchived,
-            MeetupLink = request.MeetupLink,
-            Medias = new List<EventMediaDto>()
+            SubmittedBy = currentUserId,
+            SubmittedAt = now
         };
 
+        if (resolvedIsAdmin)
+        {
+            // Admin : publication immédiate
+            newEvent.IsPublished = true;
+            newEvent.PublishedAt = now;
+        }
+        else
+        {
+            // Membre : en attente de validation
+            newEvent.IsPublished = false;
+            newEvent.PublishedAt = null;
+        }
+
         _events.Add(newEvent);
-        return await Task.FromResult(newEvent);
+        return newEvent;
     }
+
+    private async Task<bool> IsAdminCurrentUserAsync()
+    {
+        var accessToken = await _authStateProvider.GetAccessTokenAsync();
+        var role = _authService.GetRoleFromAccessToken(accessToken);
+
+        if (string.IsNullOrWhiteSpace(role))
+            return false;
+
+        return role.Equals("admin", StringComparison.OrdinalIgnoreCase)
+               || role.Equals("superadmin", StringComparison.OrdinalIgnoreCase)
+               || role.Equals("moderator", StringComparison.OrdinalIgnoreCase);
+    }
+
+      public async Task<List<EventDto>> GetPendingEventsAsync()
+    {
+        await Task.Delay(300);
+        return _events.Where(e => !e.IsPublished).ToList();
+    }
+
+    public async Task<bool> ApproveEventAsync(Guid eventId, string? adminComment = null)
+    {
+        await Task.Delay(500);
+        var evt = _events.FirstOrDefault(e => e.Id == eventId);
+        if (evt == null || evt.IsPublished) return false;
+
+        evt.IsPublished = true;
+        evt.PublishedAt = DateTime.Now;
+        // Optionnel : stocker le commentaire admin (à ajouter dans DTO si besoin)
+        return true;
+    }
+
+    public async Task<bool> RejectEventAsync(Guid eventId, string reason)
+    {
+        await Task.Delay(500);
+        var evt = _events.FirstOrDefault(e => e.Id == eventId);
+        if (evt == null || evt.IsPublished) return false;
+
+        // Stocker la raison puis supprimer l'événement rejeté des listes visibles
+        evt.RejectionReason = reason;
+
+        // notifier l'auteur de l'événement
+        var submitterId = evt.SubmittedBy;
+        var message = $"Votre événement '{evt.Title}' a été rejeté : {reason}";
+        await _notificationService.SendNotificationAsync(submitterId, message);
+
+        _events.Remove(evt);
+
+        // Supprimer aussi les inscriptions associées
+        _registrations.RemoveAll(r => r.EventId == eventId);
+
+        return true;
+    }
+
+    public async Task<List<EventDto>> GetEventsBySubmitterAsync(Guid userId)
+    {
+        await Task.Delay(300);
+        return _events.Where(e => e.SubmittedBy == userId).OrderByDescending(e => e.SubmittedAt).ToList();
+    }
+
+
 
     public async Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request)
     {
@@ -183,8 +305,6 @@ public class EventService : IEventService
         ev.EndDate = request.EndDate;
         ev.CoverImageUrl = request.CoverImageUrl;
         ev.Capacity = request.Capacity;
-        ev.IsPublished = request.IsPublished;
-        ev.IsArchived = request.IsArchived;
         ev.MeetupLink = request.MeetupLink;
 
         return await Task.FromResult<EventDto?>(ev);
@@ -199,14 +319,14 @@ public class EventService : IEventService
         return await Task.FromResult(true);
     }
 
-    public async Task<bool> TogglePublishAsync(Guid id)
-    {
-        var ev = _events.FirstOrDefault(e => e.Id == id);
-        if (ev is null) return await Task.FromResult(false);
+    // public async Task<bool> TogglePublishAsync(Guid id)
+    // {
+    //     var ev = _events.FirstOrDefault(e => e.Id == id);
+    //     if (ev is null) return await Task.FromResult(false);
 
-        ev.IsPublished = !ev.IsPublished;
-        return await Task.FromResult(true);
-    }
+    //     ev.IsPublished = !ev.IsPublished;
+    //     return await Task.FromResult(true);
+    // }
 
     // ── Inscriptions ───────────────────────────────────────────
 

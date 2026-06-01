@@ -16,7 +16,12 @@ public class EventDto
     public int Capacity { get; set; }
     public int RegisteredCount { get; set; }
     public bool IsPublished { get; set; }
-    public bool IsArchived { get; set; }
     public string MeetupLink { get; set; } = string.Empty;
     public List<EventMediaDto> Medias { get; set; } = new();
+
+    // Nouveaux champs pour la gestion d'approbation
+    public Guid SubmittedBy { get; set; }     // ID de l'utilisateur qui a créé
+    public string? RejectionReason { get; set; }
+    public DateTime? SubmittedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
 }

@@ -5,6 +5,7 @@
 @using DotnetNiger.UI.Models.Responses
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject IProfileService ProfileService
 @inject IEventService EventService
 
 <div class="p-6 bg-[#F4F2F2]">
@@ -20,7 +21,7 @@
 
     <!-- Form -->
     <div class="bg-white rounded-lg shadow p-6">
-        <EditForm Model="@eventRequest">
+        <EditForm Model="@eventRequest" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -63,21 +64,19 @@
                 <div>
                     <label class="block text-sm font-semibold mb-2">Image de couverture</label>
                     <div class="flex gap-2">
-                        <button type="button" 
-                               @onclick="SelectFile"
-                               class="bg-gray-300 hover:bg-gray-400 px-6 py-2 rounded-lg text-gray-700">
+                        <label class="bg-gray-300 cursor-pointer hover:bg-gray-400 px-6 py-2 rounded-lg text-gray-700">
                             Choisir un fichier
-                        </button>
+                            <InputFile OnChange="HandleFileSelected" 
+                              id="fileInput" 
+                              class="hidden" 
+                              accept="image/*" />
+                        </label>
                         <input type="text" 
                               @bind="eventRequest.CoverImageUrl" 
                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
                               placeholder="URL de l'image" 
                               readonly />
                     </div>
-                    <InputFile OnChange="HandleFileSelected" 
-                              id="fileInput" 
-                              class="hidden" 
-                              accept="image/*" />
                 </div>
             </div>
 
@@ -152,8 +151,7 @@
                     Publier
                 </button>
                
-                <button type="button" 
-                       
+                <button type="button"                
                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
                     <i class="fas fa-eye"></i>
                     Aperçu
@@ -164,8 +162,6 @@
 </div>
 
 @code {
-    [Parameter] public Guid Id { get; set; }
-
     private CreateEventRequest eventRequest = new()
     {
         StartDate = DateTime.Now,
@@ -173,25 +169,15 @@
         Capacity = 100
     };
     
+    private Guid currentUserId;
     private string organizerName = string.Empty;
     private string selectedFileName = string.Empty;
-    private bool isEditMode => Id != Guid.Empty;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        if (!isEditMode)
-            return;
-
-        var existingEvent = await EventService.GetEventByIdAsync(Id);
-        if (existingEvent is null)
-        {
-            await JS.InvokeVoidAsync("alert", "Événement introuvable.");
-            Navigation.NavigateTo("/admin/events");
-            return;
-        }
-
-        organizerName = existingEvent.OrganizerName;
-        eventRequest = MapToRequest(existingEvent);
+        var profile = await ProfileService.GetProfileAsync();
+        currentUserId = profile.Id;
+        organizerName = profile.FullName;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -233,15 +219,11 @@
     }
 
 
-    private async Task SaveOrUpdateAsync()
+    private async Task HandleSubmit()
     {
-        if (isEditMode)
-        {
-            await EventService.UpdateEventAsync(Id, eventRequest);
-            return;
-        }
+        eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent","eventDescription");
 
-        await EventService.CreateEventAsync(eventRequest);
+        await EventService.CreateEventAsync(eventRequest, currentUserId, false);
     }
 
     private static CreateEventRequest MapToRequest(EventDto ev)
@@ -257,8 +239,6 @@
             CoverImageUrl = ev.CoverImageUrl,
             Capacity = ev.Capacity,
             MeetupLink = ev.MeetupLink,
-            IsPublished = ev.IsPublished,
-            IsArchived = ev.IsArchived
-        };
+       };
     }
 }

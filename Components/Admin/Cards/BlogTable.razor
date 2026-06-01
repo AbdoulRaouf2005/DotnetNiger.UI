@@ -104,7 +104,7 @@
 
     private static string GetDateLabel(PostDto post)
     {
-        return IsPublished(post) ? post.PublishedAt.ToString("dd/MM/yyyy HH:mm") : "En attente";
+        return IsPublished(post) ? post.PublishedAt?.ToString("dd/MM/yyyy HH:mm") : "En attente";
     }
 
     private Task OpenPost(Guid id)

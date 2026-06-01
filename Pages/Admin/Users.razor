@@ -1,74 +1,374 @@
 @page "/admin/Users"
 @using DotnetNiger.UI.Components.Admin.Cards
+@using DotnetNiger.UI.Components.Admin.Shared
+@inject IUserService UserService
 @inject NavigationManager Navigation
 
 <div class="min-h-screen p-6">
-    <!-- Header Section -->
-    <div class="mb-8">
-        <div class="mb-6 flex items-center justify-between">
+    <div class="mb-8 flex items-center justify-between gap-4">
+        <div>
             <h1 class="text-4xl font-bold text-gray-900">Utilisateurs</h1>
-            <button
-                @onclick='() => Navigation.NavigateTo("/admin/blog/create")'
-                class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg Button flex items-center gap-2 transition">
-                <i class="fas fa-plus text-2xl"></i>
-                <span class="Button">Nouveau</span>
-            </button>
-            </div>
-            <h3 class="font-bold text-gray-900 pb-8">Liste de tous les utilisateurs connectés.</h3>
-
-        <!-- Search and Filters -->
-        <div class="mb-4 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
-                
-            <!-- Search Bar -->
-            <div class="flex-1">
-                <div class="relative">
-                    <i class="fas fa-search -translate-y-1/2 absolute left-4 top-1/2 transform text-gray-400"></i>
-                    <input type="text" placeholder="Rechercher un utilisateur..."    
-                           class="w-1/2 min-w-[455px] rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:outline-none"/>
-                </div>
-            </div>
-
-            <!-- Filter Dropdowns -->
-            <select 
-                    class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
-                <option value="Role">Role </option>
-                    <option value="Tutorial">Tutorial</option>
-                    <option value="Article">Article</option>
-                    <option value="Interview">Interview</option>
-                </select>
-
-            </div>
-
-            <!-- View Toggle -->
-            <div class="mb-6 flex gap-3">
-                <button @onclick='() => viewMode = "list"'
-                        class='@(viewMode == "list" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300") px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition hover:shadow-md'>
-                    <i class="fas fa-list text-2xl"></i>
-                </button>
-                <button @onclick='() => viewMode = "grid"'
-                        class='@(viewMode == "grid" ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300") px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition hover:shadow-md'>
-                    <i class="fas fa-th text-2xl"></i>
-                </button>
-            </div>
+            <h3 class="mt-2 font-bold text-gray-900">Comptes, demandes en attente et actions d'administration.</h3>
         </div>
 
-        
-        <!-- Table View -->
-        @if (viewMode == "list")
-        {
-            <UsersTable/>    
-        }else{
-        <div class="grid gap-4 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
-            @for (int i = 0; i < 6; i++)
-            {
-                <UsersCard/>
-            }
-            </div>
-            }
+        <button @onclick="OpenCreateAsync"
+                class="flex min-h-12 items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">
+            <i class="fas fa-plus text-2xl"></i>
+            <span class="Button">Nouveau membre</span>
+        </button>
     </div>
 
-@code {
-    
-    private string viewMode = "list";
+    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+            <p class="text-sm text-gray-500">Total utilisateurs</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900">@totalUsers</p>
+        </article>
+        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+            <p class="text-sm text-gray-500">Actifs</p>
+            <p class="mt-2 text-3xl font-bold text-emerald-600">@activeUsers</p>
+        </article>
+        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+            <p class="text-sm text-gray-500">En attente</p>
+            <p class="mt-2 text-3xl font-bold text-amber-600">@pendingUsers.Count</p>
+        </article>
+    </div>
 
+    <div class="mb-4 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
+        <div class="flex-1">
+              <div class="relative">
+                  <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-400"></i>
+                  <input type="text"
+                      placeholder="Rechercher un utilisateur..."
+                      value="@searchQuery"
+                      @oninput="HandleSearchInput"
+                      class="w-full min-w-[280px] rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:outline-none" />
+              </div>
+        </div>
+
+        <select value="@selectedRole" @onchange="HandleRoleChange"
+            class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
+            <option value="">Tous les rôles</option>
+            <option value="Admin">Admin</option>
+            <option value="Member">Member</option>
+        </select>
+
+        <div class="flex gap-3">
+            <button @onclick='() => viewMode = "list"'
+                    class='@(viewMode == "list" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-900") rounded-lg px-4 py-2 font-semibold transition hover:shadow-md'>
+                <i class="fas fa-list text-2xl"></i>
+            </button>
+            <button @onclick='() => viewMode = "grid"'
+                    class='@(viewMode == "grid" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-900") rounded-lg px-4 py-2 font-semibold transition hover:shadow-md'>
+                <i class="fas fa-th text-2xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <section class="mb-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <div class="mb-4 flex items-center justify-between gap-3">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">Demandes d'intégration</h2>
+                <p class="text-sm text-gray-500">Approuver ou rejeter les nouveaux membres avant activation.</p>
+            </div>
+            <button class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700" @onclick="ReloadAsync">Actualiser</button>
+        </div>
+
+        @if (pendingUsers.Count == 0)
+        {
+            <p class="rounded-xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">Aucune demande en attente.</p>
+        }
+        else
+        {
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @foreach (var user in pendingUsers)
+                {
+                    <article class="rounded-2xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                            <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)"
+                                 class="h-14 w-14 rounded-full object-cover" />
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-semibold text-gray-900">@user.FullName</p>
+                                    <p class="truncate text-xs text-gray-500">@user.Email</p>
+                                    <p class="mt-1 text-xs text-gray-400">@GetPrimaryRole(user)</p>
+                                </div>
+                            </div>
+                            <AdminActionDropdown ItemId="user.Id"
+                                                 Status="Pending"
+                                                 ViewLabel="Voir"
+                                                 EditLabel="Modifier"
+                                                 DeleteLabel="Rejeter"
+                                                 ApproveLabel="Approuver"
+                                                 RejectLabel="Rejeter"
+                                                 OnView="ViewAsync"
+                                                 OnEdit="EditAsync"
+                                                 OnDelete="RejectAsync"
+                                                 OnApprove="ApproveAsync"
+                                                 OnReject="RejectAsync" />
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (viewMode == "list")
+    {
+        <UsersTable Users="filteredUsers"
+                    OnView="ViewAsync"
+                    OnEdit="EditAsync"
+                    OnDelete="DeleteAsync"
+                    OnToggleStatus="ToggleStatusAsync" />
+    }
+    else
+    {
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach (var user in filteredUsers)
+            {
+                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)"
+                                 class="h-14 w-14 rounded-full object-cover" />
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-gray-900">@user.FullName</p>
+                                <p class="truncate text-xs text-gray-500">@user.Email</p>
+                                <p class="mt-1 text-xs text-gray-400">@GetPrimaryRole(user)</p>
+                            </div>
+                        </div>
+
+                        <AdminActionDropdown ItemId="user.Id"
+                                             Status="@(user.IsActive ? "Active" : "Inactive")"
+                                             ViewLabel="Voir"
+                                             EditLabel="Éditer"
+                                             DeleteLabel="Supprimer"
+                                             ToggleStatusLabel="Activer / Désactiver"
+                                             OnView="ViewAsync"
+                                             OnEdit="EditAsync"
+                                             OnDelete="DeleteAsync"
+                                             OnToggleStatus="ToggleStatusAsync" />
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+                        <span>@user.City</span>
+                        <span class="@(user.IsActive ? "text-emerald-600" : "text-amber-600") font-semibold">@(user.IsActive ? "Actif" : "Inactif")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (isFormOpen)
+    {
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseForm"></div>
+        <div class="fixed top-0 right-0 h-screen w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-2xl z-50 transform transition-transform duration-300">
+            <div class="flex flex-col h-full">
+                <div class="flex justify-between items-center px-6 py-4 border-b">
+                    <h2 class="text-xl font-semibold"> "Nouvelle ressource"</h2>
+                    <button @onclick="CloseForm" class="text-gray-500 hover:text-black text-2xl">&times;</button>
+                </div>
+                <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+                    <EditForm Model="CreateUser" OnValidSubmit="SaveAsync">
+                        <DataAnnotationsValidator />
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nom Complet</label>
+                            <InputText @bind-Value="CreateUser.FullName"
+                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                       placeholder="Titre de la ressource" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email</label>
+                            <InputText @bind-Value="CreateUser.Email"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none"
+                                           placeholder="Email de l'utilisateur" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Mot de Passe</label>
+                            <InputText @bind-Value="CreateUser.Password"
+                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none"
+                                       placeholder="le mot de passe temporaire" />
+                        </div>
+
+                        <div class="border-t pt-4 flex justify-end gap-3 bg-white">
+                            <button type="button" @onclick="CloseForm"
+                                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                                Créer
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    
+    }
+</div>
+
+@code {
+    private string viewMode = "list";
+    private string searchQuery = string.Empty;
+    private string selectedRole = string.Empty;
+    private string editPrimaryRole = "Member";
+
+    private List<UserDto> allUsers = new();
+    private List<UserDto> filteredUsers = new();
+    private List<UserDto> pendingUsers = new();
+    private int totalUsers;
+    private int activeUsers;
+
+    private bool isFormOpen;
+    private Guid? editingUserId;
+    private UserDto editModel = new();
+     private CreateUserRequest CreateUser = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        allUsers = await UserService.GetUsersAsync();
+        pendingUsers = await UserService.GetPendingUsersAsync();
+        totalUsers = await UserService.GetUsersCountAsync();
+        activeUsers = await UserService.GetActiveUsersCountAsync();
+        await ApplyFiltersAsync();
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        var users = string.IsNullOrWhiteSpace(searchQuery)
+            ? allUsers.ToList()
+            : await UserService.SearchUsersAsync(searchQuery);
+
+        if (!string.IsNullOrWhiteSpace(selectedRole))
+        {
+            users = users.Where(user => user.Roles.Any(role => role.Equals(selectedRole, StringComparison.OrdinalIgnoreCase))).ToList();
+        }
+
+        filteredUsers = users;
+    }
+
+    private Task HandleSearchInput(ChangeEventArgs args)
+    {
+        searchQuery = args.Value?.ToString() ?? string.Empty;
+        return ApplyFiltersAsync();
+    }
+
+    private Task HandleRoleChange(ChangeEventArgs args)
+    {
+        selectedRole = args.Value?.ToString() ?? string.Empty;
+        return ApplyFiltersAsync();
+    }
+
+    private static string GetPrimaryRole(UserDto user)
+        => user.Roles.FirstOrDefault() ?? "Member";
+
+    private async Task ApproveAsync(Guid userId)
+    {
+        await UserService.ApproveUserAsync(userId);
+        await ReloadAsync();
+    }
+
+    private async Task RejectAsync(Guid userId)
+    {
+        await UserService.RejectUserAsync(userId);
+        await ReloadAsync();
+    }
+
+    private async Task DeleteAsync(Guid userId)
+    {
+        await UserService.DeleteUserAsync(userId);
+        await ReloadAsync();
+    }
+
+    private async Task ToggleStatusAsync(Guid userId)
+    {
+        var user = await UserService.GetUserByIdAsync(userId);
+        if (user is null)
+            return;
+
+        user.IsActive = !user.IsActive;
+        await UserService.UpdateUserAsync(user);
+        await ReloadAsync();
+    }
+
+    private async Task ViewAsync(Guid userId)
+    {
+        Navigation.NavigateTo($"/admin/profile/{userId}");
+        await Task.CompletedTask;
+    }
+
+    private async Task EditAsync(Guid userId)
+    {
+        var user = await UserService.GetUserByIdAsync(userId);
+        if (user is null)
+            return;
+
+        editingUserId = userId;
+        editModel = CloneUser(user);
+        editPrimaryRole = GetPrimaryRole(user);
+        isFormOpen = true;
+    }
+
+    private async Task OpenCreateAsync()
+    {
+        editingUserId = null;
+        editModel = new UserDto
+        {
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            Roles = new List<string> { "Member" }
+        };
+        editPrimaryRole = "Member";
+        isFormOpen = true;
+        await Task.CompletedTask;
+    }
+
+    private void CloseForm()
+    {
+        isFormOpen = false;
+        editingUserId = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        editModel.Roles = new List<string> { editPrimaryRole };
+
+        if (editingUserId is null)
+        {
+            await UserService.CreateUserAsync(CreateUser);
+        }
+        else
+        {
+            editModel.Id = editingUserId.Value;
+            await UserService.UpdateUserAsync(editModel);
+        }
+
+        CloseForm();
+        await ReloadAsync();
+    }
+
+    private static UserDto CloneUser(UserDto user)
+        => new()
+        {
+            Id = user.Id,
+            Username = user.Username,
+            Email = user.Email,
+            FullName = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Bio = user.Bio,
+            AvatarUrl = user.AvatarUrl,
+            Country = user.Country,
+            City = user.City,
+            IsActive = user.IsActive,
+            CreatedAt = user.CreatedAt,
+            LastLoginAt = user.LastLoginAt,
+            Skills = user.Skills.ToList(),
+            Roles = user.Roles.ToList(),
+            SocialLinks = user.SocialLinks.ToList()
+        };
 }

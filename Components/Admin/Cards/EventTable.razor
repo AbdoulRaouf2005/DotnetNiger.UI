@@ -75,27 +75,18 @@
     [Parameter] public List<EventDto> Event { get; set; } = new();
     [Parameter] public EventCallback OnChanged { get; set; }
 
-    private static bool IsPublished(EventDto ev) => ev.IsPublished && !ev.IsArchived;
-    private static bool IsPending(EventDto ev) => !ev.IsPublished && !ev.IsArchived;
-    private static bool IsArchived(EventDto ev) => ev.IsArchived;
+    private static bool IsPublished(EventDto ev) => ev.IsPublished;
+    private static bool IsPending(EventDto ev) => !ev.IsPublished;
+
 
     private static string GetStatusLabel(EventDto ev)
     {
-        if (IsArchived(ev))
-        {
-            return "Archivé";
-        }
 
         return IsPublished(ev) ? "Publié" : "En attente";
     }
 
     private static string GetStatusClass(EventDto ev)
     {
-        if (IsArchived(ev))
-        {
-            return "bg-gray-100 text-gray-700";
-        }
-
         return IsPublished(ev) ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700";
     }
 
@@ -119,7 +110,7 @@
 
     private async Task PublishEvent(Guid id)
     {
-        await EventService.TogglePublishAsync(id);
+        await EventService.ApproveEventAsync(id);
         await OnChanged.InvokeAsync();
     }
 }

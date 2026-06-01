@@ -24,6 +24,5 @@ public class CreateEventRequest
     public string CoverImageUrl { get; set; } = string.Empty;
     public int Capacity { get; set; } = 100;
     public string MeetupLink { get; set; } = string.Empty;
-    public bool IsPublished { get; set; }
-    public bool IsArchived { get; set; }
+
 }

@@ -12,7 +12,7 @@ public class PostDto
     public string AuthorName { get; set; } = string.Empty;
     public string AuthorAvatar { get; set; } = string.Empty;
     public string PostType { get; set; } = string.Empty;
-    public DateTime PublishedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
     public int ViewCount { get; set; }
     public List<CategoryDto> Categories { get; set; } = new();
     public List<TagDto> Tags { get; set; } = new();

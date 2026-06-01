@@ -1,3 +1,5 @@
+@implements IDisposable
+
 <div class="relative inline-block text-left">
     <button type="button"
             class="inline-flex items-center justify-center rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
@@ -11,6 +13,12 @@
 
     @if (isOpen)
     {
+        <button type="button"
+                class="fixed inset-0 z-40 cursor-default"
+                aria-label="Fermer le menu"
+                @onclick="CloseMenu">
+        </button>
+
         <div class="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_18px_35px_rgba(15,23,42,0.18)]">
             <div class="py-2">
                 @if (IsReviewState)
@@ -59,6 +67,17 @@
                         <span class="text-sm font-medium">@EditLabel</span>
                     </button>
 
+                    @if (OnToggleStatus.HasDelegate)
+                    {
+                        <button type="button"
+                                class="flex w-full items-center gap-3 px-4 py-3 text-left text-gray-700 transition hover:bg-gray-50"
+                                @onclick="ToggleStatusAsync"
+                                @onclick:stopPropagation="true">
+                            <i class="fas fa-toggle-on text-base text-gray-500"></i>
+                            <span class="text-sm font-medium">@ToggleStatusLabel</span>
+                        </button>
+                    }
+
                     <div class="my-2 border-t border-gray-100"></div>
 
                     <button type="button"
@@ -97,6 +116,9 @@
     public string DeleteLabel { get; set; } = "Supprimer";
 
     [Parameter]
+    public string ToggleStatusLabel { get; set; } = "Activer / Désactiver";
+
+    [Parameter]
     public string ApproveLabel { get; set; } = "Approuver";
 
     [Parameter]
@@ -112,18 +134,52 @@
     public EventCallback<Guid> OnDelete { get; set; }
 
     [Parameter]
+    public EventCallback<Guid> OnToggleStatus { get; set; }
+
+    [Parameter]
     public EventCallback<Guid> OnApprove { get; set; }
 
     [Parameter]
     public EventCallback<Guid> OnReject { get; set; }
 
+    private static event Action<Guid>? OnMenuOpened;
+
+    private readonly Guid _instanceId = Guid.NewGuid();
     private bool isOpen;
 
     private bool IsReviewState => string.Equals(Status, ReviewStatusValue, StringComparison.OrdinalIgnoreCase);
 
+    protected override void OnInitialized()
+    {
+        OnMenuOpened += HandleOtherMenuOpened;
+    }
+
     private void ToggleMenu()
     {
-        isOpen = !isOpen;
+        if (isOpen)
+        {
+            isOpen = false;
+            return;
+        }
+
+        OnMenuOpened?.Invoke(_instanceId);
+        isOpen = true;
+    }
+
+    private void CloseMenu()
+    {
+        isOpen = false;
+    }
+
+    private void HandleOtherMenuOpened(Guid openedInstanceId)
+    {
+        if (openedInstanceId == _instanceId || !isOpen)
+        {
+            return;
+        }
+
+        isOpen = false;
+        _ = InvokeAsync(StateHasChanged);
     }
 
     private async Task ViewAsync() => await InvokeAndCloseAsync(OnView);
@@ -131,6 +187,8 @@
     private async Task EditAsync() => await InvokeAndCloseAsync(OnEdit);
 
     private async Task DeleteAsync() => await InvokeAndCloseAsync(OnDelete);
+
+    private async Task ToggleStatusAsync() => await InvokeAndCloseAsync(OnToggleStatus);
 
     private async Task ApproveAsync() => await InvokeAndCloseAsync(OnApprove);
 
@@ -144,5 +202,10 @@
         }
 
         isOpen = false;
+    }
+
+    public void Dispose()
+    {
+        OnMenuOpened -= HandleOtherMenuOpened;
     }
 }

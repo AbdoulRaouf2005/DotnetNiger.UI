@@ -4,6 +4,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @inject IPostService PostService
+@inject IProfileService ProfileService
 
 <div class="min-h-screen bg-[#F4F2F2] p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -30,11 +31,11 @@
                 <div class="flex items-center overflow-hidden rounded-lg border border-gray-300">
                     <label class="cursor-pointer bg-gray-200 px-4 py-3 text-sm text-gray-700">
                         Choisir un fichier
-                        <input type="file" class="hidden" />
+                        <InputFile type="file" accept="image/*" class="hidden" Onchange="HandleImage"/>
                     </label>
-                    <span class="px-3 text-sm text-gray-500">Aucun fichier choisi</span>
+                    <span class="px-3 text-sm text-gray-500">@postRequest.CoverImageUrl</span>
                 </div>
-            </div>
+            </div> 
         </div>
 
 
@@ -48,7 +49,7 @@
         }
 
         <div class="mt-6 flex flex-wrap gap-4">
-            <button @onclick="Publish" class="flex items-center gap-2 rounded-lg bg-green-500 px-6 py-3 text-white transition hover:bg-green-600">
+            <button class="flex items-center gap-2 rounded-lg bg-green-500 px-6 py-3 text-white transition hover:bg-green-600" @onclick="@HandleSubmit">
                 <i class="fas fa-paper-plane"></i>
                 Publier
             </button>
@@ -64,6 +65,14 @@
     private CreatePostRequest postRequest = new();
     private string errorMessage = string.Empty;
 
+    private Guid currentUserId;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var profile = await ProfileService.GetProfileAsync();
+        currentUserId = profile.Id;
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -72,25 +81,29 @@
             catch (Exception ex) { Console.Error.WriteLine($"TinyMCE: {ex.Message}"); }
         }
     }
-
-    private async Task SaveDraft()
+    private async Task HandleImage(InputFileChangeEventArgs eventArgs)
     {
-        await SaveAsync(isPublished: false);
+        var file = eventArgs.File;
+        if (file is null)
+        {
+            return;
+        }
+
+        const long maxFileSize = 2 * 1024 * 1024;
+        await using var stream = file.OpenReadStream(maxFileSize);
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+
+        postRequest.CoverImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(memoryStream.ToArray())}";
     }
 
-    private async Task Publish()
-    {
-        await SaveAsync(isPublished: true);
-    }
-
-    private async Task SaveAsync(bool isPublished)
+    private async Task HandleSubmit()
     {
         try
         {
             errorMessage = string.Empty;
 
             postRequest.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "blogDescription");
-            postRequest.IsPublished = isPublished;
 
             if (string.IsNullOrWhiteSpace(postRequest.Title))
             {
@@ -112,7 +125,7 @@
 
             postRequest.Excerpt = BuildExcerpt(postRequest.Content);
 
-            await PostService.CreatePostAsync(postRequest);
+            await PostService.CreatePostAsync(postRequest,currentUserId);
             NavigationManager.NavigateTo("/admin/blog");
         }
         catch (Exception ex)
@@ -133,4 +146,5 @@
 
         return plainText.Length <= 180 ? plainText : $"{plainText[..180].Trim()}...";
     }
+
 }

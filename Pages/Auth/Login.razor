@@ -2,7 +2,9 @@
 @* Page d'authentification : connexion utilisateur (design refait) *@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
-@inject IAuthService Auth
+@inject IAuthService AuthService
+@inject IUserStateService UserStateService
+@inject DotnetNiger.UI.Services.Contracts.ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
 
 <PageTitle>Connexion - .NET Niger</PageTitle>
@@ -101,25 +103,34 @@
 
 @code {
     private LoginRequest model = new();
-    private string errorMessage = "";
-    private bool isLoading;
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
     private bool showPassword = false;
 
     private async Task HandleLogin()
     {
         isLoading = true;
-        errorMessage = "";
-        var result = await Auth.LoginAsync(model);
-        isLoading = false;
-
-        if (result.Success)
+        errorMessage = string.Empty;
+        
+        var response = await AuthService.LoginAsync(model);
+        
+        if (response.Success && response.Data != null)
         {
-            var destination = Auth.GetPostLoginRedirectPath(result.Data?.User?.Roles);
-            Navigation.NavigateTo(destination);
+            var userInfo = response.Data.User;
+
+            await UserStateService.SetUserAsync(userInfo);
+
+            // Stocker le token pour les futurs appels API
+            await LocalStorage.SetItemAsync("accessToken", response.Data.Token.AccessToken);
+            await LocalStorage.SetItemAsync("refreshToken", response.Data.Token.RefreshToken);
+
+            Navigation.NavigateTo("/");
         }
         else
         {
-            errorMessage = result.Message ?? "Erreur de connexion.";
+            errorMessage = response.Message ?? "Erreur de connexion";
         }
+
+        isLoading = false;
     }
 }

@@ -1,4 +1,5 @@
 using DotnetNiger.UI;
+using DotnetNiger.UI.Services.Browser;
 using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Api;
 using DotnetNiger.UI.Services.Mock;
@@ -32,6 +33,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<CustomAuthStateProvider>());
+builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
 
 // Services applicatifs — basculer entre Mock et API via "UseMockServices" dans appsettings.json
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
@@ -39,16 +41,20 @@ var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 if (useMock)
 {
     builder.Services.AddScoped<IAuthService, MockAuthService>();
+    builder.Services.AddScoped<IUserService, MockUserService>();
     builder.Services.AddScoped<IPostService, PostService>();
     builder.Services.AddScoped<IEventService, EventService>();
+    builder.Services.AddScoped<INotificationService, NotificationService>();
     builder.Services.AddScoped<IResourceService, ResourceService>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
     builder.Services.AddScoped<ICommentService, CommentService>();
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
+    builder.Services.AddScoped<IUserStateService, MockUserStateService>();
 }
 else
 {
     builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
+    builder.Services.AddScoped<IUserService, MockUserService>();
     builder.Services.AddScoped<IPostService>(sp =>
         new ApiPostService(CreateGatewayHttpClient(
             apiBaseUrl,
@@ -60,7 +66,9 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<IAuthService>()));
     builder.Services.AddScoped<IResourceService>(sp =>
         new ApiResourceService(CreateGatewayHttpClient(
             apiBaseUrl,
@@ -87,6 +95,7 @@ else
             sp.GetRequiredService<CustomAuthStateProvider>()));
 
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
+    builder.Services.AddScoped<INotificationService, NotificationService>();
 }
 
 await builder.Build().RunAsync();

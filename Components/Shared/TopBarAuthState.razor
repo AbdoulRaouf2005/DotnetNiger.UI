@@ -1,6 +1,9 @@
+@implements IDisposable
 @using System.Security.Claims
 @inject NavigationManager Navigation
 @inject IAuthService Auth
+@inject IProfileService ProfileService
+@inject INotificationService NotificationService
 
 <AuthorizeView>
     <Authorized Context="authState">
@@ -8,20 +11,29 @@
         {
             <div class="grid grid-cols-2 gap-2">
                 <button type="button"
+                        class="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary px-3 py-2 text-sm font-semibold text-secondary transition duration-150 ease-in-out hover:bg-secondary hover:text-white"
+                        @onclick="NavigateToNotificationsAsync">
+                    <span>Notifications</span>
+                    @if (UnreadNotificationCount > 0)
+                    {
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">@UnreadNotificationCount</span>
+                    }
+                </button>
+                <button type="button"
                         class="flex w-full items-center justify-center rounded-lg border border-secondary px-3 py-2 text-sm font-semibold text-secondary transition duration-150 ease-in-out hover:bg-secondary hover:text-white"
                         @onclick="() => NavigateToProfileAsync(authState.User)">
                     Mon Profile
                 </button>
-                <button type="button"
-                        class="flex w-full items-center justify-center rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out hover:bg-red-600"
-                        @onclick="LogoutAsync">
-                    Déconnexion
-                </button>
             </div>
+            <button type="button"
+                    class="mt-2 flex w-full items-center justify-center rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out hover:bg-red-600"
+                    @onclick="LogoutAsync">
+                Déconnexion
+            </button>
         }
         else
         {
-            <TopBarProfileDropdown User="authState.User" NotificationCount="NotificationCount" />
+            <TopBarProfileDropdown User="authState.User" NotificationCount="UnreadNotificationCount" />
         }
     </Authorized>
     <NotAuthorized>
@@ -50,6 +62,31 @@
     [Parameter] public int? NotificationCount { get; set; }
     [Parameter] public EventCallback OnActionCompleted { get; set; }
 
+    private UserDto? profile;
+    private int unreadNotificationCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await ProfileService.GetProfileAsync();
+            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+            NotificationService.NotificationsChanged += HandleNotificationsChanged;
+        }
+        catch
+        {
+            profile = null;
+            unreadNotificationCount = 0;
+        }
+    }
+
+    public void Dispose()
+    {
+        NotificationService.NotificationsChanged -= HandleNotificationsChanged;
+    }
+
+    private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount : NotificationCount.GetValueOrDefault();
+
     private async Task NavigateToLoginAsync()
     {
         await NotifyActionCompletedAsync();
@@ -74,6 +111,24 @@
         await Auth.LogoutAsync();
         await NotifyActionCompletedAsync();
         Navigation.NavigateTo("/");
+    }
+
+    private async Task NavigateToNotificationsAsync()
+    {
+        await NotifyActionCompletedAsync();
+        Navigation.NavigateTo("/notifications");
+    }
+
+    private void HandleNotificationsChanged(Guid userId)
+    {
+        if (profile is null || userId != profile.Id)
+            return;
+
+        _ = InvokeAsync(async () =>
+        {
+            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+            StateHasChanged();
+        });
     }
 
     private Task NotifyActionCompletedAsync()

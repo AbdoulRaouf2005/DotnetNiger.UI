@@ -182,26 +182,24 @@
 
     private async Task SetPendingAsync()
     {
-        await SaveAsync(isPublished: false, isArchived: false);
+        await SaveAsync();
     }
 
     private async Task PublishAsync()
     {
-        await SaveAsync(isPublished: true, isArchived: false);
+        await SaveAsync();
     }
 
     private async Task ArchiveAsync()
     {
-        await SaveAsync(isPublished: false, isArchived: true);
+        await SaveAsync();
     }
 
-    private async Task SaveAsync(bool isPublished, bool isArchived)
+    private async Task SaveAsync()
     {
         try
         {
             eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescriptionEdit");
-            eventRequest.IsPublished = isPublished;
-            eventRequest.IsArchived = isArchived;
 
             var updated = await EventService.UpdateEventAsync(Id, eventRequest);
             if (updated is null)
@@ -231,8 +229,6 @@
             CoverImageUrl = ev.CoverImageUrl,
             Capacity = ev.Capacity,
             MeetupLink = ev.MeetupLink,
-            IsPublished = ev.IsPublished,
-            IsArchived = ev.IsArchived
         };
     }
 }

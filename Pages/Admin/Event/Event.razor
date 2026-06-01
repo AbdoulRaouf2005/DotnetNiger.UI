@@ -34,7 +34,6 @@
                 <option value="">Tous</option>
                 <option value="published">Publié</option>
                 <option value="pending">En attente</option>
-                <option value="archived">Archivé</option>
             </select>
             <select @bind="selectedType" class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Type</option>
@@ -146,9 +145,9 @@
                     e.OrganizerName.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
                     e.Location.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
         .Where(e => string.IsNullOrEmpty(selectedStatus) ||
-                    (selectedStatus == "published" && e.IsPublished && !e.IsArchived) ||
-                    (selectedStatus == "pending" && !e.IsPublished && !e.IsArchived) ||
-                    (selectedStatus == "archived" && e.IsArchived))
+                    (selectedStatus == "published" && e.IsPublished ) ||
+                    (selectedStatus == "pending" && !e.IsPublished ))
+                    
         .Where(e => string.IsNullOrEmpty(selectedType) ||
                     e.EventType.Equals(selectedType, StringComparison.OrdinalIgnoreCase))
         .Where(e => string.IsNullOrEmpty(selectedPeriod) ||
@@ -185,7 +184,7 @@
 
     private async Task TogglePublish(Guid id)
     {
-        await EventService.TogglePublishAsync(id);
+        await EventService.ApproveEventAsync(id);
         allEvents = await EventService.GetAllEventsAsync();
     }
 
@@ -229,8 +228,6 @@
             CoverImageUrl = ev.CoverImageUrl,
             Capacity = ev.Capacity,
             MeetupLink = ev.MeetupLink,
-            IsPublished = isPublished,
-            IsArchived = isArchived
         };
 
         var updated = await EventService.UpdateEventAsync(ev.Id, request);

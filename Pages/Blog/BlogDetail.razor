@@ -33,7 +33,7 @@
 					}
 					<span>@post.AuthorName</span>
 					<span>•</span>
-					<span>@post.PublishedAt.ToString("dd MMM yyyy")</span>
+					<span>@post.PublishedAt?.ToString("dd MMM yyyy")</span>
 					@if (post.ViewCount > 0)
 					{
 						<span>•</span>
@@ -58,7 +58,7 @@
 					</div>
 					<div>
 						<p class="text-sm sm:text-[15px] font-semibold text-gray-900">@post.AuthorName</p>
-						<p class="text-[11px] sm:text-xs text-gray-500">Architecte Cloud Senior • @post.PublishedAt.ToString("dd MMM yyyy")</p>
+						<p class="text-[11px] sm:text-xs text-gray-500">Architecte Cloud Senior • @post.PublishedAt?.ToString("dd MMM yyyy")</p>
 					</div>
 				</div>
 

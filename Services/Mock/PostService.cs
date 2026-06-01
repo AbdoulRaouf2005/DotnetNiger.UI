@@ -59,395 +59,11 @@ namespace DotnetNiger.UI.Services.Mock
                         new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
                         new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
                     }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Les meilleures pratiques en C#",
-                    Slug = "les-meilleures-pratiques-en-csharp",
-                    Excerpt = "Guide complet des meilleures pratiques en C# : nommage, SOLID, gestion des erreurs.",
-                    Content = "<h2>Nommage significatif</h2><p>Utilisez des noms clairs et expressifs.</p><h2>Principes SOLID</h2><ul><li>Single Responsibility</li><li>Open/Closed</li><li>Liskov Substitution</li><li>Interface Segregation</li><li>Dependency Inversion</li></ul><h2>Gestion des erreurs</h2><p>Utilisez try-catch et using pour la gestion des ressources.</p>",
-                    CoverImageUrl = "/images/csharp.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Pierre Dubois",
-                    AuthorAvatar = "/images/avatars/pierre.jpg",
-                    PostType = "Article",
-                    PublishedAt = DateTime.Now.AddDays(-3),
-                    ViewCount = 389,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Programmation", Slug = "programmation", Description = "", PostCount = 35 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "C#", Slug = "csharp", PostCount = 15 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "Best Practices", Slug = "best-practices", PostCount = 12 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WebAssembly, la révolution C# pour le développement web moderne.",
-                    Content = "<h2>Qu'est-ce que Blazor WebAssembly?</h2><p>Blazor WASM est un framework de frontend qui permet d'exécuter du code C# directement dans le navigateur via WebAssembly.</p><h2>Avantages</h2><ul><li>Partage de code C#</li><li>Performance optimale</li><li>Sécurité renforcée</li><li>Productivité accrue</li></ul>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
-                },
-                new PostDto
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
-                    Slug = "introduction-a-blazor-webassembly",
-                    Excerpt = "Apprenez les bases de Blazor WASM...",
-                    Content = "<h1>Blazor WASM</h1><p>...</p>",
-                    CoverImageUrl = "/images/blazor.jpg",
-                    AuthorId = Guid.NewGuid(),
-                    AuthorName = "Marie Martin",
-                    AuthorAvatar = "/images/avatars/marie.jpg",
-                    PostType = "Tutorial",
-                    PublishedAt = DateTime.Now.AddDays(-10),
-                    ViewCount = 512,
-                    Categories = new List<CategoryDto>
-                    {
-                        new CategoryDto { Id = Guid.NewGuid(), Name = "Web", Slug = "web", Description = "", PostCount = 20 }
-                    },
-                    Tags = new List<TagDto>
-                    {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
-                    }
                 }
             };
         }
 
-        public async Task<PostDto> CreatePostAsync(CreatePostRequest request)
+        public async Task<PostDto> CreatePostAsync(CreatePostRequest request, Guid CurrentId)
         {
             var newPost = new PostDto
             {
@@ -457,11 +73,11 @@ namespace DotnetNiger.UI.Services.Mock
                 Excerpt = request.Excerpt,
                 Content = request.Content,
                 CoverImageUrl = request.CoverImageUrl ?? "/images/default.jpg",
-                AuthorId = Guid.NewGuid(), // � remplacer par l'utilisateur connect�
+                AuthorId = CurrentId, // � remplacer par l'utilisateur connect�
                 AuthorName = "Admin",
                 AuthorAvatar = "/images/avatars/default.jpg",
                 PostType = request.PostType,
-                PublishedAt = request.IsPublished ? DateTime.Now : DateTime.MinValue,
+                PublishedAt = DateTime.Now,
                 ViewCount = 0,
                 Categories = new List<CategoryDto>(),
                 Tags = new List<TagDto>(),
@@ -575,6 +191,29 @@ namespace DotnetNiger.UI.Services.Mock
                 .ToList();
 
             return await Task.FromResult(posts);
+        }
+
+        // nouveaux fonctionnalité
+
+        public async Task<bool> PublishPostAsync(Guid postId)
+        {
+            await Task.Delay(300);
+            var post = _posts.FirstOrDefault(p => p.Id == postId);
+            if(post == null) return false;
+
+            post.PublishedAt = DateTime.Now;
+            return true;
+        }
+
+        public async Task<bool> UnPublishPostAsync (Guid postId)
+        {
+            await Task.Delay(300);
+            var post = _posts.FirstOrDefault(p => p.Id == postId);
+            if(post == null) return false;
+
+            post.PublishedAt = null;
+            return true;
+
         }
 
         private string GenerateSlug(string title)

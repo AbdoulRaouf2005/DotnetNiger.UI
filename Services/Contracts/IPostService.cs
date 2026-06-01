@@ -5,14 +5,17 @@ namespace DotnetNiger.UI.Services.Contracts;
 
 public interface IPostService
 {
-    Task<List<PostDto>> GetAllPostsAsync();
     Task<List<PostDto>> GetPublishedPostsAsync();
     Task<List<PostDto>> GetPostsByCategoryAsync(string categorySlug);
     Task<List<PostDto>> GetPostsByTagAsync(string tagSlug);
-    Task<PostDto?> GetPostByIdAsync(Guid id);
+    Task<List<PostDto>> GetAllPostsAsync();
+    Task<PostDto?> GetPostByIdAsync(Guid postId);
     Task<PostDto?> GetPostBySlugAsync(string slug);
-    Task<PostDto> CreatePostAsync(CreatePostRequest request);
-    Task<PostDto?> UpdatePostAsync(Guid id, UpdatePostRequest request);
-    Task<bool> DeletePostAsync(Guid id);
     Task<List<PostDto>> SearchPostsAsync(string query);
+    Task<PostDto> CreatePostAsync(CreatePostRequest request,Guid UserId);
+    Task<PostDto?> UpdatePostAsync(Guid postId, UpdatePostRequest request);
+    Task<bool> DeletePostAsync(Guid postId);
+    Task<bool> PublishPostAsync(Guid postId) => Task.FromResult(false);
+    Task<bool> UnPublishPostAsync(Guid postId) => Task.FromResult(false);
+    
 }
