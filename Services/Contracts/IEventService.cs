@@ -16,7 +16,7 @@ public interface IEventService
     // Task<EventDto> CreateEventAsync(CreateEventRequest request);
     Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request);
     Task<bool> DeleteEventAsync(Guid id);
-    // Task<bool> TogglePublishAsync(Guid id);
+    Task<bool> TogglePublishAsync(Guid id);
     Task<EventRegistrationDto?> RegisterToEventAsync(RegisterEventRequest request, Guid userId, string userName);
     Task<bool> CancelRegistrationAsync(Guid eventId, Guid userId);
     Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId);

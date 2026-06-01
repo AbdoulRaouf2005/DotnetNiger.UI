@@ -25,4 +25,7 @@ public class CreateEventRequest
     public int Capacity { get; set; } = 100;
     public string MeetupLink { get; set; } = string.Empty;
 
+    public bool IsPublished { get; set; }
+    public bool IsArchived { get; set; }
+    public List<string> TagNames { get; set; } = new();
 }

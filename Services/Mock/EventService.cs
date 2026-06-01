@@ -319,14 +319,14 @@ public class EventService : IEventService
         return await Task.FromResult(true);
     }
 
-    // public async Task<bool> TogglePublishAsync(Guid id)
-    // {
-    //     var ev = _events.FirstOrDefault(e => e.Id == id);
-    //     if (ev is null) return await Task.FromResult(false);
+    public async Task<bool> TogglePublishAsync(Guid id)
+    {
+        var ev = _events.FirstOrDefault(e => e.Id == id);
+        if (ev is null) return await Task.FromResult(false);
 
-    //     ev.IsPublished = !ev.IsPublished;
-    //     return await Task.FromResult(true);
-    // }
+        ev.IsPublished = !ev.IsPublished;
+        return await Task.FromResult(true);
+    }
 
     // ── Inscriptions ───────────────────────────────────────────
 
@@ -372,11 +372,11 @@ public class EventService : IEventService
 
     public async Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId)
     {
-        return await Task.FromResult(
-            _registrations.Where(r => r.EventId == eventId).ToList());
+        var registrations = _registrations
+            .Where(r => r.EventId == eventId)
+            .ToList();
+        return await Task.FromResult(registrations);
     }
-
-    // ── Utilitaires ────────────────────────────────────────────
 
     private static string GenerateSlug(string title)
     {
