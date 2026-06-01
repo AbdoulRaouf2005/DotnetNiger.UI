@@ -54,7 +54,12 @@ if (useMock)
 else
 {
     builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
-    builder.Services.AddScoped<IUserService, MockUserService>();
+    builder.Services.AddScoped<IUserService>(sp =>
+        new ApiUserService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
     builder.Services.AddScoped<IPostService>(sp =>
         new ApiPostService(CreateGatewayHttpClient(
             apiBaseUrl,
