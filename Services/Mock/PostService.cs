@@ -32,8 +32,8 @@ namespace DotnetNiger.UI.Services.Mock
                     },
                     Tags = new List<TagDto>
                     {
-                        new TagDto { Id = Guid.NewGuid(), Name = ".NET9", Slug = "dotnet9", PostCount = 5 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "C#", Slug = "csharp", PostCount = 15 }
+                        new TagDto { Id = Guid.NewGuid(), Name = ".NET9", Slug = "dotnet9", UsageCount = 5 },
+                        new TagDto { Id = Guid.NewGuid(), Name = "C#", Slug = "csharp", UsageCount = 15 }
                     }
                 },
                 new PostDto
@@ -56,8 +56,8 @@ namespace DotnetNiger.UI.Services.Mock
                     },
                     Tags = new List<TagDto>
                     {
-                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", PostCount = 8 },
-                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", PostCount = 6 }
+                        new TagDto { Id = Guid.NewGuid(), Name = "Blazor", Slug = "blazor", UsageCount = 8 },
+                        new TagDto { Id = Guid.NewGuid(), Name = "WebAssembly", Slug = "webassembly", UsageCount = 6 }
                     }
                 }
             };

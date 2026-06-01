@@ -337,7 +337,7 @@ public class MockAuthService : IAuthService
         }
 
         // Simuler la vérification du token
-        if (request.Token != "valid-verification-token")
+        if (request.Code != "valid-verification-code")
         {
             return false;
         }

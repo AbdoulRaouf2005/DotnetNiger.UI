@@ -61,7 +61,7 @@
         isVerified = await Auth.VerifyEmailAsync(new VerifyEmailRequest
         {
             Email = Email,
-            Token = Token
+            Code = Token
         });
 
         if (!isVerified)
