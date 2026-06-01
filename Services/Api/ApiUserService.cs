@@ -19,7 +19,7 @@ public class ApiUserService : IUserService
     {
         var response = await _http.GetAsync(AdminUsersBase);
         if (!response.IsSuccessStatusCode)
-            return new List<UserDto>();
+            return [];
 
         return await ApiResponseReader.ReadCollectionAsync<UserDto>(response);
     }
@@ -88,31 +88,53 @@ public class ApiUserService : IUserService
 
     public Task<UserDto> CreateUserAsync(CreateUserRequest user)
     {
-        throw new NotSupportedException("La création d'utilisateur via l'API Community n'est pas encore implémentée.");
+        throw new NotSupportedException("La création d'utilisateur via l'API Community n'est pas implémentée. Utilisez le flux d'inscription (Register).");
     }
 
     public async Task<UserDto?> UpdateUserAsync(UserDto user)
     {
-        var content = JsonContent.Create(new { isActive = user.IsActive });
-        var response = await _http.PatchAsync($"{AdminUsersBase}/{user.Id}/status", content);
-        if (!response.IsSuccessStatusCode)
+        var statusContent = JsonContent.Create(new UpdateUserStatusRequest { IsActive = user.IsActive });
+        var statusResponse = await _http.PatchAsync($"{AdminUsersBase}/{user.Id}/status", statusContent);
+        if (!statusResponse.IsSuccessStatusCode)
             return null;
+
+        var existing = await GetUserByIdAsync(user.Id);
+        if (existing is null) return null;
+
+        foreach (var role in user.Roles)
+        {
+            if (!existing.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+            {
+                var roleContent = JsonContent.Create(new { roleName = role });
+                await _http.PostAsync($"{AdminUsersBase}/{user.Id}/roles", roleContent);
+            }
+        }
 
         return await GetUserByIdAsync(user.Id);
     }
 
     public Task<bool> DeleteUserAsync(Guid userId)
     {
-        throw new NotSupportedException("La suppression d'utilisateur via l'API Community n'est pas encore implémentée.");
+        throw new NotSupportedException("La suppression d'utilisateur via l'API Community n'est pas implémentée.");
     }
 
-    public Task<bool> ApproveUserAsync(Guid userId)
+    public async Task<bool> ApproveUserAsync(Guid userId)
     {
-        throw new NotSupportedException("L'approbation d'utilisateur via l'API Community n'est pas encore implémentée.");
+        var statusContent = JsonContent.Create(new UpdateUserStatusRequest { IsActive = true });
+        var response = await _http.PatchAsync($"{AdminUsersBase}/{userId}/status", statusContent);
+        if (!response.IsSuccessStatusCode)
+            return false;
+
+        var roleContent = JsonContent.Create(new { roleName = "Member" });
+        await _http.PostAsync($"{AdminUsersBase}/{userId}/roles", roleContent);
+
+        return true;
     }
 
-    public Task<bool> RejectUserAsync(Guid userId)
+    public async Task<bool> RejectUserAsync(Guid userId)
     {
-        throw new NotSupportedException("Le rejet d'utilisateur via l'API Community n'est pas encore implémentée.");
+        var content = JsonContent.Create(new UpdateUserStatusRequest { IsActive = false });
+        var response = await _http.PatchAsync($"{AdminUsersBase}/{userId}/status", content);
+        return response.IsSuccessStatusCode;
     }
 }

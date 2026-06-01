@@ -50,6 +50,11 @@ if (useMock)
     builder.Services.AddScoped<ICommentService, CommentService>();
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
     builder.Services.AddScoped<IUserStateService, MockUserStateService>();
+    builder.Services.AddScoped<IProjectService, MockProjectService>();
+    builder.Services.AddScoped<IPartnerService, MockPartnerService>();
+    builder.Services.AddScoped<INewsletterService, MockNewsletterService>();
+    builder.Services.AddScoped<IMemberDirectoryService, MockMemberDirectoryService>();
+    builder.Services.AddScoped<ISearchService, MockSearchService>();
 }
 else
 {
@@ -101,6 +106,43 @@ else
 
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
     builder.Services.AddScoped<INotificationService, NotificationService>();
+
+    builder.Services.AddScoped<IProjectService>(sp =>
+        new ApiProjectService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IPartnerService>(sp =>
+        new ApiPartnerService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<INewsletterService>(sp =>
+        new ApiNewsletterService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IMemberDirectoryService>(sp =>
+        new ApiMemberDirectoryService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<ISearchService>(sp =>
+        new ApiSearchService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IUserStateService, MockUserStateService>();
 }
 
 await builder.Build().RunAsync();

@@ -253,36 +253,38 @@ public class AuthService : IAuthService
         return result;
     }
 
-    public async Task<UserDto?> GetCurrentUserAsync()
-    {
-        var token = await _authProvider.GetAccessTokenAsync();
-        if (string.IsNullOrWhiteSpace(token))
-            return null;
+	public async Task<UserDto?> GetCurrentUserAsync()
+	{
+		var token = await _authProvider.GetAccessTokenAsync();
+		if (string.IsNullOrWhiteSpace(token))
+			return null;
 
-        var claims = ParseClaimsFromJwt(token).ToList();
-        var userIdClaim = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier || claim.Type == "sub");
+		var claims = ParseClaimsFromJwt(token).ToList();
+		var userIdClaim = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier || claim.Type == "sub");
 
-        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
-            return null;
+		if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+			return null;
 
-        var email = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email || claim.Type == "email")?.Value ?? string.Empty;
-        var fullName = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name || claim.Type == "name")?.Value ?? string.Empty;
-        var roles = claims
-            .Where(claim => claim.Type == ClaimTypes.Role)
-            .Select(claim => claim.Value)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+		var email = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email || claim.Type == "email")?.Value ?? string.Empty;
+		var fullName = claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name || claim.Type == "name" || claim.Type == "full_name")?.Value ?? string.Empty;
+		var avatarUrl = claims.FirstOrDefault(claim => claim.Type == "avatar_url" || claim.Type == "avatarUrl" || claim.Type == "picture")?.Value ?? string.Empty;
+		var roles = claims
+			.Where(claim => claim.Type == ClaimTypes.Role)
+			.Select(claim => claim.Value)
+			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.ToList();
 
-        return new UserDto
-        {
-            Id = userId,
-            Email = email,
-            FullName = fullName,
-            Username = string.IsNullOrWhiteSpace(fullName) ? email : fullName,
-            IsActive = true,
-            Roles = roles
-        };
-    }
+		return new UserDto
+		{
+			Id = userId,
+			Email = email,
+			FullName = fullName,
+			AvatarUrl = avatarUrl,
+			Username = string.IsNullOrWhiteSpace(fullName) ? email : fullName,
+			IsActive = true,
+			Roles = roles
+		};
+	}
 
     public async Task<bool> IsAuthenticatedAsync()
         => !string.IsNullOrWhiteSpace(await _authProvider.GetAccessTokenAsync());

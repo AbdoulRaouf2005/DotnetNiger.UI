@@ -198,28 +198,30 @@
         new MobileNavItem("/contact", "Messagerie", "material-symbols:mail-rounded", HasNotification: true)
     ];
 
-    private string? ResolvedAvatarUrl => NormalizeImagePath(FirstNotEmpty(
-        profile?.AvatarUrl,
-        GetClaimValue("avatarUrl"),
-        GetClaimValue("avatar"),
-        GetClaimValue("picture"),
-        GetClaimValue("image"),
-        GetClaimValue("profile_picture")
-    ));
+	private string? ResolvedAvatarUrl => NormalizeImagePath(FirstNotEmpty(
+		profile?.AvatarUrl,
+		GetClaimValue("avatar_url"),
+		GetClaimValue("avatarUrl"),
+		GetClaimValue("avatar"),
+		GetClaimValue("picture"),
+		GetClaimValue("image"),
+		GetClaimValue("profile_picture")
+	));
 
     private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount : NotificationCount ?? ParseNotificationCountFromClaims();
 
-    private string DisplayName => FirstNotEmpty(
-        profile?.FullName,
-        profile?.Username,
-        User.Identity?.Name,
-        GetClaimValue(ClaimTypes.Name),
-        GetClaimValue("name"),
-        GetClaimValue("unique_name"),
-        GetClaimValue("preferred_username"),
-        GetClaimValue("given_name"),
-        "Utilisateur"
-    )!;
+	private string DisplayName => FirstNotEmpty(
+		profile?.FullName,
+		profile?.Username,
+		User.Identity?.Name,
+		GetClaimValue(ClaimTypes.Name),
+		GetClaimValue("name"),
+		GetClaimValue("full_name"),
+		GetClaimValue("unique_name"),
+		GetClaimValue("preferred_username"),
+		GetClaimValue("given_name"),
+		"Utilisateur"
+	)!;
 
     private string Initials
     {

@@ -1,6 +1,7 @@
 @page "/propos"
 
 @using DotnetNiger.UI.Components
+@inject IUserService UserService
 
 <PageTitle>À propos - .NET Niger</PageTitle>
 
@@ -186,76 +187,64 @@
 								@if (showMembersSection)
 								{
 									<div class="mt-6 sm:mt-8 p-4 text-left ">
-										<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
-											<button type="button"
-												  class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary"
-												  aria-label="Filtrer les événements">
-												<i class="fa-solid fa-sliders text-base"></i>
-											</button>
-											<label class="relative w-full min-w-[220px] flex-1">
-												<span
-													class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-													<i class="fa-solid fa-magnifying-glass text-sm"></i>
-												</span>
-												<input type="search" placeholder="Rechercher un membre..."
-													 class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-											</label>
-											<select
-												class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-												<option>Rôle</option>
-												<option>Développeur</option>
-												<option>Designer</option>
-												<option>Mentor</option>
-											</select>
+										@if (membersLoading)
+										{
+											<div class="flex items-center justify-center py-12">
+												<div class="flex items-center gap-3 text-slate-500">
+													<i class="fa-solid fa-spinner fa-spin text-xl"></i>
+													<span class="text-sm">Chargement des membres...</span>
+												</div>
+											</div>
+										}
+										else if (membersError)
+										{
+											<div class="flex flex-col items-center justify-center py-12 text-center">
+												<i class="fa-solid fa-exclamation-triangle text-3xl text-amber-500"></i>
+												<p class="mt-3 text-sm text-slate-600">Impossible de charger la liste des membres.</p>
+												<button type="button" @onclick="LoadMembersAsync"
+														class="mt-3 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#6a4df0]">
+													<i class="fa-solid fa-rotate"></i> Réessayer
+												</button>
+											</div>
+										}
+										else if (members.Count == 0)
+										{
+											<div class="flex flex-col items-center justify-center py-12 text-center">
+												<i class="fa-solid fa-users-slash text-3xl text-slate-300"></i>
+												<p class="mt-3 text-sm text-slate-500">Aucun membre pour le moment.</p>
+											</div>
+										}
+										else
+										{
+											<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
+												<button type="button"
+													  class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary"
+													  aria-label="Filtrer">
+													<i class="fa-solid fa-sliders text-base"></i>
+												</button>
+												<label class="relative w-full min-w-[220px] flex-1">
+													<span
+														class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
+														<i class="fa-solid fa-magnifying-glass text-sm"></i>
+													</span>
+													<input type="search" placeholder="Rechercher un membre..."
+														   @bind="memberSearch" @bind:event="oninput"
+														   class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
+												</label>
+											</div>
 
-											<select
-												class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-												<option>Type</option>
-												<option>Senior</option>
-												<option>Junior</option>
-												<option>Lead</option>
-											</select>
+											<div class="mt-8 sm:mt-10 flex items-center gap-3">
+												<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Membres</h2>
+												<span class="rounded-full bg-[#ECE7FF] px-3 py-1 text-xs font-bold text-[#512BD4]">@filteredMembers.Count</span>
+											</div>
 
-											<select
-												class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-												<option>Réseau</option>
-												<option>Niamey</option>
-												<option>Maradi</option>
-												<option>Zinder</option>
-											</select>
-
-			
-										</div>
-
-										<div class="mt-8 sm:mt-10 flex items-center gap-3">
-											<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Membres</h2>
-											<span
-											class="rounded-full bg-[#ECE7FF] px-3 py-1 text-xs font-bold text-[#512BD4]">@members.Count</span>
-										</div>
-
-										<div class="mt-5 sm:mt-6 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
-											@foreach (var member in members)
-											{
-												<UserCard User="member"/>
-											}
-										</div>
-
-										<div class="mt-6 sm:mt-8 flex items-center justify-center gap-3">
-											<button
-												class="flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 sm:px-4 text-xs sm:text-sm text-slate-400">
-												<i class="fa-solid fa-arrow-left"></i>
-												<span>Préc</span>
-											</button>
-											<button
-											class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-900 bg-white text-xs sm:text-sm font-semibold text-slate-900">1</button>
-											<button
-											class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-600">2</button>
-											<button
-												class="flex h-10 items-center gap-2 rounded-xl border border-slate-900 bg-white px-3 sm:px-4 text-xs sm:text-sm font-semibold text-slate-900">
-												<span>Suiv</span>
-												<i class="fa-solid fa-arrow-right"></i>
-											</button>
-										</div>
+											<div class="mt-5 sm:mt-6 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
+												@foreach (var member in filteredMembers)
+												{
+													<UserCard User="member"/>
+												}
+											</div>
+										}
 									</div>
 								}
 							</div>
@@ -288,61 +277,57 @@
 new[] { "Editorial", "UX", "Culture" })
 	};
 
-	private readonly IReadOnlyList<UserDto> members = new[]
-	{
-		CreateMember("Amadou Diallo", "Senior .NET Developer", "Niamey", "Niger", new[] { "ASP.NET", "Microservices" }),
-		CreateMember("Fatima Ibrahim", "Fullstack Cloud Engineer", "Maradi", "Niger", new[] { "Blazor", "Azure Cloud" }),
-		CreateMember("Moussa Harouna", "Backend Mentor", "Zinder", "Niger", new[] { "C#", "Unity" }),
-		CreateMember("Issaka Salifou", "Software Architect", "Niamey", "Niger", new[] { "DDD", "DevOps" }),
-		CreateMember("Zalika Adamou", "Backend Developer", "Tahoua", "Niger", new[] { "Entity Framework", "PostgreSQL" }),
-		CreateMember("Amina Karim", "Junior Developer", "Agadez", "Niger", new[] { "C# Basics", ".NET MAUI" })
-	};
-
+	private List<UserDto> members = [];
 	private bool showMembersSection;
+	private bool membersLoading;
+	private bool membersError;
+	private string memberSearch = string.Empty;
 
 	private string MembersToggleIconClass => showMembersSection ? "fa-chevron-up" : "fa-users";
+
+	private List<UserDto> filteredMembers =>
+		string.IsNullOrWhiteSpace(memberSearch)
+			? members
+			: members.Where(m =>
+				m.FullName.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
+				m.City.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
+				m.Country.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
+				m.Skills.Any(s => s.Contains(memberSearch, StringComparison.OrdinalIgnoreCase)) ||
+				m.Roles.Any(r => r.Contains(memberSearch, StringComparison.OrdinalIgnoreCase))
+			).ToList();
 
 	private void ToggleMembersSection()
 	{
 		showMembersSection = !showMembersSection;
+		if (showMembersSection && members.Count == 0 && !membersLoading)
+			_ = LoadMembersAsync();
 	}
 
-	private static Type? GetUserCardType()
+	protected override async Task OnInitializedAsync()
 	{
-		return Type.GetType("DotnetNiger.UI.Components.UserCard, DotnetNiger.UI")
-			?? Type.GetType("DotnetNiger.UI.UserCard, DotnetNiger.UI")
-			?? Type.GetType("UserCard, DotnetNiger.UI");
+		await LoadMembersAsync();
 	}
 
-	private static IDictionary<string, object> GetUserCardParameters(UserDto member)
+	private async Task LoadMembersAsync()
 	{
-		return new Dictionary<string, object>
+		membersLoading = true;
+		membersError = false;
+		try
 		{
-			["User"] = member
-		};
-	}
-
-	private static UserDto CreateMember(string fullName, string role, string city, string country, IEnumerable<string>
-skills)
-	{
-		return new UserDto
+			var all = await UserService.GetUsersAsync();
+			members = all
+				.Where(u => u.IsActive)
+				.OrderByDescending(u => u.CreatedAt)
+				.ToList();
+		}
+		catch
 		{
-			Id = Guid.NewGuid(),
-			FullName = fullName,
-			Username = fullName.Replace(" ", string.Empty).ToLowerInvariant(),
-			Email = string.Empty,
-			PhoneNumber = string.Empty,
-			Bio = string.Empty,
-			AvatarUrl = string.Empty,
-			Country = country,
-			City = city,
-			IsActive = true,
-			CreatedAt = DateTime.UtcNow,
-			LastLoginAt = null,
-			Roles = new List<string> { role },
-			Skills = skills.ToList(),
-			SocialLinks = new List<SocialLinkDto>()
-		};
+			membersError = true;
+		}
+		finally
+		{
+			membersLoading = false;
+		}
 	}
 
 	private sealed record ValueItem(string Title, string Icon, string IconBackground, string IconColor, string Description);

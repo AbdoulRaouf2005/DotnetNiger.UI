@@ -1,0 +1,168 @@
+@page "/ressource/{Slug}"
+@inject IResourceService ResourceService
+@inject NavigationManager Navigation
+
+<PageTitle>@(resource?.Title ?? "Ressource") - .NET Niger</PageTitle>
+
+@if (isLoading)
+{
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-secondary border-r-transparent"></div>
+    </div>
+}
+else if (resource is null)
+{
+    <div class="min-h-[60vh] flex items-center justify-center px-4">
+        <div class="text-center max-w-md">
+            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                <i class="fas fa-search text-2xl text-gray-400"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900 mb-2">Ressource non trouvée</h2>
+            <p class="text-sm text-gray-500 mb-6">La ressource demandée n'existe pas ou a été retirée.</p>
+            <a href="/ressources"
+               class="inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition">
+                <i class="fas fa-arrow-left"></i>
+                Retour aux ressources
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <section class="bg-gradient-to-b from-[#e8e3f6] to-white px-4 py-10 sm:py-14 lg:px-10">
+        <div class="mx-auto w-full max-w-4xl">
+            <nav class="mb-6 text-sm text-gray-500">
+                <a href="/ressources" class="hover:text-secondary transition">Ressources</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-900 font-medium">@resource.Title</span>
+            </nav>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="@GradientClass h-44 sm:h-56 flex items-center justify-center relative">
+                    <div class="absolute inset-0 bg-white/10"></div>
+                    <div class="relative flex flex-col items-center gap-3">
+                        <i class="@IconClass text-white text-5xl sm:text-6xl opacity-90"></i>
+                        <span class="inline-flex rounded-full bg-white/20 backdrop-blur-sm px-4 py-1 text-sm font-semibold text-white">@resource.ResourceType</span>
+                    </div>
+                </div>
+
+                <div class="p-6 sm:p-8 lg:p-10">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
+                            <i class="@LevelIconClass"></i>
+                            @resource.Level
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                            <i class="fas fa-eye"></i>
+                            @resource.ViewCount vue@(resource.ViewCount > 1 ? "s" : "")
+                        </span>
+                        @if (resource.CreatedAt != default)
+                        {
+                            <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                                <i class="fas fa-calendar"></i>
+                                @resource.CreatedAt.ToString("dd MMM yyyy")
+                            </span>
+                        }
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">@resource.Title</h1>
+
+                    @if (!string.IsNullOrWhiteSpace(resource.Description))
+                    {
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">@resource.Description</p>
+                    }
+
+                    @if (resource.Tags.Count > 0)
+                    {
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            @foreach (var tag in resource.Tags)
+                            {
+                                <span class="inline-flex rounded-full bg-gray-100 text-gray-600 px-3 py-1 text-xs font-medium">#@tag.Name</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+                        <a href="@resource.Url" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center justify-center gap-2 rounded-lg bg-secondary text-white px-6 py-3 text-sm font-semibold hover:brightness-110 transition">
+                            Accéder à la ressource
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+                        <a href="/ressources"
+                           class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 text-gray-700 px-6 py-3 text-sm font-semibold hover:bg-gray-50 transition">
+                            <i class="fas fa-arrow-left text-xs"></i>
+                            Retour aux ressources
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string? Slug { get; set; }
+
+    private ResourceDto? resource;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Slug))
+        {
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            resource = await ResourceService.GetResourceBySlugAsync(Slug);
+            if (resource is not null && resource.Id != Guid.Empty)
+            {
+                await ResourceService.IncrementViewCountAsync(resource.Id);
+            }
+        }
+        catch
+        {
+            resource = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GradientClass => resource?.ResourceType switch
+    {
+        "Documentation" => "bg-gradient-to-br from-blue-600 to-blue-400",
+        "Tutoriel" => "bg-gradient-to-br from-emerald-600 to-emerald-400",
+        "Article" => "bg-gradient-to-br from-purple-600 to-purple-400",
+        "GitHub" => "bg-gradient-to-br from-gray-800 to-gray-600",
+        "Cours" => "bg-gradient-to-br from-orange-600 to-orange-400",
+        "Livre" => "bg-gradient-to-br from-rose-600 to-rose-400",
+        "Outil" => "bg-gradient-to-br from-cyan-600 to-cyan-400",
+        _ => "bg-gradient-to-br from-indigo-600 to-indigo-400"
+    };
+
+    private string IconClass => resource?.ResourceType switch
+    {
+        "Documentation" => "fas fa-book",
+        "Tutoriel" => "fas fa-graduation-cap",
+        "Article" => "fas fa-newspaper",
+        "GitHub" => "fab fa-github",
+        "Cours" => "fas fa-video",
+        "Livre" => "fas fa-book-open",
+        "Outil" => "fas fa-wrench",
+        _ => "fas fa-file"
+    };
+
+    private string LevelIconClass => resource?.Level switch
+    {
+        "Débutant" => "fas fa-seedling",
+        "Intermédiaire" or "Intermediaire" => "fas fa-chart-line",
+        "Avancé" => "fas fa-rocket",
+        "Tous niveaux" => "fas fa-users",
+        _ => "fas fa-tag"
+    };
+}

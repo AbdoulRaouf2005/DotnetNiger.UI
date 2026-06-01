@@ -1,5 +1,5 @@
 ﻿@* Composant admin : barre latérale de navigation (responsive + mode réduit). *@
-@inject IProfileService ProfileService
+@inject IUserStateService UserStateService
 
 <div class="h-full">
       <aside class="hidden h-full flex-col justify-between bg-secondary text-white shadow-lg transition-all duration-300 sm:flex @DesktopSidebarWidthClass">
@@ -153,22 +153,21 @@
       [Parameter]
       public bool IsOpen { get; set; }
 
-      private UserDto? profil;
+	private string DesktopSidebarWidthClass => IsCollapsed ? "w-20" : "w-64"; 
 
-      private string DesktopSidebarWidthClass => IsCollapsed ? "w-20" : "w-64"; 
+	private string DisplayName => string.IsNullOrWhiteSpace(UserStateService.CurrentUser?.Username) ? "Administrateur" : UserStateService.CurrentUser.Username;
 
-      private string DisplayName => string.IsNullOrWhiteSpace(profil?.Username) ? "Administrateur" : profil.Username;
+	private string PrimaryRole => UserStateService.CurrentUser?.Roles?.FirstOrDefault() ?? "Membre";
 
-      private string PrimaryRole => profil?.Roles?.FirstOrDefault() ?? "Membre";
+	private string AvatarUrl => UserStateService.CurrentUser?.AvatarUrl ?? string.Empty;
 
-      private string AvatarUrl => profil?.AvatarUrl ?? string.Empty;
+	private bool HasAvatar => !string.IsNullOrWhiteSpace(AvatarUrl);
 
-      private bool HasAvatar => !string.IsNullOrWhiteSpace(AvatarUrl);
+	private string UserInitial => DisplayName.Substring(0, 1).ToUpperInvariant();
 
-      private string UserInitial => DisplayName.Substring(0, 1).ToUpperInvariant();
-
-      protected override async Task OnInitializedAsync()
-      {
-            profil = await ProfileService.GetProfileAsync();
-      }
+	protected override async Task OnInitializedAsync()
+	{
+		if (UserStateService.CurrentUser is null)
+			await UserStateService.LoadUserFromStorageAsync();
+	}
 }
