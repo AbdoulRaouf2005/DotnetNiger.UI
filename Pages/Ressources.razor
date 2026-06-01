@@ -1,110 +1,291 @@
 ﻿@page "/ressources"
+@inject IResourceService ResourceService
+@inject NavigationManager Navigation
+
+@using DotnetNiger.UI.Components.Admin.Cards
 
 <PageTitle>Ressources - .NET Niger</PageTitle>
 
-<section class="bg-[#e8e3f6] px-4 py-8 sm:py-12 md:py-14 lg:px-10">
-	<div class="mx-auto w-full max-w-6xl">
-		<h1 class="mb-8 sm:mb-12 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Les Ressources du DotNet niger</h1>
+@if (isLoading)
+{
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="text-center">
+            <div class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-secondary border-r-transparent"></div>
+            <p class="mt-4 text-sm text-gray-500">Chargement des ressources...</p>
+        </div>
+    </div>
+}
+else if (errorMessage is not null)
+{
+    <div class="min-h-[60vh] flex items-center justify-center px-4">
+        <div class="text-center max-w-md">
+            <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-500"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900 mb-2">Oups ! Une erreur est survenue</h2>
+            <p class="text-sm text-gray-500 mb-6">@errorMessage</p>
+            <button @onclick="LoadResourcesAsync"
+                    class="inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition">
+                <i class="fas fa-redo-alt"></i>
+                Réessayer
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <section class="bg-gradient-to-b from-[#e8e3f6] to-white px-4 py-10 sm:py-14 lg:px-10">
+        <div class="mx-auto w-full max-w-6xl">
+            <div class="text-center mb-10">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-secondary mb-3">Ressources</h1>
+                <p class="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
+                    Documentation, tutoriels, articles et outils pour la communauté .NET — trouvez tout ce qu'il vous faut pour monter en compétence.
+                </p>
+            </div>
 
-		<h2 class="mb-6 sm:mb-8 text-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Formations et Tutorials</h2>
+            <div class="flex flex-col sm:flex-row gap-3 mb-8">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text"
+                           placeholder="Rechercher une ressource..."
+                           @bind="searchQuery"
+                           @bind:event="oninput"
+                           class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+                    @if (!string.IsNullOrEmpty(searchQuery))
+                    {
+                        <button @onclick="() => { searchQuery = string.Empty; currentPage = 1; }"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    }
+                </div>
+                <select @bind="selectedType" @bind:after="() => currentPage = 1"
+                        class="bg-white px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+                    <option value="">Tous les types</option>
+                    @foreach (var t in resourceTypes)
+                    {
+                        <option value="@t">@t</option>
+                    }
+                </select>
+                <select @bind="selectedLevel" @bind:after="() => currentPage = 1"
+                        class="bg-white px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+                    <option value="">Tous les niveaux</option>
+                    @foreach (var l in levels)
+                    {
+                        <option value="@l">@l</option>
+                    }
+                </select>
+                <div class="flex gap-2">
+                    <button @onclick="() => { isListView = false; currentPage = 1; }"
+                            class="px-4 py-3 rounded-xl border transition text-sm @(!isListView ? "bg-secondary text-white border-secondary" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300")">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button @onclick="() => { isListView = true; currentPage = 1; }"
+                            class="px-4 py-3 rounded-xl border transition text-sm @(isListView ? "bg-secondary text-white border-secondary" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300")">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
 
-		<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
-			@foreach (var training in Trainings)
-			{
-				<article class="overflow-hidden rounded-xl bg-white shadow-md">
-					<div class="h-24 sm:h-32 md:h-36 bg-[#e6e4e4]"></div>
-					<div class="space-y-2 sm:space-y-3 p-3 sm:p-4">
-						<h3 class="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900">@training.Title</h3>
-						<p class="text-xs sm:text-sm leading-relaxed text-gray-600">@training.Description</p>
-						<a href="@training.Link" class="inline-flex h-9 sm:h-10 w-full items-center justify-center rounded-md bg-secondary text-xs sm:text-sm font-semibold text-white transition hover:brightness-110">Accéder</a>
-					</div>
-				</article>
-			}
-		</div>
-	</div>
-</section>
+            @if (filteredResources.Count == 0)
+            {
+                <div class="text-center py-16">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                        <i class="fas fa-search text-2xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">Aucune ressource trouvée</h3>
+                    <p class="text-sm text-gray-500 mb-4">Essayez de modifier vos filtres ou votre recherche.</p>
+                    <button @onclick="ClearFilters" class="text-sm text-secondary font-semibold hover:underline">
+                        Effacer tous les filtres
+                    </button>
+                </div>
+            }
+            else if (isListView)
+            {
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100">
+                                    <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Titre</th>
+                                    <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Niveau</th>
+                                    <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vues</th>
+                                    <th class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-5 py-3.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                @foreach (var resource in pagedResources)
+                                {
+                                    <tr class="hover:bg-gray-50/50 transition-colors">
+                                        <td class="px-5 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="flex-shrink-0 w-8 h-8 rounded-lg @RowIconBgClass(resource.ResourceType) flex items-center justify-center">
+                                                    <i class="@RowIconClass(resource.ResourceType) text-white text-xs"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="text-sm font-medium text-gray-900 truncate max-w-[280px]">@resource.Title</p>
+                                                    <p class="text-xs text-gray-400 truncate max-w-[280px]">@resource.Description</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-5 py-4">
+                                            <span class="inline-flex rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-0.5 text-xs font-medium">@resource.ResourceType</span>
+                                        </td>
+                                        <td class="px-5 py-4">
+                                            <span class="inline-flex items-center gap-1 text-xs font-medium @LevelTextColor(resource.Level)">
+                                                <i class="@RowLevelIcon(resource.Level)"></i>
+                                                @resource.Level
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-4 text-sm text-gray-500">
+                                            <span class="inline-flex items-center gap-1">
+                                                <i class="fas fa-eye text-xs text-gray-300"></i>
+                                                @resource.ViewCount
+                                            </span>
+                                        </td>
+                                        <td class="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                            @(resource.CreatedAt != default ? resource.CreatedAt.ToString("dd/MM/yyyy") : "-")
+                                        </td>
+                                        <td class="px-5 py-4 text-right">
+                                            <a href="@resource.Url" target="_blank" rel="noopener noreferrer"
+                                               class="inline-flex items-center gap-1.5 text-sm font-medium text-secondary hover:text-secondary/80 transition">
+                                                Ouvrir
+                                                <i class="fas fa-external-link-alt text-xs"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                    @foreach (var resource in pagedResources)
+                    {
+                        <RessourceCard Resource="resource" />
+                    }
+                </div>
+            }
 
-<section class="bg-[#f5f5f7] px-4 py-8 sm:py-12 md:py-14 lg:px-10">
-	<div class="mx-auto w-full max-w-6xl">
-		<h2 class="mb-8 sm:mb-10 text-center text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Articles de Blog et Guides</h2>
-
-		<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
-			@foreach (var article in Articles)
-			{
-				<article class="overflow-hidden rounded-xl bg-white shadow-md">
-					<div class="h-32 sm:h-40 md:h-44 bg-secondary"></div>
-					<div class="space-y-2 sm:space-y-3 p-3 sm:p-4">
-						<span class="inline-flex rounded-sm bg-[#e8e3f6] px-2 py-1 text-[10px] sm:text-xs font-semibold text-secondary">Projet Local</span>
-						<h3 class="text-sm sm:text-base md:text-lg lg:text-xl font-bold leading-snug text-gray-900">@article.Title</h3>
-						<p class="text-xs sm:text-sm leading-relaxed text-gray-600">@article.Description</p>
-
-						<div class="flex items-center justify-between gap-2 text-[10px] sm:text-xs text-gray-700">
-							<span class="font-semibold text-gray-800">@article.Author</span>
-							<span>@article.DateLabel</span>
-						</div>
-					</div>
-				</article>
-			}
-		</div>
-	</div>
-</section>
-
-<section class="bg-[#e8e3f6] px-4 py-8 sm:py-12 md:py-14 lg:px-10">
-	<div class="mx-auto w-full max-w-6xl">
-		<h2 class="mb-8 sm:mb-10 text-center text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-secondary">Bibliothèque et Outils</h2>
-
-		<div class="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
-			@foreach (var tool in Tools)
-			{
-				<article class="overflow-hidden rounded-xl bg-[#efeff2] shadow-sm">
-					<div class="space-y-1 sm:space-y-2 px-4 sm:px-6 py-4 sm:py-5">
-						<h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-secondary">@tool.Title</h3>
-						<p class="text-xs sm:text-sm md:text-base text-gray-700">@tool.Description</p>
-					</div>
-					<a href="@tool.Link" class="inline-flex h-10 sm:h-11 w-full items-center justify-center border-t border-white/70 bg-[#e6e2f4] text-xs sm:text-sm font-medium text-gray-800 transition hover:text-secondary">
-						@tool.CategoryLabel
-						<span class="ml-2 sm:ml-3 text-base">&gt;</span>
-					</a>
-				</article>
-			}
-		</div>
-	</div>
-</section>
+            <div class="flex items-center justify-between mt-6">
+                <p class="text-sm text-gray-500">
+                    @((currentPage - 1) * pageSize + 1)–@Math.Min(currentPage * pageSize, filteredResources.Count) sur @filteredResources.Count ressource@(filteredResources.Count > 1 ? "s" : "")
+                </p>
+                <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" MaxVisiblePages="5" />
+            </div>
+        </div>
+    </section>
+}
 
 @code {
-	private static readonly IReadOnlyList<ResourceItem> Trainings =
-	[
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#"),
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#"),
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#"),
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#"),
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#"),
-		new("Microsoft Learn", "Plateforme officiel avec des parcours Microsoft Learn C# et ASP.NET Core à votre rythme", "#")
-	];
+    private bool isLoading = true;
+    private string? errorMessage;
+    private List<ResourceDto> allResources = [];
+    private List<string> resourceTypes = [];
+    private List<string> levels = [];
 
-	private static readonly IReadOnlyList<BlogItem> Articles =
-	[
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025"),
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025"),
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025"),
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025"),
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025"),
-		new("AgriTech Niger : La plateforme .NET qui révolutionne l'irrigation", "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum sequi laudantium dicta aut reiciendis!", "Par Fatouma Sakey", "18 Oct. 2025")
-	];
+    private string searchQuery = string.Empty;
+    private string selectedType = string.Empty;
+    private string selectedLevel = string.Empty;
+    private bool isListView;
+    private int currentPage = 1;
+    private const int pageSize = 9;
 
-	private static readonly IReadOnlyList<ToolItem> Tools =
-	[
-		new("Entity Framework Core", "ORM pour.NET", "Accès aux données", "#"),
-		new("Serilog", "Tutoriel locale | intermédiaire", "Gestion des logs", "#"),
-		new("AutoMapper", "Mapping d'objets", "Transformation des données", "#"),
-		new("Entity Framework Core", "ORM pour.NET", "Accès aux données", "#"),
-		new("Serilog", "Tutoriel locale | intermédiaire", "Gestion des logs", "#"),
-		new("AutoMapper", "Mapping d'objets", "Transformation des données", "#")
-	];
+    private List<ResourceDto> filteredResources => allResources
+        .Where(r => string.IsNullOrEmpty(searchQuery) ||
+                    r.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    r.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    r.Tags.Any(t => t.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)))
+        .Where(r => string.IsNullOrEmpty(selectedType) || r.ResourceType == selectedType)
+        .Where(r => string.IsNullOrEmpty(selectedLevel) || r.Level == selectedLevel)
+        .ToList();
 
-	private sealed record ResourceItem(string Title, string Description, string Link);
+    private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredResources.Count / pageSize));
 
-	private sealed record BlogItem(string Title, string Description, string Author, string DateLabel);
+    private List<ResourceDto> pagedResources => filteredResources
+        .Skip((SafeCurrentPage - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
 
-	private sealed record ToolItem(string Title, string Description, string CategoryLabel, string Link);
+    private int SafeCurrentPage => Math.Clamp(currentPage, 1, totalPages);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadResourcesAsync();
+    }
+
+    private async Task LoadResourcesAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            allResources = await ResourceService.GetAllResourcesAsync();
+            resourceTypes = await ResourceService.GetResourceTypesAsync();
+            levels = await ResourceService.GetLevelsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ClearFilters()
+    {
+        searchQuery = string.Empty;
+        selectedType = string.Empty;
+        selectedLevel = string.Empty;
+        currentPage = 1;
+    }
+
+    private static string RowIconBgClass(string type) => type switch
+    {
+        "Documentation" => "bg-blue-500",
+        "Tutoriel" => "bg-emerald-500",
+        "Article" => "bg-purple-500",
+        "GitHub" => "bg-gray-700",
+        "Cours" => "bg-orange-500",
+        "Livre" => "bg-rose-500",
+        "Outil" => "bg-cyan-500",
+        _ => "bg-indigo-500"
+    };
+
+    private static string RowIconClass(string type) => type switch
+    {
+        "Documentation" => "fas fa-book",
+        "Tutoriel" => "fas fa-graduation-cap",
+        "Article" => "fas fa-newspaper",
+        "GitHub" => "fab fa-github",
+        "Cours" => "fas fa-video",
+        "Livre" => "fas fa-book-open",
+        "Outil" => "fas fa-wrench",
+        _ => "fas fa-file"
+    };
+
+    private static string LevelTextColor(string level) => level switch
+    {
+        "Débutant" => "text-emerald-600",
+        "Intermédiaire" or "Intermediaire" => "text-amber-600",
+        "Avancé" => "text-rose-600",
+        "Tous niveaux" => "text-blue-600",
+        _ => "text-gray-500"
+    };
+
+    private static string RowLevelIcon(string level) => level switch
+    {
+        "Débutant" => "fas fa-seedling text-xs",
+        "Intermédiaire" or "Intermediaire" => "fas fa-chart-line text-xs",
+        "Avancé" => "fas fa-rocket text-xs",
+        "Tous niveaux" => "fas fa-users text-xs",
+        _ => "fas fa-tag text-xs"
+    };
 }

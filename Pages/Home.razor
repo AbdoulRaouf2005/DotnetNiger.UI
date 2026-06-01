@@ -6,6 +6,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager navigation
 @inject IEventService EventService
+@inject IResourceService ResourceService
 
 <PageTitle>Accueil - .NET Niger</PageTitle>
 
@@ -159,12 +160,27 @@
         </p>
 
         <!-- Resources Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            @for (int i = 0; i < 3; i++)
-            {
-                <RessourceCard />
-            }
-        </div>
+        @if (IsLoadingResources)
+        {
+            <div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des ressources...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(ResourcesError))
+        {
+            <div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@ResourcesError</div>
+        }
+        else if (PopularResources.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @foreach (var resource in PopularResources)
+                {
+                    <RessourceCard Resource="resource" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-xs sm:text-sm md:text-base text-gray-600">Aucune ressource pour le moment</div>
+        }
     </div>
 </section>
 
@@ -199,9 +215,14 @@
     private bool IsLoading { get; set; } = true;
     private string? LoadError { get; set; }
 
+    private List<ResourceDto> PopularResources = new();
+    private bool IsLoadingResources = true;
+    private string? ResourcesError;
+
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
+        IsLoadingResources = true;
         try
         {
             AllEvents = await EventService.GetPublishedEventsAsync();
@@ -215,6 +236,21 @@
         finally
         {
             IsLoading = false;
+        }
+
+        try
+        {
+            var all = await ResourceService.GetAllResourcesAsync();
+            PopularResources = all.OrderByDescending(r => r.ViewCount).Take(3).ToList();
+        }
+        catch (Exception ex)
+        {
+            ResourcesError = "Impossible de charger les ressources.";
+            await JS.InvokeVoidAsync("console.error", ex.ToString());
+        }
+        finally
+        {
+            IsLoadingResources = false;
         }
     }
 }
