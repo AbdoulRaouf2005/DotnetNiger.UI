@@ -7,5 +7,5 @@ public class UpdateCommentRequest
     [Required]
     public string? Content { get; set; }
     [Required]
-    public string Id { get; set;} = string.Empty;
+    public Guid Id { get; set; }
 }

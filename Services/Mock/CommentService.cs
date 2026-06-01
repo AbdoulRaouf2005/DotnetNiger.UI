@@ -199,35 +199,27 @@ public class CommentService : ICommentService
 
     public Task<CommentResponse> CreateCommentAsync(CreateCommentRequest request)
     {
-        var eventId = string.IsNullOrWhiteSpace(request.EventId)
-            ? Guid.Empty
-            : Guid.Parse(request.EventId);
-
-        var parentCommentId = string.IsNullOrWhiteSpace(request.ParentCommentId) 
-            ? (Guid?)null
-            : Guid.Parse(request.ParentCommentId);
-
         var newComment = new CommentResponse
         {
             Id = Guid.NewGuid(),
-            EventId = eventId,
-            PostId = string.IsNullOrWhiteSpace(request.PostId) ? Guid.Empty : Guid.Parse(request.PostId),
+            EventId = request.EventId ?? Guid.Empty,
+            PostId = request.PostId ?? Guid.Empty,
             UserId = CurrentUserGuid,
             AuthorName = CurrentUserName,
             AuthorAvatar = CurrentUserAvatar,
             Content = request.Content,
             CreatedAt = DateTime.Now,
             UpdatedAt = null,
-            ParentCommentId = parentCommentId,
+            ParentCommentId = request.ParentCommentId,
             Replies = new List<CommentResponse>()
         };
 
         _comments.Add(newComment);
         
         // If this is a reply, add it to parent's replies
-        if (parentCommentId.HasValue)
+        if (request.ParentCommentId.HasValue)
         {
-            var parentComment = _comments.FirstOrDefault(c => c.Id == parentCommentId.Value);
+            var parentComment = _comments.FirstOrDefault(c => c.Id == request.ParentCommentId.Value);
             if (parentComment != null)
             {
                 parentComment.Replies.Add(newComment);
@@ -239,10 +231,7 @@ public class CommentService : ICommentService
 
     public Task<CommentResponse?> UpdateCommentAsync(UpdateCommentRequest request)
     {
-        if (!Guid.TryParse(request.Id, out var commentId))
-            return Task.FromResult<CommentResponse?>(null);
-
-        var comment = _comments.FirstOrDefault(c => c.Id == commentId);
+        var comment = _comments.FirstOrDefault(c => c.Id == request.Id);
         if (comment == null)
             return Task.FromResult<CommentResponse?>(null);
 
@@ -256,10 +245,7 @@ public class CommentService : ICommentService
 
     public Task<bool> DeleteCommentAsync(DeleteCommentRequest request)
     {
-        if (!Guid.TryParse(request.Id, out var commentId))
-            return Task.FromResult(false);
-
-        var comment = _comments.FirstOrDefault(c => c.Id == commentId);
+        var comment = _comments.FirstOrDefault(c => c.Id == request.Id);
         if (comment == null)
             return Task.FromResult(false);
 
@@ -268,7 +254,7 @@ public class CommentService : ICommentService
 
         if (request.DeleteAllReplies)
         {
-            _comments.RemoveAll(c => c.ParentCommentId == commentId || c.Id == commentId);
+            _comments.RemoveAll(c => c.ParentCommentId == request.Id || c.Id == request.Id);
         }
         else
         {

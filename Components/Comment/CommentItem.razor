@@ -215,9 +215,9 @@
         var reply = await CommentService.CreateCommentAsync(new CreateCommentRequest
         {
             Content = replyContent,
-            PostId = Comment.PostId.ToString(),
-            EventId = Comment.EventId.ToString(),
-            ParentCommentId = Comment.Id.ToString()
+            PostId = Comment.PostId != Guid.Empty ? Comment.PostId : null,
+            EventId = Comment.EventId != Guid.Empty ? Comment.EventId : null,
+            ParentCommentId = Comment.Id
         });
 
         Comment.Replies.Add(reply);
@@ -234,7 +234,7 @@
 
         var updated = await CommentService.UpdateCommentAsync(new UpdateCommentRequest
         {
-            Id = Comment.Id.ToString(),
+            Id = Comment.Id,
             Content = editedContent
         });
 
@@ -251,7 +251,7 @@
     {
         var success = await CommentService.DeleteCommentAsync(new DeleteCommentRequest
         {
-            Id = Comment.Id.ToString(),
+            Id = Comment.Id,
             DeleteAllReplies = true
         });
 

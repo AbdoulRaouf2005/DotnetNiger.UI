@@ -48,15 +48,7 @@ public class ApiCommentService : ICommentService
 
     public async Task<CommentResponse> CreateCommentAsync(CreateCommentRequest request)
     {
-        var payload = new
-        {
-            content = request.Content,
-            postId = ParseGuidOrNull(request.PostId),
-            eventId = ParseGuidOrNull(request.EventId),
-            parentCommentId = ParseGuidOrNull(request.ParentCommentId)
-        };
-
-        var response = await _http.PostAsJsonAsync("api/v1/comments", payload);
+        var response = await _http.PostAsJsonAsync("api/v1/comments", request);
         response.EnsureSuccessStatusCode();
 
         return await ApiResponseReader.ReadAsync<CommentResponse>(response)
@@ -65,11 +57,7 @@ public class ApiCommentService : ICommentService
 
     public async Task<CommentResponse?> UpdateCommentAsync(UpdateCommentRequest request)
     {
-        if (!Guid.TryParse(request.Id, out var commentId))
-            return null;
-
-        var payload = new { content = request.Content };
-        var response = await _http.PutAsJsonAsync($"api/v1/comments/{commentId}", payload);
+        var response = await _http.PutAsJsonAsync($"api/v1/comments/{request.Id}", new { content = request.Content });
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -78,17 +66,11 @@ public class ApiCommentService : ICommentService
 
     public async Task<bool> DeleteCommentAsync(DeleteCommentRequest request)
     {
-        if (!Guid.TryParse(request.Id, out var commentId))
-            return false;
-
         var url = request.DeleteAllReplies
-            ? $"api/v1/comments/{commentId}?deleteAllReplies=true"
-            : $"api/v1/comments/{commentId}";
+            ? $"api/v1/comments/{request.Id}?deleteAllReplies=true"
+            : $"api/v1/comments/{request.Id}";
 
         var response = await _http.DeleteAsync(url);
         return response.IsSuccessStatusCode;
     }
-
-    private static Guid? ParseGuidOrNull(string value) =>
-        Guid.TryParse(value, out var guid) && guid != Guid.Empty ? guid : null;
 }
