@@ -6,6 +6,8 @@
 @inject IUserStateService UserStateService
 @inject DotnetNiger.UI.Services.Contracts.ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
+@inject DotnetNiger.UI.Services.Auth.CustomAuthStateProvider AuthProvider
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 
 <PageTitle>Connexion - .NET Niger</PageTitle>
 
@@ -19,11 +21,11 @@
                 <p class="text-gray-500 mb-6">Bon retour parmi nous ! Veuillez entrer vos identifiants.</p>
 
                 <div class="flex gap-3 mb-6">
-                    <button class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
+                    <button @onclick='() => NavigateToExternalLogin("Google")' class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
                         <i class="fab fa-google text-xl"></i>
                         <span>Google</span>
                     </button>
-                    <button class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
+                    <button @onclick='() => NavigateToExternalLogin("GitHub")' class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
                         <i class="fab fa-github text-xl"></i>
                         <span>GitHub</span>
                     </button>
@@ -107,6 +109,14 @@
     private string errorMessage = string.Empty;
     private bool showPassword = false;
 
+    private void NavigateToExternalLogin(string provider)
+    {
+        var apiBase = Config["ApiBaseUrl"] ?? "http://localhost:5000";
+        var returnUrl = $"{Navigation.BaseUri}auth/external-callback";
+        var url = $"{apiBase}/api/auth/external-login?provider={provider}&returnUrl={Uri.EscapeDataString(returnUrl)}&target=frontend";
+        Navigation.NavigateTo(url, forceLoad: true);
+    }
+
     private async Task HandleLogin()
     {
         isLoading = true;
@@ -120,9 +130,7 @@
 
             await UserStateService.SetUserAsync(userInfo);
 
-            // Stocker le token pour les futurs appels API
-            await LocalStorage.SetItemAsync("accessToken", response.Data.Token.AccessToken);
-            await LocalStorage.SetItemAsync("refreshToken", response.Data.Token.RefreshToken);
+            await AuthProvider.SaveTokensAsync(response.Data.Token.AccessToken, response.Data.Token.RefreshToken);
 
             Navigation.NavigateTo("/");
         }

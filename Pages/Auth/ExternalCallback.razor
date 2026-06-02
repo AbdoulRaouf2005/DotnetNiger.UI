@@ -1,0 +1,66 @@
+@page "/auth/external-callback"
+@using Microsoft.AspNetCore.Components
+@inject IAuthService AuthService
+@inject DotnetNiger.UI.Services.Auth.CustomAuthStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Connexion en cours - .NET Niger</PageTitle>
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div class="text-center">
+        <div class="text-gray-500 mb-4">
+            @if (isProcessing)
+            {
+                <p>Connexion en cours...</p>
+            }
+            else if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p class="text-red-600">@errorMessage</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isProcessing = true;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        var ticket = query["ticket"];
+        var error = query["error"];
+
+        if (!string.IsNullOrEmpty(error))
+        {
+            isProcessing = false;
+            errorMessage = Uri.UnescapeDataString(error);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(ticket))
+        {
+            isProcessing = false;
+            errorMessage = "Aucun ticket de connexion reçu.";
+            return;
+        }
+
+        var response = await AuthService.CompleteExternalLoginAsync(ticket);
+
+        if (response.Success && response.Data != null)
+        {
+            await AuthProvider.SaveTokensAsync(
+                response.Data.Token.AccessToken,
+                response.Data.Token.RefreshToken);
+
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            isProcessing = false;
+            errorMessage = response.Message ?? "Erreur lors de la connexion externe.";
+        }
+    }
+}

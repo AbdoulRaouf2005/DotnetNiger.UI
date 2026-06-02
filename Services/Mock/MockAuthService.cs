@@ -111,6 +111,16 @@ public class MockAuthService : IAuthService
         };
     }
 
+    public async Task<ApiSuccessResponse<AuthDto>> CompleteExternalLoginAsync(string ticket)
+    {
+        await Task.Delay(600);
+        return new ApiSuccessResponse<AuthDto>
+        {
+            Success = false,
+            Message = "Le login externe n'est pas disponible en mode mock."
+        };
+    }
+
     public async Task<ApiSuccessResponse<AuthDto>> RegisterAsync(RegisterRequest request)
     {
         await Task.Delay(800);
