@@ -13,7 +13,6 @@ public class ApiEventService : IEventService
     private readonly IAuthService _authService;
     private const string PublicBase = "api/v1/events";
     private const string AdminBase = "api/v1/admin/events";
-    private const string SearchBase = "api/v1/search";
 
     public ApiEventService(HttpClient http, CustomAuthStateProvider authStateProvider, IAuthService authService)
     {
@@ -67,7 +66,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto?> GetEventBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        var response = await _http.GetAsync($"{PublicBase}/{slug}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -76,37 +75,12 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> SearchEventsAsync(string query)
     {
-        var searchResults = await GetCollectionAsync<SearchResultDto>(SearchBase, new Dictionary<string, string?>
+        return await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
         {
             ["query"] = query,
-            ["type"] = "Event",
             ["page"] = "1",
             ["pageSize"] = "100"
         });
-
-        var ids = searchResults
-            .Where(r => r.Type.Equals("Event", StringComparison.OrdinalIgnoreCase))
-            .Select(r => r.Id)
-            .Distinct()
-            .ToList();
-
-        if (ids.Count > 0)
-        {
-            var fetchTasks = ids.Select(GetEventByIdAsync);
-            var eventsByIds = await Task.WhenAll(fetchTasks);
-            return eventsByIds.Where(e => e is not null).Select(e => e!).ToList();
-        }
-
-        var events = await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
-        {
-            ["query"] = query
-        });
-
-        return events.Where(e =>
-                e.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                e.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                e.Location.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
     }
 
     public async Task<List<EventDto>> GetEventsByTypeAsync(string eventType)

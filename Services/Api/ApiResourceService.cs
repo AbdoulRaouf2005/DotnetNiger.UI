@@ -9,7 +9,6 @@ public class ApiResourceService : IResourceService
 {
     private readonly HttpClient _http;
     private const string PublicBase = "api/v1/resources";
-    private const string SearchBase = "api/v1/search";
 
     public ApiResourceService(HttpClient http)
     {
@@ -32,7 +31,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        var response = await _http.GetAsync($"{PublicBase}/{slug}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -61,37 +60,12 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<ResourceDto>> SearchResourcesAsync(string query)
     {
-        var searchResults = await GetCollectionAsync<SearchResultDto>(SearchBase, new Dictionary<string, string?>
+        return await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
         {
             ["query"] = query,
-            ["type"] = "Resource",
             ["page"] = "1",
             ["pageSize"] = "100"
         });
-
-        var ids = searchResults
-            .Where(r => r.Type.Equals("Resource", StringComparison.OrdinalIgnoreCase))
-            .Select(r => r.Id)
-            .Distinct()
-            .ToList();
-
-        if (ids.Count > 0)
-        {
-            var fetchTasks = ids.Select(GetResourceByIdAsync);
-            var resourcesByIds = await Task.WhenAll(fetchTasks);
-            return resourcesByIds.Where(r => r is not null).Select(r => r!).ToList();
-        }
-
-        var resources = await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
-        {
-            ["query"] = query
-        });
-
-        return resources.Where(r =>
-                r.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                r.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                r.ResourceType.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
     }
 
     public async Task<List<string>> GetResourceTypesAsync()

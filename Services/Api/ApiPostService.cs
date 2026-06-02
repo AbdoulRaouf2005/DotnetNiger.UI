@@ -9,7 +9,6 @@ public class ApiPostService : IPostService
 {
     private readonly HttpClient _http;
     private const string PublicBase = "api/v1/posts";
-    private const string SearchBase = "api/v1/search";
 
     public ApiPostService(HttpClient http)
     {
@@ -66,7 +65,7 @@ public class ApiPostService : IPostService
 
     public async Task<PostDto?> GetPostBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        var response = await _http.GetAsync($"{PublicBase}/{slug}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -99,37 +98,12 @@ public class ApiPostService : IPostService
 
     public async Task<List<PostDto>> SearchPostsAsync(string query)
     {
-        var searchResults = await GetCollectionAsync<SearchResultDto>(SearchBase, new Dictionary<string, string?>
+        return await GetCollectionAsync<PostDto>(PublicBase, new Dictionary<string, string?>
         {
             ["query"] = query,
-            ["type"] = "Post",
             ["page"] = "1",
             ["pageSize"] = "100"
         });
-
-        var ids = searchResults
-            .Where(r => r.Type.Equals("Post", StringComparison.OrdinalIgnoreCase))
-            .Select(r => r.Id)
-            .Distinct()
-            .ToList();
-
-        if (ids.Count > 0)
-        {
-            var fetchTasks = ids.Select(GetPostByIdAsync);
-            var postsByIds = await Task.WhenAll(fetchTasks);
-            return postsByIds.Where(p => p is not null).Select(p => p!).ToList();
-        }
-
-        var posts = await GetCollectionAsync<PostDto>(PublicBase, new Dictionary<string, string?>
-        {
-            ["query"] = query
-        });
-
-        return posts.Where(p =>
-                p.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.Excerpt.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                p.AuthorName.Contains(query, StringComparison.OrdinalIgnoreCase))
-            .ToList();
     }
 
     private async Task<List<T>> GetCollectionAsync<T>(string path, Dictionary<string, string?>? query = null)
