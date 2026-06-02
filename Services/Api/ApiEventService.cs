@@ -67,13 +67,11 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto?> GetEventBySlugAsync(string slug)
     {
-        var events = await SearchEventsAsync(slug);
-        var bySlug = events.FirstOrDefault(e => e.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
-        if (bySlug is not null)
-            return bySlug;
+        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        events = await GetAllEventsAsync();
-        return events.FirstOrDefault(e => e.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+        return await ApiResponseReader.ReadAsync<EventDto>(response);
     }
 
     public async Task<List<EventDto>> SearchEventsAsync(string query)
@@ -169,7 +167,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventRegistrationDto?> RegisterToEventAsync(RegisterEventRequest request, Guid userId, string userName)
     {
-        var response = await _http.PostAsJsonAsync("api/events/registrations", request);
+        var response = await _http.PostAsJsonAsync($"{PublicBase}/registrations", request);
         if (!response.IsSuccessStatusCode)
             return null;
 

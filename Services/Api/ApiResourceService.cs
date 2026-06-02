@@ -32,13 +32,11 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
-        var resources = await SearchResourcesAsync(slug);
-        var bySlug = resources.FirstOrDefault(r => r.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
-        if (bySlug is not null)
-            return bySlug;
+        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        resources = await GetAllResourcesAsync();
-        return resources.FirstOrDefault(r => r.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+        return await ApiResponseReader.ReadAsync<ResourceDto>(response);
     }
 
     public async Task<List<ResourceDto>> GetResourcesByTypeAsync(string resourceType)
@@ -98,24 +96,20 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<string>> GetResourceTypesAsync()
     {
-        var resources = await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
-        {
-            ["page"] = "1",
-            ["pageSize"] = "500"
-        });
+        var response = await _http.GetAsync($"{PublicBase}/types");
+        if (!response.IsSuccessStatusCode)
+            return [];
 
-        return resources.Select(r => r.ResourceType).Distinct().OrderBy(t => t).ToList();
+        return await ApiResponseReader.ReadCollectionAsync<string>(response);
     }
 
     public async Task<List<string>> GetLevelsAsync()
     {
-        var resources = await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
-        {
-            ["page"] = "1",
-            ["pageSize"] = "500"
-        });
+        var response = await _http.GetAsync($"{PublicBase}/levels");
+        if (!response.IsSuccessStatusCode)
+            return [];
 
-        return resources.Select(r => r.Level).Distinct().ToList();
+        return await ApiResponseReader.ReadCollectionAsync<string>(response);
     }
 
     public async Task<ResourceDto> CreateResourceAsync(CreateResourceRequest request)

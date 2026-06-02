@@ -66,13 +66,11 @@ public class ApiPostService : IPostService
 
     public async Task<PostDto?> GetPostBySlugAsync(string slug)
     {
-        var posts = await SearchPostsAsync(slug);
-        var bySlug = posts.FirstOrDefault(p => p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
-        if (bySlug is not null)
-            return bySlug;
+        var response = await _http.GetAsync($"{PublicBase}/slug/{slug}");
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        posts = await GetAllPostsAsync();
-        return posts.FirstOrDefault(p => p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+        return await ApiResponseReader.ReadAsync<PostDto>(response);
     }
 
     public async Task<PostDto> CreatePostAsync(CreatePostRequest request , Guid currentId)
