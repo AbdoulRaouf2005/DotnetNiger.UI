@@ -1,91 +1,145 @@
+@inject INewsletterService NewsletterService
+
 <footer class="bg-secondary text-white py-12 px-4">
-      <div class="max-w-6xl mx-auto">
-            <!-- Main Footer Content -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[2fr,1fr,1fr,1.5fr] gap-0">
-                  <!-- Logo and Description Section -->
-                  <div class="md:col-span-1">
-                        <div class="flex items-center gap-3 mb-4">
-                              <div class="w-16 h-16 rounded-lg flex items-center justify-center">
-                                    <div class="text-center">
-                                          <img src="Logo.svg" alt="logo dotnet.niger" class="h-14 w-14 object-cover">
-                                    </div>
-                              </div>
+    <div class="max-w-6xl mx-auto">
+        <!-- Main Footer Content -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[2fr,1fr,1fr,1.5fr] gap-0">
+            <!-- Logo and Description Section -->
+            <div class="md:col-span-1">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-16 h-16 rounded-lg flex items-center justify-center">
+                        <div class="text-center">
+                            <img src="Logo.svg" alt="logo dotnet.niger" class="h-14 w-14 object-cover" />
                         </div>
-                        <h3 class="H4 mb-2">La communauté des développeurs .NET au Niger</h3>
-                        <p class="body-small text-purple-100">Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                              Itaque, architecto. Eligendi beatae inventore dolorum.</p>
-                        </div>
-
-                        <!-- Quick Links Section -->
-                        <div>
-                              <h4 class="text-lg font-bold mb-4">Liens rapides :</h4>
-                              <ul class="space-y-2">
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Accueil</a></li>
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">À Propos</a></li>
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Ressources</a></li>
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Événements</a></li>
-                              </ul>
-                        </div>
-
-                        <!-- Resources Section -->
-                        <div>
-                              <h4 class="text-lg font-bold mb-4">Ressources :</h4>
-                              <ul class="space-y-2">
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Blog</a></li>
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Documentation</a></li>
-                                    <li><a href="#" class="text-purple-100 hover:text-white transition">Tutoriels</a></li>
-                              </ul>
-                        </div>
-
-                        <!-- Newsletter Section -->
-                        <div>
-                              <h4 class="text-lg font-bold mb-4">Newsletter :</h4>
-                              <p class="text-sm text-purple-100 mb-3">Rester connecté pour des nouveautés</p>
-                              <div class="flex">
-                                    <input type="email" placeholder="Saisissez votre email"
-                                           class="flex-1 px-4 py-2 mr-1 rounded-l-lg text-white bg-secondary border border-white focus:outline-none" />
-                                    <button class="bg-white px-3 py-2 flex items-center rounded-r-lg transition">
-                                          <i class="fa-solid text-2xl fa-paper-plane text-secondary"></i>
-                                    </button>
-                              </div>
-                              <!-- Contact Info -->
-                              <div class="mb-4">
-                                    <h4 class="text-lg font-bold mb-4">Contact :</h4>
-                                    <div class="space-y-2">
-                                          <p class="text-sm">
-                                                <a href="mailto:contact@dotetniger.com"
-                                                   class="text-purple-100 hover:text-white transition">contact@dotetniger.com</a>
-                                          </p>
-                                          <p class="text-sm text-purple-100">+227 XXXXXXXX</p>
-                                    </div>
-                              </div>
-
-                  
-                                    <!-- Social Links -->
-                                    <div class="flex gap-6 mb-12">
-                                          <a href="#" class=" hover:scale-110 transition"
-                                             title="Discord"><i class="text-2xl fab fa-discord "></i></a>
-                                          <a href="#" class="  hover:scale-110 transition"
-                                             title="Community"><i class="text-2xl fas fa-users"></i></a>
-                                          <a href="#" class=" hover:scale-110 transition"
-                                             title="LinkedIn"><i class="text-2xl fab fa-linkedin"></i></a>
-                                          <a href="#" class=" hover:scale-110 transition"
-                                             title="X (Twitter)"><i class="text-2xl fab fa-x-twitter"></i></a>
-                                          <a href="#" class=" hover:scale-110 transition"
-                                             title="Instagram"><i class="text-2xl fab fa-instagram"></i></a>
-                                    </div>
-
-                              
-                        </div>
-                  </div>
-
-                  
-
-                  <!-- Bottom Footer -->
-                  <div class="border-t border-purple-400 pt-6 text-center text-sm text-purple-100">
-                        <p>© 2026 .NET Niger Community | <a href="#" class="hover:text-white transition">Politique de
-                              confidentialité</a> | <a href="#" class="hover:text-white transition">Mentions légales</a>
-                        </p>
-                  </div>
+                    </div>
+                </div>
+                <h3 class="H4 mb-2">La communauté des développeurs .NET au Niger</h3>
+                <p class="body-small text-purple-100">Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque, architecto. Eligendi beatae inventore dolorum.</p>
             </div>
-      </footer>
+
+            <!-- Quick Links Section -->
+            <div>
+                <h4 class="text-lg font-bold mb-4">Liens rapides :</h4>
+                <ul class="space-y-2">
+                    <li><a href="/" class="text-purple-100 hover:text-white transition">Accueil</a></li>
+                    <li><a href="/about" class="text-purple-100 hover:text-white transition">À Propos</a></li>
+                    <li><a href="/ressources" class="text-purple-100 hover:text-white transition">Ressources</a></li>
+                    <li><a href="/events" class="text-purple-100 hover:text-white transition">Événements</a></li>
+                </ul>
+            </div>
+
+            <!-- Resources Section -->
+            <div>
+                <h4 class="text-lg font-bold mb-4">Ressources :</h4>
+                <ul class="space-y-2">
+                    <li><a href="/blog" class="text-purple-100 hover:text-white transition">Blog</a></li>
+                    <li><a href="/ressources" class="text-purple-100 hover:text-white transition">Documentation</a></li>
+                    <li><a href="/ressources" class="text-purple-100 hover:text-white transition">Tutoriels</a></li>
+                </ul>
+            </div>
+
+            <!-- Newsletter Section -->
+            <div>
+                <h4 class="text-lg font-bold mb-4">Newsletter :</h4>
+                <p class="text-sm text-purple-100 mb-3">Rester connecté pour des nouveautés</p>
+                <div class="flex">
+                    <input type="email" placeholder="Saisissez votre email"
+                           @bind="newsletterEmail"
+                           @bind:event="oninput"
+                           class="flex-1 px-4 py-2 mr-1 rounded-l-lg text-white bg-secondary border border-white focus:outline-none placeholder-purple-200" />
+                    <button @onclick="SubscribeNewsletterAsync" disabled="@isSubscribing"
+                            class="bg-white px-3 py-2 flex items-center rounded-r-lg transition hover:brightness-110">
+                        @if (isSubscribing)
+                        {
+                            <i class="fa-solid fa-spinner fa-spin text-2xl text-secondary"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-paper-plane text-2xl text-secondary"></i>
+                        }
+                    </button>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(newsletterMessage))
+                {
+                    <p class="mt-2 text-xs @(isNewsletterError ? "text-red-300" : "text-green-300")">@newsletterMessage</p>
+                }
+
+                <!-- Contact Info -->
+                <div class="mb-4 mt-4">
+                    <h4 class="text-lg font-bold mb-4">Contact :</h4>
+                    <div class="space-y-2">
+                        <p class="text-sm">
+                            <a href="mailto:contact@dotnetniger.com"
+                               class="text-purple-100 hover:text-white transition">contact@dotnetniger.com</a>
+                        </p>
+                        <p class="text-sm text-purple-100">+227 XXXXXXXX</p>
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="flex gap-6 mb-12">
+                    <a href="#" class="hover:scale-110 transition" title="Discord"><i class="text-2xl fab fa-discord"></i></a>
+                    <a href="#" class="hover:scale-110 transition" title="Community"><i class="text-2xl fas fa-users"></i></a>
+                    <a href="#" class="hover:scale-110 transition" title="LinkedIn"><i class="text-2xl fab fa-linkedin"></i></a>
+                    <a href="#" class="hover:scale-110 transition" title="X (Twitter)"><i class="text-2xl fab fa-x-twitter"></i></a>
+                    <a href="#" class="hover:scale-110 transition" title="Instagram"><i class="text-2xl fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Footer -->
+        <div class="border-t border-purple-400 pt-6 text-center text-sm text-purple-100">
+            <p>© 2026 .NET Niger Community | <a href="#" class="hover:text-white transition">Politique de confidentialité</a> | <a href="#" class="hover:text-white transition">Mentions légales</a></p>
+        </div>
+    </div>
+</footer>
+
+@code {
+    private string newsletterEmail = string.Empty;
+    private string? newsletterMessage;
+    private bool isNewsletterError;
+    private bool isSubscribing;
+
+    private async Task SubscribeNewsletterAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newsletterEmail))
+        {
+            newsletterMessage = "Veuillez saisir votre email.";
+            isNewsletterError = true;
+            return;
+        }
+
+        isSubscribing = true;
+        newsletterMessage = null;
+
+        try
+        {
+            var success = await NewsletterService.SubscribeAsync(new SubscribeRequest
+            {
+                Email = newsletterEmail,
+                Name = string.Empty
+            });
+
+            if (success)
+            {
+                newsletterMessage = "Merci pour votre inscription !";
+                isNewsletterError = false;
+                newsletterEmail = string.Empty;
+            }
+            else
+            {
+                newsletterMessage = "Cet email est déjà inscrit.";
+                isNewsletterError = true;
+            }
+        }
+        catch
+        {
+            newsletterMessage = "Une erreur est survenue. Réessayez plus tard.";
+            isNewsletterError = true;
+        }
+        finally
+        {
+            isSubscribing = false;
+        }
+    }
+}
