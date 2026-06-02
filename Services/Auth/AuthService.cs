@@ -25,28 +25,35 @@ public class AuthService : IAuthService
     {
         try
         {
-            var response = await _http.PostAsJsonAsync("api/auth/login", request);
+            var formData = new Dictionary<string, string>
+            {
+                ["grant_type"] = "password",
+                ["username"] = request.Email,
+                ["password"] = request.Password,
+                ["scope"] = "openid profile email roles offline_access"
+            };
+
+            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorMessage = await TryReadErrorMessageAsync(response.Content);
+                var errorBody = await response.Content.ReadAsStringAsync();
+                var message = TryReadOidcError(errorBody);
 
                 return new ApiSuccessResponse<AuthDto>
                 {
                     Success = false,
-                    Message = !string.IsNullOrWhiteSpace(errorMessage)
-                        ? errorMessage
-                        : $"Connexion impossible (HTTP {(int)response.StatusCode})."
+                    Message = message ?? $"Connexion impossible (HTTP {(int)response.StatusCode})."
                 };
             }
 
-            var result = await response.Content.ReadFromJsonAsync<ApiSuccessResponse<AuthDto>>()
-                         ?? new ApiSuccessResponse<AuthDto> { Success = false, Message = "Erreur de connexion." };
+            var (authDto, error) = await ParseTokenResponseAsync(response);
+            if (authDto is not null)
+            {
+                return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
+            }
 
-            if (result.Success && result.Data is not null)
-                await _authProvider.SaveTokensAsync(result.Data.Token.AccessToken, result.Data.Token.RefreshToken);
-
-            return result;
+            return new ApiSuccessResponse<AuthDto> { Success = false, Message = error ?? "Erreur de connexion." };
         }
         catch (HttpRequestException ex)
         {
@@ -54,8 +61,7 @@ public class AuthService : IAuthService
             {
                 Success = false,
                 Message = ex.Message
-            }; //"Impossible de joindre le serveur d'authentification. Vérifiez que l'API est démarrée et accessible."
-
+            };
         }
         catch (TaskCanceledException)
         {
@@ -149,7 +155,16 @@ public class AuthService : IAuthService
     {
         try
         {
-            var response = await _http.PostAsJsonAsync("api/auth/register", request);
+            var names = (request.FullName ?? "").Split(' ', 2, StringSplitOptions.TrimEntries);
+            var registerPayload = new
+            {
+                email = request.Email,
+                password = request.Password,
+                firstName = names.Length > 0 ? names[0] : "",
+                lastName = names.Length > 1 ? names[1] : ""
+            };
+
+            var response = await _http.PostAsJsonAsync("api/auth/register", registerPayload);
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await TryReadErrorMessageAsync(response.Content);
@@ -163,17 +178,11 @@ public class AuthService : IAuthService
                 };
             }
 
-            var wrapped = await response.Content.ReadFromJsonAsync<ApiSuccessResponse<AuthDto>>();
-            var result = wrapped ?? new ApiSuccessResponse<AuthDto>
+            return new ApiSuccessResponse<AuthDto>
             {
-                Success = false,
-                Message = "Erreur lors de l'inscription."
+                Success = true,
+                Message = "Compte créé. Vérifiez votre email pour le confirmer."
             };
-
-            if (result.Success && result.Data?.Token is not null)
-                await _authProvider.SaveTokensAsync(result.Data.Token.AccessToken, result.Data.Token.RefreshToken);
-
-            return result;
         }
         catch (HttpRequestException ex)
         {
@@ -196,7 +205,7 @@ public class AuthService : IAuthService
     public async Task<ApiSuccessResponse<Guid>> RegisterStep1Async(RegisterRequest request)
     {
         var result = await RegisterAsync(request);
-        if (!result.Success || result.Data?.User is null)
+        if (!result.Success)
         {
             return new ApiSuccessResponse<Guid>
             {
@@ -209,7 +218,7 @@ public class AuthService : IAuthService
         {
             Success = true,
             Message = result.Message ?? "Étape 1 validée.",
-            Data = result.Data.User.Id
+            Data = Guid.Empty
         };
     }
 
@@ -236,21 +245,27 @@ public class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(refreshToken))
             return null;
 
-        var response = await _http.PostAsJsonAsync("api/auth/refresh",
-            new RefreshTokenRequest { RefreshToken = refreshToken });
+        var formData = new Dictionary<string, string>
+        {
+            ["grant_type"] = "refresh_token",
+            ["refresh_token"] = refreshToken,
+            ["scope"] = "openid profile email roles offline_access"
+        };
+
+        var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
 
         if (!response.IsSuccessStatusCode)
         {
-            await _authProvider.ClearTokensAsync();
+        await _authProvider.ClearTokensAsync();
+        OnAuthStateChanged?.Invoke();
             return null;
         }
 
-        var wrapped = await response.Content.ReadFromJsonAsync<ApiSuccessResponse<AuthDto>>();
-        var result = wrapped?.Data;
-        if (result?.Token is not null)
-            await _authProvider.SaveTokensAsync(result.Token.AccessToken, result.Token.RefreshToken);
+        var (authDto, _) = await ParseTokenResponseAsync(response);
+        if (authDto?.Token is not null)
+            await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
 
-        return result;
+        return authDto;
     }
 
 	public async Task<UserDto?> GetCurrentUserAsync()
@@ -310,7 +325,8 @@ public class AuthService : IAuthService
 
     public async Task<ApiSuccessResponse<object>> ResetPasswordAsync(ResetPasswordRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/auth/reset-password", request);
+        var resetPayload = new { email = request.Email, token = request.Token, password = request.NewPassword };
+        var response = await _http.PostAsJsonAsync("api/auth/reset-password", resetPayload);
         if (!response.IsSuccessStatusCode)
         {
             var errorMessage = await TryReadErrorMessageAsync(response.Content);
@@ -351,6 +367,68 @@ public class AuthService : IAuthService
     {
         var response = await _http.PostAsJsonAsync("api/auth/verify-email", request);
         return response.IsSuccessStatusCode;
+    }
+
+    private static async Task<(AuthDto?, string?)> ParseTokenResponseAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var accessToken = root.GetProperty("access_token").GetString()!;
+            var refreshToken = root.TryGetProperty("refresh_token", out var rt) ? rt.GetString() : null;
+            var expiresIn = root.TryGetProperty("expires_in", out var exp) ? exp.GetInt32() : 3600;
+
+            var claims = ParseClaimsFromJwt(accessToken).ToList();
+
+            var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")?.Value ?? "";
+            var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == "email")?.Value ?? "";
+            var fullName = claims.FirstOrDefault(c => c.Type is "name" or "full_name")?.Value ?? "";
+            var avatarUrl = claims.FirstOrDefault(c => c.Type is "avatar_url" or "avatarUrl" or "picture")?.Value ?? "";
+            var roles = claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+            var user = new UserDto
+            {
+                Id = Guid.TryParse(userId, out var uid) ? uid : Guid.Empty,
+                Email = email,
+                FullName = fullName ?? email,
+                Username = fullName ?? email,
+                AvatarUrl = avatarUrl ?? string.Empty,
+                IsActive = true,
+                Roles = roles
+            };
+
+            var token = new TokenDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken ?? string.Empty,
+                TokenType = "Bearer",
+                ExpiresIn = expiresIn
+            };
+
+            return (new AuthDto { User = user, Token = token }, null);
+        }
+        catch (Exception ex)
+        {
+            return (null, $"Erreur de lecture de la réponse: {ex.Message}");
+        }
+    }
+
+    private static string? TryReadOidcError(string json)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            if (root.TryGetProperty("error_description", out var desc) && desc.ValueKind == JsonValueKind.String)
+                return desc.GetString();
+            if (root.TryGetProperty("error", out var err) && err.ValueKind == JsonValueKind.String)
+                return err.GetString();
+        }
+        catch { }
+        return null;
     }
 
     private static bool TryGetRoleValue(JsonElement root, string key, out string? role)

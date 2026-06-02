@@ -6,6 +6,7 @@
 @inject IUserStateService UserStateService
 @inject DotnetNiger.UI.Services.Contracts.ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
+@inject DotnetNiger.UI.Services.Auth.CustomAuthStateProvider AuthProvider
 
 <PageTitle>Connexion - .NET Niger</PageTitle>
 
@@ -120,9 +121,7 @@
 
             await UserStateService.SetUserAsync(userInfo);
 
-            // Stocker le token pour les futurs appels API
-            await LocalStorage.SetItemAsync("accessToken", response.Data.Token.AccessToken);
-            await LocalStorage.SetItemAsync("refreshToken", response.Data.Token.RefreshToken);
+            await AuthProvider.SaveTokensAsync(response.Data.Token.AccessToken, response.Data.Token.RefreshToken);
 
             Navigation.NavigateTo("/");
         }
