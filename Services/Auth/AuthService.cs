@@ -151,6 +151,49 @@ public class AuthService : IAuthService
         };
     }
 
+    public async Task<ApiSuccessResponse<AuthDto>> CompleteExternalLoginAsync(string ticket)
+    {
+        try
+        {
+            var formData = new Dictionary<string, string>
+            {
+                ["grant_type"] = "external_login",
+                ["ticket"] = ticket,
+                ["client_id"] = "web-ui",
+                ["scope"] = "openid profile email roles offline_access"
+            };
+
+            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                var message = TryReadOidcError(errorBody);
+                return new ApiSuccessResponse<AuthDto>
+                {
+                    Success = false,
+                    Message = message ?? "Erreur lors de la connexion externe."
+                };
+            }
+
+            var (authDto, error) = await ParseTokenResponseAsync(response);
+            if (authDto is not null)
+            {
+                return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
+            }
+
+            return new ApiSuccessResponse<AuthDto> { Success = false, Message = error ?? "Erreur de connexion externe." };
+        }
+        catch (HttpRequestException ex)
+        {
+            return new() { Success = false, Message = ex.Message };
+        }
+        catch (TaskCanceledException)
+        {
+            return new ApiSuccessResponse<AuthDto> { Success = false, Message = "Le serveur a mis trop de temps à répondre." };
+        }
+    }
+
     public async Task<ApiSuccessResponse<AuthDto>> RegisterAsync(RegisterRequest request)
     {
         try

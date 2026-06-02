@@ -24,6 +24,9 @@ public interface IAuthService
     Task<bool> RequestEmailVerificationAsync(RequestEmailVerificationRequest request);
     Task<bool> VerifyEmailAsync(VerifyEmailRequest request);
     
+    // Login externe (Google/GitHub)
+    Task<ApiSuccessResponse<AuthDto>> CompleteExternalLoginAsync(string ticket);
+
     // Refresh token
     Task<AuthDto?> RefreshTokenAsync();
     
