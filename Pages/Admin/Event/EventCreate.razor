@@ -1,6 +1,6 @@
 @page "/admin/events/nouveau"
-@* @page "/admin/events/{Id:guid}" *@
 @* Page admin : création d'un nouvel événement. *@
+@using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
 @inject NavigationManager Navigation
@@ -63,20 +63,10 @@
                 <!-- Image de couverture -->
                 <div>
                     <label class="block text-sm font-semibold mb-2">Image de couverture</label>
-                    <div class="flex gap-2">
-                        <label class="bg-gray-300 cursor-pointer hover:bg-gray-400 px-6 py-2 rounded-lg text-gray-700">
-                            Choisir un fichier
-                            <InputFile OnChange="HandleFileSelected" 
-                              id="fileInput" 
-                              class="hidden" 
-                              accept="image/*" />
-                        </label>
-                        <input type="text" 
-                              @bind="eventRequest.CoverImageUrl" 
-                              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                              placeholder="URL de l'image" 
-                              readonly />
-                    </div>
+                    <ImageUploader UploadType="UploadType.Event"
+                                   ExistingImageUrl="@eventRequest.CoverImageUrl"
+                                   OnImageUploaded="HandleImageUploaded"
+                                   OnImageDeleted="HandleImageDeleted" />
                 </div>
             </div>
 
@@ -171,7 +161,6 @@
     
     private Guid currentUserId;
     private string organizerName = string.Empty;
-    private string selectedFileName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -201,29 +190,22 @@
         Navigation.NavigateTo("/admin/events");
     }
 
-    private void SelectFile()
+    private void HandleImageUploaded(string imageUrl)
     {
-        JS.InvokeVoidAsync("document.getElementById('fileInput').click()");
+        eventRequest.CoverImageUrl = imageUrl;
     }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    private void HandleImageDeleted()
     {
-        var file = e.File;
-        if (file != null)
-        {
-            selectedFileName = file.Name;
-            // TODO: Upload file to server and get URL
-            eventRequest.CoverImageUrl = $"/uploads/{file.Name}";
-            StateHasChanged();
-        }
+        eventRequest.CoverImageUrl = string.Empty;
     }
-
 
     private async Task HandleSubmit()
     {
-        eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent","eventDescription");
+        eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
 
         await EventService.CreateEventAsync(eventRequest, currentUserId, false);
+        Navigation.NavigateTo("/admin/events");
     }
 
     private static CreateEventRequest MapToRequest(EventDto ev)
