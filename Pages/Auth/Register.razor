@@ -30,47 +30,73 @@
             <div class="w-8 h-px bg-gray-200"></div>
             <div class="flex items-center gap-2 text-sm @(currentStep >= 2 ? "text-gray-600" : "text-gray-400")">
                 <span class="w-8 h-8 rounded-full @(currentStep >= 2 ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-500") flex items-center justify-center">2</span>
-                <span>Validation</span>
-            </div>
-            <div class="w-8 h-px bg-gray-200"></div>
-            <div class="flex items-center gap-2 text-sm @(currentStep >= 3 ? "text-gray-600" : "text-gray-400")">
-                <span class="w-8 h-8 rounded-full @(currentStep >= 3 ? "bg-purple-600 text-white" : "bg-gray-100 text-gray-500") flex items-center justify-center">3</span>
-                <span>Terminé</span>
+                <span>Certificat</span>
             </div>
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(globalSuccessMessage))
-        {
-            <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-700 text-sm">
-                @globalSuccessMessage
-            </div>
-        }
-
         @if (currentStep == 1)
         {
-            <RegistrationStep1
-                Model="step1Model"
-                ErrorMessage="step1ErrorMessage"
-                IsLoading="isStep1Loading"
-                OnSubmit="HandleStep1Submit" />
+            @if (isReturnedFromIdentity)
+            {
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-gray-800">Compte créé avec succès</h2>
+
+                    <p class="text-gray-700 mt-3 text-lg font-medium">
+                        Bienvenue, @registeredName !
+                    </p>
+
+                    <p class="text-gray-500 mt-2 max-w-md mx-auto">
+                        Votre compte a été créé sur la plateforme .NET Niger.
+                    </p>
+
+                    <div class="mt-6 bg-green-50 border border-green-100 rounded-lg p-4 text-sm text-green-700 text-left max-w-md mx-auto">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Votre adresse email a été confirmée lors de l'inscription.
+                    </div>
+
+                    <button type="button" class="mt-6 rounded-full bg-purple-700 text-white py-3 px-8 font-semibold hover:bg-purple-800 shadow-md" @onclick="GoToStep2">
+                        Continuer vers votre certificat →
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-plus text-purple-600 text-2xl"></i>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-gray-800">Créer votre compte</h2>
+
+                    <p class="text-gray-500 mt-2 max-w-md mx-auto">
+                        Vous allez être redirigé vers la plateforme d'authentification pour créer votre compte. Votre email sera confirmé automatiquement.
+                    </p>
+
+                    <button type="button" class="mt-6 rounded-full bg-purple-700 text-white py-3 px-8 font-semibold hover:bg-purple-800 shadow-md" @onclick="RedirectToIdentityRegister">
+                        Créer mon compte sur Identity
+                    </button>
+
+                    <p class="text-center text-sm text-gray-500 mt-6">
+                        Déjà membre ? <a href="/login" class="text-orange-500 font-medium">Se connecter</a>
+                    </p>
+                </div>
+            }
         }
 
         @if (currentStep == 2)
         {
-            <RegistrationStep2
-                Model="step2Model"
-                ErrorMessage="step2ErrorMessage"
-                IsLoading="isStep2Loading"
-                OnSubmit="HandleStep2Submit"
-                OnBack="GoToStep1" />
-        }
-
-        @if (currentStep == 3)
-        {
             <RegistrationStep3
                 Model="step3Model"
-                ErrorMessage="null"
+                ErrorMessage="step3ErrorMessage"
                 IsLoading="isStep3Loading"
+                IsSubmitted="isStep3Submitted"
+                Status="step3Status"
+                OnSubmit="HandleStep3Submit"
+                OnBack="GoToStep1"
                 OnContinue="NavigateToLogin" />
         }
 
@@ -78,76 +104,79 @@
 </div>
 
 @code {
-    private readonly RegisterRequest step1Model = new();
-    private readonly CertificateSubmissionDto step2Model = new();
-    private CertificateStatusDto step3Model = new()
-    {
-        Status = "Pending",
-        SubmissionDate = DateTime.UtcNow,
-        EstimatedWaitTime = "24-48 heures",
-        SupportEmail = "support@dotnetniger.org"
-    };
+    private static readonly Uri IdentityRegisterUri = new("http://localhost:5075/Account/Register");
+
+    private readonly CertificateSubmissionDto step3Model = new();
+    private CertificateStatusDto? step3Status;
 
     private int currentStep = 1;
     private Guid tempUserId;
+    private string registeredName = string.Empty;
+    private string registeredEmail = string.Empty;
 
-    private string? globalSuccessMessage;
-    private string? step1ErrorMessage;
-    private string? step2ErrorMessage;
+    private bool isReturnedFromIdentity;
+    private bool isStep3Submitted;
 
-    private bool isStep1Loading;
-    private bool isStep2Loading;
+    private string? step3ErrorMessage;
+
     private bool isStep3Loading;
 
-    private async Task HandleStep1Submit(RegisterRequest request)
+    protected override void OnInitialized()
     {
-        isStep1Loading = true;
-        step1ErrorMessage = null;
-        step2ErrorMessage = null;
-        globalSuccessMessage = null;
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
 
-        var result = await Auth.RegisterStep1Async(request);
-        isStep1Loading = false;
+        var userIdStr = query["userId"];
+        var email = query["email"];
+        var fullName = query["fullName"];
 
-        if (result.Success && result.Data is Guid userId && userId != Guid.Empty)
+        if (!string.IsNullOrWhiteSpace(userIdStr) && Guid.TryParse(userIdStr, out var uid)
+            && !string.IsNullOrWhiteSpace(email))
         {
-            tempUserId = userId;
-            step2Model.UserId = tempUserId;
-            globalSuccessMessage = "Compte créé. Veuillez valider votre expertise.";
-            currentStep = 2;
-        }
-        else
-        {
-            step1ErrorMessage = result.Message ?? "Erreur lors de l'inscription.";
+            tempUserId = uid;
+            registeredEmail = email;
+            registeredName = fullName ?? email;
+            step3Model.UserId = uid;
+            isReturnedFromIdentity = true;
         }
     }
 
-    private async Task HandleStep2Submit(CertificateSubmissionDto request)
+    private void RedirectToIdentityRegister()
     {
-        isStep2Loading = true;
-        step2ErrorMessage = null;
-        globalSuccessMessage = null;
+        var returnUrl = $"{Navigation.BaseUri}register";
+        var redirectUrl = $"{IdentityRegisterUri}?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        Navigation.NavigateTo(redirectUrl);
+    }
+
+    private async Task HandleStep3Submit(CertificateSubmissionDto request)
+    {
+        isStep3Loading = true;
+        step3ErrorMessage = null;
 
         request.UserId = tempUserId;
         var result = await RegistrationService.SubmitStep2Async(request);
-        isStep2Loading = false;
+        isStep3Loading = false;
 
         if (result.Success && result.Data is not null)
         {
-            step3Model = result.Data;
-            globalSuccessMessage = result.Message;
-            currentStep = 3;
-            return;
+            step3Status = result.Data;
+            isStep3Submitted = true;
         }
-
-        step2ErrorMessage = result.Message ?? "Erreur lors de la soumission de la certification.";
+        else
+        {
+            step3ErrorMessage = result.Message ?? "Erreur lors de la soumission de la certification.";
+        }
     }
 
     private Task GoToStep1()
     {
-        step2ErrorMessage = null;
-        globalSuccessMessage = null;
         currentStep = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task GoToStep2()
+    {
+        currentStep = 2;
         return Task.CompletedTask;
     }
 
