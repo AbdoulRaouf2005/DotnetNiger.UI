@@ -1,51 +1,29 @@
-@* Composant admin : wrapper TinyMCE pour saisie/lecture de contenu riche. *@
+@* Composant admin : wrapper TinyMCE autonome. *@
+@* Utiliser RichTextEditor pour les pages create/edit. *@
 @inject IJSRuntime JS
+@implements IAsyncDisposable
 
-<textarea id="myEditor"></textarea>
-<button @onclick="GetContent" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-    Récupérer le contenu
-</button>
-
-@if (!string.IsNullOrEmpty(content))
-{
-    <div class="mt-4 p-4 bg-gray-100 rounded">
-        <h3>Contenu récupéré :</h3>
-        <p>@((MarkupString)content)</p>
-    </div>
-}
+<textarea id="@EditorId"></textarea>
 
 @code {
-    private string content = string.Empty;
-    
+    [Parameter] public string EditorId { get; set; } = "standaloneEditor";
+    [Parameter] public string InitialContent { get; set; } = string.Empty;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            try
-            {
-                await JS.InvokeVoidAsync("initTinyMCE", "myEditor");
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error initializing TinyMCE: {ex.Message}");
-            }
+            await JS.InvokeVoidAsync("initTinyMCE", EditorId, InitialContent);
         }
     }
 
-    private async Task GetContent()
+    public async Task<string> GetContentAsync()
     {
-        try
-        {
-            content = await JS.InvokeAsync<string>("getTinyMCEContent", "myEditor");
-            if (string.IsNullOrEmpty(content))
-            {
-                content = "No content available";
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error getting TinyMCE content: {ex.Message}");
-            content = "Error retrieving content";
-        }
+        return await JS.InvokeAsync<string>("getTinyMCEContent", EditorId);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("destroyTinyMCE", EditorId);
     }
 }

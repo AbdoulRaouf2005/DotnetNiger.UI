@@ -1,9 +1,11 @@
 @page "/admin/events/edit/{Id:guid}"
 @* Page admin : édition d'un événement. *@
+@using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Components.Admin
+@using DotnetNiger.UI.Components.Shared
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
 @inject IEventService EventService
 
 <div class="p-6 bg-[#F4F2F2]">
@@ -53,9 +55,10 @@
 
                 <div>
                     <label class="block text-sm font-semibold mb-2">Image de couverture</label>
-                    <InputText @bind-Value="eventRequest.CoverImageUrl"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                               placeholder="URL de l'image" />
+                    <ImageUploader UploadType="UploadType.Event"
+                                   ExistingImageUrl="@eventRequest.CoverImageUrl"
+                                   OnImageUploaded="HandleImageUploaded"
+                                   OnImageDeleted="HandleImageDeleted" />
                 </div>
             </div>
 
@@ -107,14 +110,18 @@
 
             <div class="mb-6">
                 <label class="block text-sm font-semibold mb-2">Description</label>
-                <textarea id="eventDescriptionEdit" class="w-full"></textarea>
-                <ValidationMessage For="@(() => eventRequest.Description)" class="text-red-500 text-sm mt-1" />
+                <Editor @ref="EditorRef" EditorId="eventDescriptionEdit" InitialContent="@(eventRequest.Description ?? string.Empty)" />
+                @if (showDescriptionError)
+                {
+                    <p class="text-red-500 text-sm mt-1">La description est obligatoire.</p>
+                }
             </div>
 
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
                 <div class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
             }
+
 
             <div class="flex gap-4">
                 <button type="button"
@@ -145,6 +152,9 @@
     private CreateEventRequest eventRequest = new();
     private string organizerName = string.Empty;
     private string errorMessage = string.Empty;
+    private bool   showDescriptionError;
+    private Editor EditorRef = default!;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,55 +169,64 @@
         eventRequest = MapToRequest(existingEvent);
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-
-        try
-        {
-            await JS.InvokeVoidAsync("initTinyMCE", "eventDescriptionEdit");
-            await JS.InvokeVoidAsync("setTinyMCEContent", "eventDescriptionEdit", eventRequest.Description ?? string.Empty);
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-    }
-
     private void GoBack()
     {
         Navigation.NavigateTo("/admin/events");
     }
 
+    private void HandleImageUploaded(string imageUrl)
+    {
+        eventRequest.CoverImageUrl = imageUrl;
+    }
+
+    private void HandleImageDeleted()
+    {
+        eventRequest.CoverImageUrl = string.Empty;
+    }
+
     private async Task SetPendingAsync()
     {
+        eventRequest.IsPublished = false;
+        eventRequest.IsArchived = false;
         await SaveAsync();
     }
 
     private async Task PublishAsync()
     {
+        eventRequest.IsPublished = true;
+        eventRequest.IsArchived = false;
         await SaveAsync();
     }
 
     private async Task ArchiveAsync()
     {
+        eventRequest.IsPublished = false;
+        eventRequest.IsArchived = true;
         await SaveAsync();
     }
 
     private async Task SaveAsync()
     {
+        errorMessage = string.Empty;
+        showDescriptionError = false;
+
+        eventRequest.Description = await EditorRef.GetContentAsync();
+
+        if (string.IsNullOrWhiteSpace(eventRequest.Description) ||
+            eventRequest.Description is "<p></p>" or "<p><br></p>")
+        {
+            showDescriptionError = true;
+            return;
+        }
+
         try
         {
-            eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescriptionEdit");
-
             var updated = await EventService.UpdateEventAsync(Id, eventRequest);
             if (updated is null)
             {
                 errorMessage = "Impossible de mettre à jour l'événement.";
                 return;
             }
-
             GoBack();
         }
         catch (Exception ex)
@@ -215,7 +234,6 @@
             errorMessage = ex.Message;
         }
     }
-
     private static CreateEventRequest MapToRequest(EventDto ev)
     {
         return new CreateEventRequest

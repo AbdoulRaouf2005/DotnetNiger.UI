@@ -3,8 +3,9 @@
 @using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Components.Shared
+@using DotnetNiger.UI.Components.Admin
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject IEventService EventService
@@ -127,12 +128,19 @@
                 </div>
             </div>
 
-            <!-- Description avec TinyMCE -->
             <div class="mb-6">
                 <label class="block text-sm font-semibold mb-2">Description</label>
-                <textarea id="eventDescription" class="w-full"></textarea>
-                <ValidationMessage For="@(() => eventRequest.Description)" class="text-red-500 text-sm mt-1" />
+                <Editor @ref="EditorRef" EditorId="eventDescription" InitialContent="" />
+                @if (showDescriptionError)
+                {
+                    <p class="text-red-500 text-sm mt-1">La description est obligatoire.</p>
+                }
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
+            }
 
             <!-- Action Buttons -->
             <div class="flex gap-4">
@@ -163,6 +171,10 @@
     private Guid currentUserId;
     private string organizerName = string.Empty;
 
+    private string errorMessage = string.Empty;
+    private bool   showDescriptionError;
+    private Editor EditorRef = default!;
+
     protected override async Task OnInitializedAsync()
     {
         // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
@@ -177,22 +189,6 @@
 
         currentUserId  = UserStateService.UserId;
         organizerName  = UserStateService.UserName;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                await JS.InvokeVoidAsync("initTinyMCE", "eventDescription");
-                await JS.InvokeVoidAsync("setTinyMCEContent", "eventDescription", eventRequest.Description ?? string.Empty);
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error initializing TinyMCE: {ex.Message}");
-            }
-        }
     }
 
     private void GoBack()
@@ -212,25 +208,32 @@
 
     private async Task HandleSubmit()
     {
-        eventRequest.Description = await JS.InvokeAsync<string>("getTinyMCEContent", "eventDescription");
+        errorMessage        = string.Empty;
+        showDescriptionError = false;
 
-        await EventService.CreateEventAsync(eventRequest, currentUserId, false);
-        Navigation.NavigateTo("/admin/events");
-    }
+        // 1. Lire le contenu de l'éditeur AVANT toute validation
+        eventRequest.Description = await EditorRef.GetContentAsync();
 
-    private static CreateEventRequest MapToRequest(EventDto ev)
-    {
-        return new CreateEventRequest
+        // 2. Validation manuelle de la description
+        if (string.IsNullOrWhiteSpace(eventRequest.Description) ||
+            eventRequest.Description == "<p></p>" ||
+            eventRequest.Description == "<p><br></p>")
         {
-            Title = ev.Title,
-            Description = ev.Description,
-            Location = ev.Location,
-            EventType = ev.EventType,
-            StartDate = ev.StartDate,
-            EndDate = ev.EndDate,
-            CoverImageUrl = ev.CoverImageUrl,
-            Capacity = ev.Capacity,
-            MeetupLink = ev.MeetupLink,
-       };
+            showDescriptionError = true;
+            return;
+        }
+
+        // 3. Laisser DataAnnotations valider le reste
+        //    (Title, EventType, dates… via le validator inline)
+        try
+        {
+            await EventService.CreateEventAsync(eventRequest, currentUserId, false);
+            Navigation.NavigateTo("/admin/events");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
     }
+
 }

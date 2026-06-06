@@ -1,9 +1,9 @@
-@page "/admin/blog/edit/{Id:guid}"
+@page "/admin/blog/{Id:guid}"
 @* Page admin : édition d'article avec éditeur riche. *@
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Components.Admin
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JS
 @inject IPostService PostService
 
 <div class="min-h-screen p-6">
@@ -39,7 +39,12 @@
         </div>
 
         <div class="mt-6">
-            <textarea id="blogDescriptionEdit" class="w-full min-h-96"></textarea>
+            <label class="mb-2 block text-sm font-semibold text-gray-700">Contenu</label>
+            <Editor @ref="EditorRef" EditorId="blogDescriptionEdit" InitialContent="@(postRequest.Content ?? string.Empty)" />
+            @if (showContentError)
+            {
+                <p class="text-red-500 text-sm mt-1">Le contenu de l'article est obligatoire.</p>
+            }
         </div>
 
         @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -65,6 +70,10 @@
 
     private UpdatePostRequest postRequest = new();
     private string errorMessage = string.Empty;
+
+    private bool   showContentError;
+    private Editor EditorRef = default!;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -93,22 +102,6 @@
         postRequest.CoverImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(memoryStream.ToArray())}";
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            try
-            {
-                await JS.InvokeVoidAsync("initTinyMCE", "blogDescriptionEdit");
-                await JS.InvokeVoidAsync("setTinyMCEContent", "blogDescriptionEdit", postRequest.Content ?? string.Empty);
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-            }
-        }
-    }
-
     private async Task SaveDraft()
     {
         await SaveAsync(isPublished: false);
@@ -120,25 +113,45 @@
     }
     private void Cancel() => NavigationManager.NavigateTo("/admin/blog");
 
-    private async Task SaveAsync(bool isPublished)
+       private async Task SaveAsync(bool isPublished)
     {
+        errorMessage    = string.Empty;
+        showContentError = false;
+
+        // Lire TinyMCE avant validation
+        postRequest.Content = await EditorRef.GetContentAsync();
+
+        if (string.IsNullOrWhiteSpace(postRequest.Content) ||
+            postRequest.Content is "<p></p>" or "<p><br></p>")
+        {
+            showContentError = true;
+            return;
+        }
+
         try
         {
-            postRequest.Content = await JS.InvokeAsync<string>("getTinyMCEContent", "blogDescriptionEdit");
             postRequest.IsPublished = isPublished;
+            postRequest.Excerpt     = BuildExcerpt(postRequest.Content);
+
             var updated = await PostService.UpdatePostAsync(Id, postRequest);
             if (updated is null)
             {
                 errorMessage = "Impossible de mettre à jour l'article.";
                 return;
             }
-
             NavigationManager.NavigateTo("/admin/blog");
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
         }
+    }
+
+        private static string BuildExcerpt(string content)
+    {
+        var plain = System.Text.RegularExpressions.Regex.Replace(content, "<.*?>", string.Empty);
+        plain = System.Net.WebUtility.HtmlDecode(plain).Trim();
+        return plain.Length <= 180 ? plain : $"{plain[..180].Trim()}...";
     }
 
     private static UpdatePostRequest MapToUpdateRequest(PostDto post)
