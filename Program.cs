@@ -40,6 +40,7 @@ var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
+    builder.Services.AddScoped<IUploadService, MockUploadService>();
     builder.Services.AddScoped<IAuthService, MockAuthService>();
     builder.Services.AddScoped<IUserService, MockUserService>();
     builder.Services.AddScoped<IPostService, PostService>();
@@ -143,6 +144,13 @@ else
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<IUserStateService, MockUserStateService>();
+
+    builder.Services.AddScoped<IUploadService>(sp =>
+        new ApiUploadService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 }
 
 await builder.Build().RunAsync();
