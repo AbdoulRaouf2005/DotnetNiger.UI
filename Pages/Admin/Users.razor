@@ -7,46 +7,44 @@
 <div class="min-h-screen p-6">
     <div class="mb-8 flex items-center justify-between gap-4">
         <div>
-            <h1 class="text-4xl font-bold text-gray-900">Utilisateurs</h1>
+            <AdminBreadcrumb />
             <h3 class="mt-2 font-bold text-gray-900">Comptes, demandes en attente et actions d'administration.</h3>
         </div>
 
         <button @onclick="OpenCreateAsync"
                 class="flex min-h-12 items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">
-            <i class="fas fa-plus text-2xl"></i>
-            <span class="Button">Nouveau membre</span>
+            <i class="fas fa-plus text-sm"></i>
+            <span class="hidden sm:block">Nouveau</span>
         </button>
     </div>
 
     <div class="mb-6 grid gap-4 sm:grid-cols-3">
-        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <article class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
             <p class="text-sm text-gray-500">Total utilisateurs</p>
             <p class="mt-2 text-3xl font-bold text-gray-900">@totalUsers</p>
         </article>
-        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <article class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
             <p class="text-sm text-gray-500">Actifs</p>
             <p class="mt-2 text-3xl font-bold text-emerald-600">@activeUsers</p>
         </article>
-        <article class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <article class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
             <p class="text-sm text-gray-500">En attente</p>
             <p class="mt-2 text-3xl font-bold text-amber-600">@pendingUsers.Count</p>
         </article>
     </div>
 
-    <div class="mb-4 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
+    <div class="mb-6 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
         <div class="flex-1">
-              <div class="relative">
-                  <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-400"></i>
-                  <input type="text"
-                      placeholder="Rechercher un utilisateur..."
-                      value="@searchQuery"
-                      @oninput="HandleSearchInput"
-                      class="w-full min-w-[280px] rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:outline-none" />
-              </div>
+            <div class="relative ">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-400"></i>
+                <input type="text" placeholder="Rechercher un utilisateur..." value="@searchQuery"
+                       @oninput="HandleSearchInput"
+                       class="w-full bg-white min-w-[280px] rounded-lg border border-gray-300 py-3 pl-12 pr-4 focus:outline-none" />
+            </div>
         </div>
 
         <select value="@selectedRole" @onchange="HandleRoleChange"
-            class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
+                class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 hover:border-gray-400 focus:outline-none">
             <option value="">Tous les rôles</option>
             <option value="Admin">Admin</option>
             <option value="Member">Member</option>
@@ -64,148 +62,112 @@
         </div>
     </div>
 
-    <section class="mb-8 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+    <section class="mb-8 rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
         <div class="mb-4 flex items-center justify-between gap-3">
             <div>
                 <h2 class="text-xl font-semibold text-gray-900">Demandes d'intégration</h2>
                 <p class="text-sm text-gray-500">Approuver ou rejeter les nouveaux membres avant activation.</p>
             </div>
-            <button class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700" @onclick="ReloadAsync">Actualiser</button>
+            <button class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700"
+                    @onclick="ReloadAsync">Actualiser</button>
         </div>
 
         @if (pendingUsers.Count == 0)
         {
-            <p class="rounded-xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">Aucune demande en attente.</p>
+            <p class="rounded-xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">Aucune demande en
+                attente.</p>
+            }
+        else
+            {
+                <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach (var user in pendingUsers)
+                    {
+                        <article class="rounded-lg border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex min-w-0 items-center gap-3">
+                                    <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)"
+                                         class="h-14 w-14 rounded-full object-cover" />
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-gray-900">@user.FullName</p>
+                                        <p class="truncate text-xs text-gray-500">@user.Email</p>
+                                        <p class="mt-1 text-xs text-gray-400">@GetPrimaryRole(user)</p>
+                                    </div>
+                                </div>
+                                <AdminActionDropdown ItemId="user.Id" Status="Pending" ViewLabel="Voir" EditLabel="Modifier"
+                                                     DeleteLabel="Rejeter" ApproveLabel="Approuver" RejectLabel="Rejeter" OnView="ViewAsync"
+                                                     OnEdit="EditAsync" OnDelete="RejectAsync" OnApprove="ApproveAsync" OnReject="RejectAsync" />
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </section>
+
+        @if (viewMode == "list")
+        {
+            <UsersTable Users="filteredUsers" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
+                        OnToggleStatus="ToggleStatusAsync" />
         }
         else
         {
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                @foreach (var user in pendingUsers)
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach (var user in filteredUsers)
                 {
-                    <article class="rounded-2xl border border-gray-200 p-4 shadow-sm">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex min-w-0 items-center gap-3">
-                            <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)"
-                                 class="h-14 w-14 rounded-full object-cover" />
-                                <div class="min-w-0">
-                                    <p class="truncate text-sm font-semibold text-gray-900">@user.FullName</p>
-                                    <p class="truncate text-xs text-gray-500">@user.Email</p>
-                                    <p class="mt-1 text-xs text-gray-400">@GetPrimaryRole(user)</p>
-                                </div>
-                            </div>
-                            <AdminActionDropdown ItemId="user.Id"
-                                                 Status="Pending"
-                                                 ViewLabel="Voir"
-                                                 EditLabel="Modifier"
-                                                 DeleteLabel="Rejeter"
-                                                 ApproveLabel="Approuver"
-                                                 RejectLabel="Rejeter"
-                                                 OnView="ViewAsync"
-                                                 OnEdit="EditAsync"
-                                                 OnDelete="RejectAsync"
-                                                 OnApprove="ApproveAsync"
-                                                 OnReject="RejectAsync" />
-                        </div>
-                    </article>
+                    <AdminUsersCard Users="filteredUsers" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
+                                    OnToggleStatus="ToggleStatusAsync" />
                 }
             </div>
         }
-    </section>
 
-    @if (viewMode == "list")
-    {
-        <UsersTable Users="filteredUsers"
-                    OnView="ViewAsync"
-                    OnEdit="EditAsync"
-                    OnDelete="DeleteAsync"
-                    OnToggleStatus="ToggleStatusAsync" />
-    }
-    else
-    {
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach (var user in filteredUsers)
-            {
-                <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex min-w-0 items-center gap-3">
-                            <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)"
-                                 class="h-14 w-14 rounded-full object-cover" />
-                            <div class="min-w-0">
-                                <p class="truncate text-sm font-semibold text-gray-900">@user.FullName</p>
-                                <p class="truncate text-xs text-gray-500">@user.Email</p>
-                                <p class="mt-1 text-xs text-gray-400">@GetPrimaryRole(user)</p>
+        @if (isFormOpen)
+        {
+            <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseForm"></div>
+            <div
+                class="fixed top-0 right-0 h-screen w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-lg z-50 transform transition-transform duration-300">
+                <div class="flex flex-col h-full">
+                    <div class="flex justify-between items-center px-6 py-4 border-b">
+                        <h2 class="text-xl font-semibold"> "Nouvelle ressource"</h2>
+                        <button @onclick="CloseForm" class="text-gray-500 hover:text-black text-lg">&times;</button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+                        <EditForm Model="CreateUser" OnValidSubmit="SaveAsync">
+                            <DataAnnotationsValidator />
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Nom Complet</label>
+                                <InputText @bind-Value="CreateUser.FullName"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                           placeholder="Titre de la ressource" />
                             </div>
-                        </div>
-
-                        <AdminActionDropdown ItemId="user.Id"
-                                             Status="@(user.IsActive ? "Active" : "Inactive")"
-                                             ViewLabel="Voir"
-                                             EditLabel="Éditer"
-                                             DeleteLabel="Supprimer"
-                                             ToggleStatusLabel="Activer / Désactiver"
-                                             OnView="ViewAsync"
-                                             OnEdit="EditAsync"
-                                             OnDelete="DeleteAsync"
-                                             OnToggleStatus="ToggleStatusAsync" />
-                    </div>
-
-                    <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
-                        <span>@user.City</span>
-                        <span class="@(user.IsActive ? "text-emerald-600" : "text-amber-600") font-semibold">@(user.IsActive ? "Actif" : "Inactif")</span>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-
-    @if (isFormOpen)
-    {
-        <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseForm"></div>
-        <div class="fixed top-0 right-0 h-screen w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-2xl z-50 transform transition-transform duration-300">
-            <div class="flex flex-col h-full">
-                <div class="flex justify-between items-center px-6 py-4 border-b">
-                    <h2 class="text-xl font-semibold"> "Nouvelle ressource"</h2>
-                    <button @onclick="CloseForm" class="text-gray-500 hover:text-black text-2xl">&times;</button>
-                </div>
-                <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-                    <EditForm Model="CreateUser" OnValidSubmit="SaveAsync">
-                        <DataAnnotationsValidator />
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Nom Complet</label>
-                            <InputText @bind-Value="CreateUser.FullName"
-                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                       placeholder="Titre de la ressource" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Email</label>
-                            <InputText @bind-Value="CreateUser.Email"
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Email</label>
+                                <InputText @bind-Value="CreateUser.Email"
                                            class="w-full border rounded-lg px-4 py-2 focus:outline-none"
                                            placeholder="Email de l'utilisateur" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Mot de Passe</label>
-                            <InputText @bind-Value="CreateUser.Password"
-                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none"
-                                       placeholder="le mot de passe temporaire" />
-                        </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Mot de Passe</label>
+                                <InputText @bind-Value="CreateUser.Password"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none"
+                                           placeholder="le mot de passe temporaire" />
+                            </div>
 
-                        <div class="border-t pt-4 flex justify-end gap-3 bg-white">
-                            <button type="button" @onclick="CloseForm"
-                                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-                                Créer
-                            </button>
-                        </div>
-                    </EditForm>
+                            <div class="border-t pt-4 flex justify-end gap-3 bg-white">
+                                <button type="button" @onclick="CloseForm"
+                                        class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                                    Créer
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
                 </div>
             </div>
-        </div>
-    
-    }
-</div>
+
+        }
+    </div>
 
 @code {
     private string viewMode = "list";
@@ -222,7 +184,7 @@
     private bool isFormOpen;
     private Guid? editingUserId;
     private UserDto editModel = new();
-     private CreateUserRequest CreateUser = new();
+    private CreateUserRequest CreateUser = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -246,7 +208,8 @@
 
         if (!string.IsNullOrWhiteSpace(selectedRole))
         {
-            users = users.Where(user => user.Roles.Any(role => role.Equals(selectedRole, StringComparison.OrdinalIgnoreCase))).ToList();
+            users = users.Where(user => user.Roles.Any(role => role.Equals(selectedRole,
+StringComparison.OrdinalIgnoreCase))).ToList();
         }
 
         filteredUsers = users;

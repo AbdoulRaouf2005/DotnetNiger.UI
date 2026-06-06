@@ -3,7 +3,6 @@
 @inject IPostService PostService
 @inject IEventService EventService
 @inject IResourceService ResourceService
-@inject IProfileService ProfileService
 @inject IUserService UserService
 @inject IUserStateService UserStateService
 @inject NavigationManager Navigation
@@ -354,7 +353,8 @@
 			var events = await EventService.GetAllEventsAsync();
 			var resources = await ResourceService.GetAllResourcesAsync();
 			var users = await UserService.GetPendingUsersAsync();
-			CurrentProfile = await ProfileService.GetProfileAsync();
+			// UserStateService est la source unique de vérité pour le profil courant.
+			CurrentProfile = UserStateService.CurrentUser;
 			IsCurrentUserLoaded = UserStateService.CurrentUser is not null;
 
 			// Mise à jour des compteurs KPI.

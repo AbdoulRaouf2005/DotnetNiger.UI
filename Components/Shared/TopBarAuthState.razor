@@ -2,6 +2,7 @@
 @using System.Security.Claims
 @inject NavigationManager Navigation
 @inject IAuthService Auth
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject INotificationService NotificationService
 
@@ -69,9 +70,22 @@
     {
         try
         {
-            profile = await ProfileService.GetProfileAsync();
-            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+            // Utiliser UserStateService comme source principale; ProfileService en fallback.
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
+
+            if (UserStateService.CurrentUser is null)
+            {
+                var fetched = await ProfileService.GetProfileAsync();
+                await UserStateService.SetUserAsync(fetched);
+            }
+
+            profile = UserStateService.CurrentUser;
+            if (profile is not null)
+                unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+
             NotificationService.NotificationsChanged += HandleNotificationsChanged;
+            UserStateService.OnChange += HandleUserStateChanged;
         }
         catch
         {
@@ -83,6 +97,7 @@
     public void Dispose()
     {
         NotificationService.NotificationsChanged -= HandleNotificationsChanged;
+        UserStateService.OnChange -= HandleUserStateChanged;
     }
 
     private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount : NotificationCount.GetValueOrDefault();
@@ -117,6 +132,12 @@
     {
         await NotifyActionCompletedAsync();
         Navigation.NavigateTo("/notifications");
+    }
+
+    private void HandleUserStateChanged()
+    {
+        profile = UserStateService.CurrentUser;
+        InvokeAsync(StateHasChanged);
     }
 
     private void HandleNotificationsChanged(Guid userId)

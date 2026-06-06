@@ -4,24 +4,22 @@
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 
-<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
+<div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
     <div class="mx-auto max-w-7xl">
         <div class="mb-8 flex items-center justify-between gap-4">
-            <AdminBreadcrumb />
-            <button @onclick='() => NavigationManager.NavigateTo("/admin/blog/create")'
-                    class="inline-flex items-center gap-2 rounded-2xl bg-[#5b4df5] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
+        <section>
+                <AdminBreadcrumb />
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Consultez, filtrez et modérez les articles dans une interface plus claire et plus rapide.</p>
+        </section>
+        <button @onclick='() => NavigationManager.NavigateTo("/admin/blog/create")'
+                    class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
                 <i class="fas fa-plus text-sm"></i>
                 <span class="hidden sm:block">Nouveau</span>
             </button>
         </div>
 
-        <section class="mb-8">
-            <h1 class="text-3xl font-bold tracking-tight text-[#111827] md:text-4xl">Gestion des articles</h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Consultez, filtrez et modérez les articles dans une interface plus claire et plus rapide.</p>
-        </section>
-
         <section class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
-            <div class="flex-1 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+            <div class="flex-1 rounded-lg bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
                 <div class="relative">
                     <i class="fas fa-search absolute left-0 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" placeholder="Rechercher un article..."
@@ -31,7 +29,7 @@
             </div>
 
             <select @bind="selectedType"
-                    class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Type d'article</option>
                 <option value="Tutorial">Tutorial</option>
                 <option value="Article">Article</option>
@@ -39,7 +37,7 @@
             </select>
 
             <select @bind="selectedStatus"
-                    class="cursor-pointer rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Statut</option>
                 <option value="published">Publié</option>
             </select>

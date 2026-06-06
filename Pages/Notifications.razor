@@ -1,5 +1,6 @@
 @page "/notifications"
 @implements IDisposable
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject INotificationService NotificationService
 @inject NavigationManager Navigation
@@ -83,14 +84,25 @@
 @code {
     private readonly List<NotificationDto> notifications = new();
     private bool isLoading = true;
-    private UserDto? profile;
 
-    private Guid CurrentUserId => profile?.Id ?? Guid.Empty;
-    private bool HasUnreadNotifications => notifications.Any(notification => !notification.IsRead);
+    // Utilise UserStateService comme source unique de vérité.
+    private Guid CurrentUserId => UserStateService.UserId;
+    private bool HasUnreadNotifications => notifications.Any(n => !n.IsRead);
 
     protected override async Task OnInitializedAsync()
     {
         NotificationService.NotificationsChanged += HandleNotificationsChanged;
+
+        // Charger l'état utilisateur si nécessaire.
+        if (UserStateService.CurrentUser is null)
+            await UserStateService.LoadUserFromStorageAsync();
+
+        if (UserStateService.CurrentUser is null)
+        {
+            var profil = await ProfileService.GetProfileAsync();
+            await UserStateService.SetUserAsync(profil);
+        }
+
         await LoadAsync();
     }
 
@@ -105,18 +117,16 @@
 
         try
         {
-            profile = await ProfileService.GetProfileAsync();
-
-            if (profile is null || profile.Id == Guid.Empty)
+            if (CurrentUserId == Guid.Empty)
             {
                 notifications.Clear();
                 Navigation.NavigateTo("/login");
                 return;
             }
 
-            var loadedNotifications = await NotificationService.GetNotificationsAsync(profile.Id);
+            var loaded = await NotificationService.GetNotificationsAsync(CurrentUserId);
             notifications.Clear();
-            notifications.AddRange(loadedNotifications);
+            notifications.AddRange(loaded);
         }
         finally
         {
@@ -124,32 +134,23 @@
         }
     }
 
-    private async Task ReloadAsync()
-    {
-        await LoadAsync();
-    }
+    private async Task ReloadAsync() => await LoadAsync();
 
     private async Task MarkAsReadAsync(Guid notificationId)
     {
-        if (CurrentUserId == Guid.Empty)
-            return;
-
+        if (CurrentUserId == Guid.Empty) return;
         await NotificationService.MarkAsReadAsync(CurrentUserId, notificationId);
     }
 
     private async Task MarkAllAsReadAsync()
     {
-        if (CurrentUserId == Guid.Empty)
-            return;
-
+        if (CurrentUserId == Guid.Empty) return;
         await NotificationService.MarkAllAsReadAsync(CurrentUserId);
     }
 
     private void HandleNotificationsChanged(Guid userId)
     {
-        if (userId != CurrentUserId)
-            return;
-
+        if (userId != CurrentUserId) return;
         _ = InvokeAsync(LoadAsync);
     }
 }

@@ -1,4 +1,6 @@
 @page "/profile"
+@implements IDisposable
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
 
@@ -13,7 +15,7 @@
             <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
                 <div class="mb-5 flex justify-center">
                     <div class="relative">
-                        <img src="@GetAvatarUrl(profil?.AvatarUrl)"
+                        <img src="@GetAvatarUrl(CurrentUser?.AvatarUrl)"
                              alt="Avatar"
                              class="h-40 w-40 rounded-full border-4 border-indigo-100 object-cover" />
                         <button @onclick='() => Navigation.NavigateTo("/profile/informations")'
@@ -25,30 +27,30 @@
                 </div>
 
                 <div class="space-y-2 text-center">
-                    <h2 class="text-xl font-semibold tracking-tight text-slate-800 sm:text-4xl">@DisplayOrFallback(profil?.FullName, profil?.Username ?? "Utilisateur")</h2>
-                    <p class="text-lg text-slate-500">@DisplayPrimaryRole(profil?.Roles)</p>
+                    <h2 class="text-xl font-semibold tracking-tight text-slate-800 sm:text-4xl">@DisplayOrFallback(CurrentUser?.FullName, CurrentUser?.Username ?? "Utilisateur")</h2>
+                    <p class="text-lg text-slate-500">@DisplayPrimaryRole(CurrentUser?.Roles)</p>
                 </div>
 
                 <div class="mt-7 space-y-3 text-sm text-slate-700">
                     <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
                         <i class="fas fa-map-marker-alt text-slate-500"></i>
-                        <span>@BuildLocation(profil?.City, profil?.Country)</span>
+                        <span>@BuildLocation(CurrentUser?.City, CurrentUser?.Country)</span>
                     </div>
                     <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
                         <i class="fas fa-envelope text-slate-500"></i>
-                        <span>@DisplayOrFallback(profil?.Email, "Email non renseigne")</span>
+                        <span>@DisplayOrFallback(CurrentUser?.Email, "Email non renseigne")</span>
                     </div>
                     <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
                         <i class="fas fa-phone text-slate-500"></i>
-                        <span>@DisplayOrFallback(profil?.PhoneNumber, "Telephone non renseigne")</span>
+                        <span>@DisplayOrFallback(CurrentUser?.PhoneNumber, "Telephone non renseigne")</span>
                     </div>
                     <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
                         <i class="fas fa-calendar-alt text-slate-500"></i>
-                        <span>Membre depuis @FormatMemberSince(profil?.CreatedAt)</span>
+                        <span>Membre depuis @FormatMemberSince(CurrentUser?.CreatedAt)</span>
                     </div>
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full @((profil?.IsActive ?? false) ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600") px-4 py-2">
-                        <span class="h-2.5 w-2.5 rounded-full @((profil?.IsActive ?? false) ? "bg-emerald-500" : "bg-slate-400")"></span>
-                        <span>@((profil?.IsActive ?? false) ? "En ligne" : "Hors ligne")</span>
+                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600") px-4 py-2">
+                        <span class="h-2.5 w-2.5 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-500" : "bg-slate-400")"></span>
+                        <span>@((CurrentUser?.IsActive ?? false) ? "En ligne" : "Hors ligne")</span>
                     </div>
                 </div>
             </section>
@@ -63,14 +65,14 @@
                     </button>
                 </div>
 
-                @if (socialLinks.Count == 0)
+                @if (SocialLinks.Count == 0)
                 {
                     <p class="text-sm text-slate-500">Aucun lien social enregistre.</p>
                 }
                 else
                 {
                     <div class="flex flex-wrap gap-3">
-                        @foreach (var link in socialLinks)
+                        @foreach (var link in SocialLinks)
                         {
                             <a href="@link.Url"
                                target="_blank"
@@ -95,7 +97,7 @@
                         <i class="fas fa-pen"></i>
                     </button>
                 </div>
-                <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(profil?.Bio, "Aucune biographie renseignee.")</p>
+                <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(CurrentUser?.Bio, "Aucune biographie renseignee.")</p>
             </section>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -109,7 +111,7 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3">
-                    @foreach (var skill in ResolveSkills(profil?.Skills))
+                    @foreach (var skill in ResolveSkills(CurrentUser?.Skills))
                     {
                         <span class="rounded-md bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
                     }
@@ -120,53 +122,57 @@
 </div>
 
 @code {
-    private UserDto? profil;
-    private List<SocialLinkDto> socialLinks = new();
+    // Source unique de vérité : l'état global de l'utilisateur.
+    private UserDto? CurrentUser => UserStateService.CurrentUser;
+    private List<SocialLinkDto> SocialLinks => CurrentUser?.SocialLinks ?? new();
 
     protected override async Task OnInitializedAsync()
     {
-        profil = await ProfileService.GetProfileAsync();
-        socialLinks = await ProfileService.GetSocialLinksAsync();
+        UserStateService.OnChange += HandleStateChanged;
+
+        // Charger depuis le storage si l'état est vide, puis compléter via ProfileService.
+        if (UserStateService.CurrentUser is null)
+        {
+            await UserStateService.LoadUserFromStorageAsync();
+        }
+
+        // Si toujours vide (première visite), charger depuis ProfileService et synchroniser.
+        if (UserStateService.CurrentUser is null)
+        {
+            var profil = await ProfileService.GetProfileAsync();
+            await UserStateService.SetUserAsync(profil);
+        }
     }
+
+    public void Dispose()
+    {
+        UserStateService.OnChange -= HandleStateChanged;
+    }
+
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
 
     private static string DisplayOrFallback(string? value, string fallback)
         => string.IsNullOrWhiteSpace(value) ? fallback : value;
 
     private static string BuildLocation(string? city, string? country)
     {
-        var hasCity = !string.IsNullOrWhiteSpace(city);
+        var hasCity    = !string.IsNullOrWhiteSpace(city);
         var hasCountry = !string.IsNullOrWhiteSpace(country);
-
-        if (hasCity && hasCountry)
+        return (hasCity, hasCountry) switch
         {
-            return $"{city}, {country}";
-        }
-
-        if (hasCity)
-        {
-            return city!;
-        }
-
-        if (hasCountry)
-        {
-            return country!;
-        }
-
-        return "Non renseignee";
+            (true, true)  => $"{city}, {country}",
+            (true, false) => city!,
+            (false, true) => country!,
+            _             => "Non renseignee"
+        };
     }
 
     private static IEnumerable<string> ResolveSkills(List<string>? skills)
-    {
-        if (skills is not null && skills.Count > 0)
-        {
-            return skills;
-        }
-
-        return ["C# / .NET 8", "ASP.NET Core", "Azure Cloud", "Entity Framework", "Microservices", "Docker", "Blazor", "TypeScript"];
-    }
+        => (skills is { Count: > 0 }) ? skills
+            : ["C# / .NET 8", "ASP.NET Core", "Azure Cloud", "Entity Framework", "Microservices", "Docker", "Blazor", "TypeScript"];
 
     private static string DisplayPrimaryRole(List<string>? roles)
-        => (roles is not null && roles.Count > 0) ? roles[0] : "Membre .NET Niger";
+        => (roles is { Count: > 0 }) ? roles[0] : "Membre .NET Niger";
 
     private static string GetAvatarUrl(string? avatarUrl)
         => string.IsNullOrWhiteSpace(avatarUrl) ? "/Images/Fond.jpeg" : avatarUrl;

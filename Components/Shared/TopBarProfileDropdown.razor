@@ -2,6 +2,7 @@
 @using System.Security.Claims
 @inject NavigationManager Navigation
 @inject IAuthService Auth
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject INotificationService NotificationService
 
@@ -177,6 +178,7 @@
     public void Dispose()
     {
         NotificationService.NotificationsChanged -= HandleNotificationsChanged;
+        UserStateService.OnChange -= HandleUserStateChanged;
     }
 
     [Parameter, EditorRequired] public ClaimsPrincipal User { get; set; } = new();
@@ -243,10 +245,25 @@
     {
         try
         {
-            profile = await ProfileService.GetProfileAsync();
-            currentUserId = profile.Id;
-            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(currentUserId);
+            // UserStateService en priorité, ProfileService en fallback.
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
+
+            if (UserStateService.CurrentUser is null)
+            {
+                var fetched = await ProfileService.GetProfileAsync();
+                await UserStateService.SetUserAsync(fetched);
+            }
+
+            profile = UserStateService.CurrentUser;
+            if (profile is not null)
+            {
+                currentUserId = profile.Id;
+                unreadNotificationCount = await NotificationService.GetUnreadCountAsync(currentUserId);
+            }
+
             NotificationService.NotificationsChanged += HandleNotificationsChanged;
+            UserStateService.OnChange += HandleUserStateChanged;
         }
         catch
         {
@@ -284,6 +301,14 @@
         isMenuOpen = false;
         await Task.Yield();
         Navigation.NavigateTo("/notifications");
+    }
+
+    private void HandleUserStateChanged()
+    {
+        profile = UserStateService.CurrentUser;
+        if (profile is not null)
+            currentUserId = profile.Id;
+        InvokeAsync(StateHasChanged);
     }
 
     private void HandleNotificationsChanged(Guid userId)

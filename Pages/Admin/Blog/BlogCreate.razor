@@ -4,6 +4,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @inject IPostService PostService
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 
 <div class="min-h-screen bg-[#F4F2F2] p-6">
@@ -15,11 +16,11 @@
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
                 <label class="mb-2 block text-sm font-semibold text-gray-700">Titre</label>
-                <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" />
+                <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none" />
             </div>
             <div>
                 <label class="mb-2 block text-sm font-semibold text-gray-700">Type d'article</label>
-                <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500">
+                <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none">
                     <option value="">Sélectionner</option>
                     <option value="Tutorial">Tutorial</option>
                     <option value="Article">Article</option>
@@ -70,8 +71,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var profile = await ProfileService.GetProfileAsync();
-        currentUserId = profile.Id;
+        // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
+        if (UserStateService.CurrentUser is null)
+            await UserStateService.LoadUserFromStorageAsync();
+
+        if (UserStateService.CurrentUser is null)
+        {
+            var profil = await ProfileService.GetProfileAsync();
+            await UserStateService.SetUserAsync(profil);
+        }
+
+        currentUserId = UserStateService.UserId;
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

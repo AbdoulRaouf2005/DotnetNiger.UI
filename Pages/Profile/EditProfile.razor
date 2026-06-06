@@ -1,4 +1,6 @@
 @page "/profile/informations"
+@implements IDisposable
+@inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -162,45 +164,72 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var profil = await ProfileService.GetProfileAsync();
+        UserStateService.OnChange += HandleStateChanged;
+
+        // Charger l'état si absent.
+        if (UserStateService.CurrentUser is null)
+            await UserStateService.LoadUserFromStorageAsync();
+
+        if (UserStateService.CurrentUser is null)
+        {
+            var profil = await ProfileService.GetProfileAsync();
+            await UserStateService.SetUserAsync(profil);
+        }
+
+        SyncFormFromState();
+    }
+
+    public void Dispose()
+    {
+        UserStateService.OnChange -= HandleStateChanged;
+    }
+
+    // Re-synchronise le formulaire si l'état global change depuis l'extérieur.
+    private void HandleStateChanged()
+    {
+        SyncFormFromState();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SyncFormFromState()
+    {
+        var user = UserStateService.CurrentUser;
+        if (user is null) return;
+
         model = new UpdateProfileRequest
         {
-            FullName = profil.FullName,
-            PhoneNumber = profil.PhoneNumber,
-            Country = profil.Country,
-            City = profil.City,
-            AvatarUrl = profil.AvatarUrl,
-            Bio = profil.Bio
+            FullName    = user.FullName,
+            PhoneNumber = user.PhoneNumber,
+            Country     = user.Country,
+            City        = user.City,
+            AvatarUrl   = user.AvatarUrl,
+            Bio         = user.Bio
         };
-        displayEmail = profil.Email;
-
-        socialLinks = await ProfileService.GetSocialLinksAsync();
+        displayEmail = user.Email;
+        socialLinks  = user.SocialLinks ?? new();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || avatarDropZoneInitialized)
-        {
-            return;
-        }
-
+        if (!firstRender || avatarDropZoneInitialized) return;
         avatarDropZoneInitialized = true;
         await JS.InvokeVoidAsync("initAvatarDropZone", AvatarDropZoneId, AvatarInputId);
     }
 
+    /// <summary>
+    /// Enregistre le profil via ProfileService (qui synchronise UserStateService en interne).
+    /// </summary>
     private async Task HandleSubmit()
     {
         await ProfileService.UpdateProfileAsync(model);
+        // La synchronisation est assurée par ProfileService → UserStateService.UpdateUserAsync.
         Navigation.NavigateTo("/profile");
     }
 
     private async Task HandleAvatarSelected(InputFileChangeEventArgs eventArgs)
     {
         var file = eventArgs.File;
-        if (file is null)
-        {
-            return;
-        }
+        if (file is null) return;
 
         const long maxFileSize = 2 * 1024 * 1024;
         await using var stream = file.OpenReadStream(maxFileSize);
@@ -220,6 +249,7 @@
             return;
         }
 
+        // ProfileService ajoute le lien ET synchronise UserStateService.
         var created = await ProfileService.AddSocialLinkAsync(socialModel);
         if (created is null)
         {
@@ -227,8 +257,8 @@
             return;
         }
 
-        socialLinks = await ProfileService.GetSocialLinksAsync();
-        socialModel = new AddSocialLinkRequest();
+        socialLinks   = await ProfileService.GetSocialLinksAsync();
+        socialModel   = new AddSocialLinkRequest();
         messageSocial = "Lien social ajoute avec succes.";
     }
 
@@ -236,6 +266,7 @@
     {
         messageSocial = null;
 
+        // ProfileService supprime le lien ET synchronise UserStateService.
         var deleted = await ProfileService.DeleteSocialLinkAsync(id);
         if (!deleted)
         {
@@ -243,7 +274,7 @@
             return;
         }
 
-        socialLinks = await ProfileService.GetSocialLinksAsync();
+        socialLinks   = await ProfileService.GetSocialLinksAsync();
         messageSocial = "Lien social supprime avec succes.";
     }
 

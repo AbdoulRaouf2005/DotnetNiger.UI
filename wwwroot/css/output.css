@@ -2558,6 +2558,11 @@ video {
   padding-bottom: 2rem;
 }
 
+.px-10{
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
 .pb-2{
   padding-bottom: 0.5rem;
 }
@@ -3000,6 +3005,11 @@ video {
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
 
+.text-green-300{
+  --tw-text-opacity: 1;
+  color: rgb(134 239 172 / var(--tw-text-opacity, 1));
+}
+
 .text-green-500{
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity, 1));
@@ -3052,6 +3062,11 @@ video {
 .text-purple-600{
   --tw-text-opacity: 1;
   color: rgb(147 51 234 / var(--tw-text-opacity, 1));
+}
+
+.text-red-300{
+  --tw-text-opacity: 1;
+  color: rgb(252 165 165 / var(--tw-text-opacity, 1));
 }
 
 .text-red-400{
@@ -3134,6 +3149,16 @@ video {
 
 .text-white{
   color: var(--color-white);
+}
+
+.placeholder-purple-200::-moz-placeholder{
+  --tw-placeholder-opacity: 1;
+  color: rgb(233 213 255 / var(--tw-placeholder-opacity, 1));
+}
+
+.placeholder-purple-200::placeholder{
+  --tw-placeholder-opacity: 1;
+  color: rgb(233 213 255 / var(--tw-placeholder-opacity, 1));
 }
 
 .opacity-0{
@@ -3907,6 +3932,10 @@ video {
   background-color: rgb(79 70 229 / var(--tw-bg-opacity, 1));
 }
 
+.group:hover .group-hover\:text-secondary{
+  color: var(--color-secondary);
+}
+
 .group:hover .group-hover\:text-white{
   color: var(--color-white);
 }
@@ -4395,6 +4424,10 @@ video {
     display: block;
   }
 
+  .md\:inline{
+    display: inline;
+  }
+
   .md\:flex{
     display: flex;
   }
@@ -4603,6 +4636,10 @@ video {
     display: block;
   }
 
+  .lg\:grid{
+    display: grid;
+  }
+
   .lg\:hidden{
     display: none;
   }
@@ -4686,6 +4723,10 @@ video {
 @media (min-width: 1280px){
   .xl\:col-span-2{
     grid-column: span 2 / span 2;
+  }
+
+  .xl\:grid{
+    display: grid;
   }
 
   .xl\:grid-cols-2{

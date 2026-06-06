@@ -21,17 +21,17 @@
                 <p class="text-gray-500 mb-6">Bon retour parmi nous ! Veuillez entrer vos identifiants.</p>
 
                 <div class="flex gap-3 mb-6">
-                    <button @onclick='() => NavigateToExternalLogin("Google")' class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
+                    <button @onclick='() => NavigateToExternalLogin("Google")' title="Google" class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
                         <i class="fab fa-google text-xl"></i>
-                        <span>Google</span>
+                        <span class="hidden md:inline">Google</span>
                     </button>
-                    <button @onclick='() => NavigateToExternalLogin("GitHub")' class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
+                    <button @onclick='() => NavigateToExternalLogin("GitHub")' title="GitHub" class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
                         <i class="fab fa-github text-xl"></i>
-                        <span>GitHub</span>
+                        <span class="hidden md:inline">GitHub</span>
                     </button>
-                    <button class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
+                    <button title="Microsoft" class="flex-1 flex items-center justify-center gap-2 border rounded-lg px-4 py-2 text-sm bg-white hover:bg-gray-50">
                         <i class="fab fa-microsoft text-xl"></i>
-                        <span>Microsoft</span>
+                        <span class="hidden md:inline">Microsoft</span>
                     </button>
                 </div>
 
