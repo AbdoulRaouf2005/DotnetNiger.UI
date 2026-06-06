@@ -1,34 +1,86 @@
-<div class="py-8 text-center">
-    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
-    {
-        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm text-left">
-            @ErrorMessage
+@if (!IsSubmitted)
+{
+    <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="py-6">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-certificate text-purple-600 text-2xl"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">Valider votre expertise</h2>
+                <p class="text-gray-500 mt-2">Renseignez le lien et le type de votre certification C# pour finaliser l'inscription.</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+                    @ErrorMessage
+                </div>
+            }
+
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-500 mb-2">URL de la certification</label>
+                <InputText @bind-Value="Model.CertificateUrl" placeholder="https://www.freecodecamp.org/certification/..." class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm" />
+                <ValidationMessage For="@(() => Model.CertificateUrl)" class="text-xs text-red-500 mt-1" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-500 mb-2">Type de certificat</label>
+                <InputSelect @bind-Value="Model.CertificateType" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm bg-white">
+                    <option value="">Sélectionnez un type</option>
+                    <option value="Foundational C# with Microsoft">Foundational C# with Microsoft</option>
+                    <option value="C# Data and Web">C# Data and Web</option>
+                    <option value="Autre">Autre</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => Model.CertificateType)" class="text-xs text-red-500 mt-1" />
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" class="flex-1 rounded-full bg-white border py-3 text-sm" @onclick="HandleBack">← Retour</button>
+                <button type="submit" disabled="@IsLoading" class="flex-1 rounded-full bg-purple-700 text-white py-3 text-sm disabled:opacity-70">
+                    @(IsLoading ? "Soumission en cours..." : "Soumettre pour vérification")
+                </button>
+            </div>
         </div>
-    }
+    </EditForm>
+}
+else
+{
+    <div class="py-8 text-center">
+        <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-clock text-purple-600 text-2xl"></i>
+        </div>
+        <h2 class="text-xl font-bold text-gray-800">Certification soumise</h2>
 
-    <div class="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-4">
-        <i class="fas fa-clock text-purple-600 text-2xl"></i>
+        <p class="text-gray-500 mt-3 max-w-md mx-auto">
+            Votre certification a été soumise avec succès. Vous recevrez un email de confirmation après validation de votre certificat.
+        </p>
+
+        <div class="mt-4 text-sm text-gray-600">
+            <p>Statut : <span class="font-semibold text-gray-700">@(Status?.Status ?? "En attente")</span></p>
+            @if (Status is not null)
+            {
+                <p>Soumis le : @Status.SubmissionDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                <p>Délai estimé : @Status.EstimatedWaitTime</p>
+                <p>Support : @Status.SupportEmail</p>
+            }
+        </div>
+
+        <div class="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700 text-left max-w-md mx-auto">
+            <i class="fas fa-info-circle mr-1"></i>
+            Vous pouvez dès à présent vous connecter et participer aux événements. Vous pourrez créer du contenu (blogs, ressources) une fois votre certificat validé par l'équipe.
+        </div>
+
+        <button class="mt-6 rounded-full bg-purple-700 text-white py-3 px-8 font-semibold hover:bg-purple-800 shadow-md" disabled="@IsLoading" @onclick="HandleContinue">
+            @(IsLoading ? "Redirection..." : "Aller à la connexion")
+        </button>
     </div>
-    <h2 class="text-xl font-bold text-gray-800">Certification en attente</h2>
-
-    <p class="text-gray-500 mt-2 max-w-xl mx-auto">
-        Votre soumission est bien enregistrée. Statut actuel : <span class="font-semibold text-gray-700">@Model.Status</span>
-    </p>
-
-    <div class="mt-4 text-sm text-gray-600">
-        <p>Soumis le : @Model.SubmissionDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
-        <p>Délai estimé : @Model.EstimatedWaitTime</p>
-        <p>Support : @Model.SupportEmail</p>
-    </div>
-
-    <button class="mt-6 rounded-full bg-purple-700 text-white py-3 px-6 text-sm disabled:opacity-70" disabled="@IsLoading" @onclick="ContinueToLogin">
-        @(IsLoading ? "Redirection..." : "Aller à la connexion")
-    </button>
-</div>
+}
 
 @code {
     [Parameter, EditorRequired]
-    public CertificateStatusDto Model { get; set; } = new();
+    public CertificateSubmissionDto Model { get; set; } = default!;
 
     [Parameter]
     public string? ErrorMessage { get; set; }
@@ -37,7 +89,23 @@
     public bool IsLoading { get; set; }
 
     [Parameter]
+    public bool IsSubmitted { get; set; }
+
+    [Parameter]
+    public CertificateStatusDto? Status { get; set; }
+
+    [Parameter]
+    public EventCallback<CertificateSubmissionDto> OnSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    [Parameter]
     public EventCallback OnContinue { get; set; }
 
-    private Task ContinueToLogin() => OnContinue.InvokeAsync();
+    private Task HandleValidSubmit() => OnSubmit.InvokeAsync(Model);
+
+    private Task HandleBack() => OnBack.InvokeAsync();
+
+    private Task HandleContinue() => OnContinue.InvokeAsync();
 }
