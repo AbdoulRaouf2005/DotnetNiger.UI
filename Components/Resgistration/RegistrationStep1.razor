@@ -1,74 +1,104 @@
-<EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
+@if (!IsRegistered)
+{
+    <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
 
-    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
-    {
-        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
-            @ErrorMessage
-        </div>
-    }
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+                @ErrorMessage
+            </div>
+        }
 
-    <div class="grid grid-cols-1 gap-4 mb-4">
-        <div class="flex gap-3">
-            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
-                <i class="fab fa-google text-lg"></i>
-                Google
-            </button>
-            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
-                <i class="fab fa-github text-lg"></i>
-                GitHub
-            </button>
-            <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
-                <i class="fab fa-microsoft text-lg"></i>
-                Microsoft
-            </button>
-        </div>
-
-        <div class="flex items-center justify-center text-xs text-gray-400">ou</div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
-            <InputText @bind-Value="Model.FullName" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Votre nom complet" />
-            <ValidationMessage For="@(() => Model.FullName)" class="text-xs text-red-500 mt-1" />
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
-            <InputText @bind-Value="Model.Email" type="email" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="vous@exemple.com" />
-            <ValidationMessage For="@(() => Model.Email)" class="text-xs text-red-500 mt-1" />
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-            <div class="relative">
-                <InputText @bind-Value="Model.Password" type="@(showPassword ? "text" : "password")" class="w-full rounded-lg border border-gray-200 px-4 py-3 pr-10 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Minimum 8 caractères" />
-                <button type="button" @onclick="TogglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    @if (showPassword)
-                    {
-                        <i class="fas fa-eye"></i>
-                    }
-                    else
-                    {
-                        <i class="fas fa-eye-slash"></i>
-                    }
+        <div class="grid grid-cols-1 gap-4 mb-4">
+            <div class="flex gap-3">
+                <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                    <i class="fab fa-google text-lg"></i>
+                    Google
+                </button>
+                <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                    <i class="fab fa-github text-lg"></i>
+                    GitHub
+                </button>
+                <button type="button" class="flex-1 border rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:shadow-sm">
+                    <i class="fab fa-microsoft text-lg"></i>
+                    Microsoft
                 </button>
             </div>
-            <ValidationMessage For="@(() => Model.Password)" class="text-xs text-red-500 mt-1" />
+
+            <div class="flex items-center justify-center text-xs text-gray-400">ou</div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <InputText @bind-Value="Model.FullName" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Votre nom complet" />
+                <ValidationMessage For="@(() => Model.FullName)" class="text-xs text-red-500 mt-1" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Adresse e-mail</label>
+                <InputText @bind-Value="Model.Email" type="email" class="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:ring-1 focus:ring-purple-500" placeholder="vous@exemple.com" />
+                <ValidationMessage For="@(() => Model.Email)" class="text-xs text-red-500 mt-1" />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                <div class="relative">
+                    <InputText @bind-Value="Model.Password" type="@(showPassword ? "text" : "password")" class="w-full rounded-lg border border-gray-200 px-4 py-3 pr-10 text-sm focus:ring-1 focus:ring-purple-500" placeholder="Minimum 8 caractères" />
+                    <button type="button" @onclick="TogglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                        @if (showPassword)
+                        {
+                            <i class="fas fa-eye"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-eye-slash"></i>
+                        }
+                    </button>
+                </div>
+                <ValidationMessage For="@(() => Model.Password)" class="text-xs text-red-500 mt-1" />
+            </div>
+
+            <div class="bg-green-50 border border-green-100 rounded-lg p-4 text-sm text-green-700">
+                <strong>Action requise :</strong> Pour valider votre adhésion, vous devez détenir le certificat Foundational C# with Microsoft.
+            </div>
+
+            <button type="submit" disabled="@IsLoading" class="w-full rounded-full bg-purple-700 text-white py-3 font-semibold hover:bg-purple-800 shadow-md disabled:opacity-70">
+                @(IsLoading ? "Inscription en cours..." : "Créer mon compte")
+            </button>
+
+            <p class="text-center text-sm text-gray-500">
+                Déjà membre ? <a href="/login" class="text-orange-500 font-medium">Se connecter</a>
+            </p>
+        </div>
+    </EditForm>
+}
+else
+{
+    <div class="text-center py-6">
+        <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check-circle text-green-600 text-3xl"></i>
         </div>
 
-        <div class="bg-green-50 border border-green-100 rounded-lg p-4 text-sm text-green-700">
-            <strong>Action requise :</strong> Pour valider votre adhésion, vous devez détenir le certificat Foundational C# with Microsoft.
-        </div>
+        <h2 class="text-xl font-bold text-gray-800">Compte créé avec succès</h2>
 
-        <button type="submit" disabled="@IsLoading" class="w-full rounded-full bg-purple-700 text-white py-3 font-semibold hover:bg-purple-800 shadow-md disabled:opacity-70">
-            @(IsLoading ? "Inscription en cours..." : "Créer mon compte")
-        </button>
-
-        <p class="text-center text-sm text-gray-500">
-            Déjà membre ? <a href="/login" class="text-orange-500 font-medium">Se connecter</a>
+        <p class="text-gray-700 mt-3 text-lg font-medium">
+            Bienvenue, @RegisteredName !
         </p>
+
+        <p class="text-gray-500 mt-2 max-w-md mx-auto">
+            Votre compte a été créé. Un code de confirmation vous a été envoyé par email à l'adresse <strong class="text-gray-700">@RegisteredEmail</strong>.
+        </p>
+
+        <div class="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700 text-left max-w-md mx-auto">
+            <i class="fas fa-info-circle mr-1"></i>
+            Vous devez confirmer votre email pour pouvoir vous connecter et accéder aux events de la communauté.
+        </div>
+
+        <button type="button" class="mt-6 rounded-full bg-purple-700 text-white py-3 px-8 font-semibold hover:bg-purple-800 shadow-md" @onclick="HandleNext">
+            Suivant →
+        </button>
     </div>
-</EditForm>
+}
 
 @code {
     private bool showPassword;
@@ -83,9 +113,23 @@
     public bool IsLoading { get; set; }
 
     [Parameter]
+    public bool IsRegistered { get; set; }
+
+    [Parameter]
+    public string? RegisteredName { get; set; }
+
+    [Parameter]
+    public string? RegisteredEmail { get; set; }
+
+    [Parameter]
     public EventCallback<RegisterRequest> OnSubmit { get; set; }
 
+    [Parameter]
+    public EventCallback OnNext { get; set; }
+
     private Task HandleValidSubmit() => OnSubmit.InvokeAsync(Model);
+
+    private Task HandleNext() => OnNext.InvokeAsync();
 
     private void TogglePassword() => showPassword = !showPassword;
 }

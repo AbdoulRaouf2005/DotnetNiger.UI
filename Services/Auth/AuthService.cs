@@ -221,10 +221,34 @@ public class AuthService : IAuthService
                 };
             }
 
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            var userId = root.TryGetProperty("userId", out var uidProp)
+                && uidProp.ValueKind == JsonValueKind.String
+                ? uidProp.GetString() : null;
+            var email = root.TryGetProperty("email", out var emailProp)
+                && emailProp.ValueKind == JsonValueKind.String
+                ? emailProp.GetString() : null;
+            var message = root.TryGetProperty("message", out var msgProp)
+                && msgProp.ValueKind == JsonValueKind.String
+                ? msgProp.GetString() : "Compte créé. Vérifiez votre email pour le confirmer.";
+
             return new ApiSuccessResponse<AuthDto>
             {
                 Success = true,
-                Message = "Compte créé. Vérifiez votre email pour le confirmer."
+                Message = message,
+                Data = new AuthDto
+                {
+                    User = new UserDto
+                    {
+                        Id = Guid.TryParse(userId, out var uid) ? uid : Guid.Empty,
+                        Email = email ?? request.Email,
+                        FullName = request.FullName,
+                        Username = request.FullName
+                    }
+                }
             };
         }
         catch (HttpRequestException ex)
@@ -261,7 +285,7 @@ public class AuthService : IAuthService
         {
             Success = true,
             Message = result.Message ?? "Étape 1 validée.",
-            Data = Guid.Empty
+            Data = result.Data?.User?.Id ?? Guid.Empty
         };
     }
 
