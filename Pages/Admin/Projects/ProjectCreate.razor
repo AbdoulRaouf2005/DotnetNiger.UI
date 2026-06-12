@@ -1,0 +1,143 @@
+@page "/admin/projects/nouveau"
+@* Page admin : création d'un nouveau projet. *@
+@using DotnetNiger.UI.Models.Requests
+@inject NavigationManager Navigation
+@inject IProjectService ProjectService
+@inject IToastService ToastService
+
+<div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-6 flex items-center justify-between gap-4">
+            <AdminBreadcrumb />
+            <button @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour</span>
+            </button>
+        </div>
+
+        <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
+            <h1 class="text-2xl font-bold text-[#111827]">Nouveau projet</h1>
+            <p class="mt-1 text-sm text-[#6b7280]">Ajoutez un projet à la vitrine communautaire.</p>
+
+            <EditForm Model="@projectRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
+                <DataAnnotationsValidator />
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-semibold text-[#111827]">Titre *</label>
+                        <InputText @bind-Value="projectRequest.Title"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   placeholder="Nom du projet" />
+                        <ValidationMessage For="@(() => projectRequest.Title)" class="mt-1 text-xs text-red-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#111827]">Statut</label>
+                        <InputSelect @bind-Value="projectRequest.Status"
+                                     class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20">
+                            <option value="active">Actif</option>
+                            <option value="archived">Archivé</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111827]">Description *</label>
+                    <InputTextArea @bind-Value="projectRequest.Description"
+                                   rows="5"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   placeholder="Décrivez le projet..." />
+                    <ValidationMessage For="@(() => projectRequest.Description)" class="mt-1 text-xs text-red-500" />
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-semibold text-[#111827]">URL du projet</label>
+                        <InputText @bind-Value="projectRequest.Url"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   placeholder="https://..." />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[#111827]">URL GitHub</label>
+                        <InputText @bind-Value="projectRequest.GithubUrl"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   placeholder="https://github.com/..." />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111827]">Technologies</label>
+                    <InputText @bind-Value="projectRequest.Technologies"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               placeholder="ASP.NET Core, Blazor, PostgreSQL..." />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-[#111827]">Image URL</label>
+                    <InputText @bind-Value="projectRequest.ImageUrl"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               placeholder="https://..." />
+                </div>
+
+                <div class="flex items-center gap-6">
+                    <label class="flex items-center gap-2 text-sm text-[#111827]">
+                        <InputCheckbox @bind-Value="projectRequest.IsFeatured" />
+                        Projet à la une
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-[#111827]">
+                        <InputCheckbox @bind-Value="projectRequest.IsPublished" />
+                        Publié
+                    </label>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">@errorMessage</div>
+                }
+
+                <div class="flex gap-4">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                        <i class="fas fa-check"></i>
+                        Créer le projet
+                    </button>
+                    <button type="button" @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300">
+                        Annuler
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateProjectRequest projectRequest = new()
+    {
+        Status = "active",
+        IsPublished = true
+    };
+
+    private string errorMessage = string.Empty;
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/admin/projects");
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            await ProjectService.CreateAsync(projectRequest);
+            ToastService.ShowToast("Projet créé avec succès.", ToastLevel.Success);
+            Navigation.NavigateTo("/admin/projects");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la création du projet.", ToastLevel.Error);
+        }
+    }
+}

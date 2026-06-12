@@ -1,0 +1,28 @@
+@* Boutons vue liste / grille centralisés. *@
+
+<div class="flex gap-2">
+    <button @onclick="() => SetView(true)"
+            class="@(IsListView ? "bg-gray-900 text-white" : "bg-white text-gray-900 ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm">
+        <i class="fas fa-list text-lg"></i>
+    </button>
+    <button @onclick="() => SetView(false)"
+            class="@(!IsListView ? "bg-gray-900 text-white" : "bg-white text-gray-900 ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm">
+        <i class="fas fa-th text-lg"></i>
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public bool IsListView { get; set; } = true;
+
+    [Parameter]
+    public EventCallback<bool> IsListViewChanged { get; set; }
+
+    private async Task SetView(bool isList)
+    {
+        if (IsListView != isList)
+        {
+            await IsListViewChanged.InvokeAsync(isList);
+        }
+    }
+}

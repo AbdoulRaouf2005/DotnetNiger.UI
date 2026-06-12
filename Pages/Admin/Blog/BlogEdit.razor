@@ -1,10 +1,11 @@
-@page "/admin/blog/{Id:guid}"
+@page "/admin/blog/edit/{Id:guid}"
 @* Page admin : édition d'article avec éditeur riche. *@
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Components.Admin
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
+@inject IToastService ToastService
 
 <div class="min-h-screen p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -137,13 +138,16 @@
             if (updated is null)
             {
                 errorMessage = "Impossible de mettre à jour l'article.";
+                ToastService.ShowToast("Erreur lors de la mise à jour.", ToastLevel.Error);
                 return;
             }
+            ToastService.ShowToast("Article mis à jour.", ToastLevel.Success);
             NavigationManager.NavigateTo("/admin/blog");
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la mise à jour.", ToastLevel.Error);
         }
     }
 

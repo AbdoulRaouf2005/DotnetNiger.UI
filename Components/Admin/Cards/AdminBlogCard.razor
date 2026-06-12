@@ -5,6 +5,7 @@
 @using System.Text.RegularExpressions
 @inject IPostService PostService
 @inject NavigationManager NavigationManager
+@inject IToastService ToastService
 
 <div class="group overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
     <div class="relative h-44 w-full overflow-hidden">
@@ -91,12 +92,19 @@
     {
         if (post?.Id != null)
         {
-            bool success = await PostService.DeletePostAsync(post.Id);
-            if (success)
+            try
             {
-                // Notifier le parent que le post a été supprimé
-                await OnPostDeleted.InvokeAsync();
-                StateHasChanged();
+                bool success = await PostService.DeletePostAsync(post.Id);
+                if (success)
+                {
+                    ToastService.ShowToast("Article supprimé.", ToastLevel.Success);
+                    await OnPostDeleted.InvokeAsync();
+                    StateHasChanged();
+                }
+            }
+            catch
+            {
+                ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
             }
         }
     }
@@ -108,21 +116,29 @@
             return;
         }
 
-        var request = new UpdatePostRequest
+        try
         {
-            Title = post.Title,
-            Content = post.Content,
-            Excerpt = post.Excerpt,
-            CoverImageUrl = post.CoverImageUrl,
-            PostType = post.PostType,
-            SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
-            CategoryIds = post.Categories.Select(category => category.Id).ToList(),
-            TagNames = post.Tags.Select(tag => tag.Name).ToList(),
-            IsPublished = true
-        };
+            var request = new UpdatePostRequest
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Excerpt = post.Excerpt,
+                CoverImageUrl = post.CoverImageUrl,
+                PostType = post.PostType,
+                SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
+                CategoryIds = post.Categories.Select(category => category.Id).ToList(),
+                TagNames = post.Tags.Select(tag => tag.Name).ToList(),
+                IsPublished = true
+            };
 
-        await PostService.UpdatePostAsync(post.Id, request);
-        await OnPostDeleted.InvokeAsync();
+            await PostService.UpdatePostAsync(post.Id, request);
+            ToastService.ShowToast("Article publié.", ToastLevel.Success);
+            await OnPostDeleted.InvokeAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de la publication.", ToastLevel.Error);
+        }
     }
 
     private string GetDateLabel()

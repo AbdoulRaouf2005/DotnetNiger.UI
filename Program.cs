@@ -40,6 +40,7 @@ var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
+    builder.Services.AddScoped<IToastService, ToastService>();
     builder.Services.AddScoped<IUploadService, MockUploadService>();
     builder.Services.AddScoped<IAuthService, MockAuthService>();
     builder.Services.AddScoped<IUserService, MockUserService>();
@@ -59,6 +60,7 @@ if (useMock)
 }
 else
 {
+    builder.Services.AddScoped<IToastService, ToastService>();
     builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
     builder.Services.AddScoped<IUserService>(sp =>
         new ApiUserService(CreateGatewayHttpClient(

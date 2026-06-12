@@ -19,6 +19,7 @@ public class EventDto
     public bool IsArchived { get; set; }
     public string MeetupLink { get; set; } = string.Empty;
     public List<EventMediaDto> Medias { get; set; } = new();
+    public List<string> GalleryImageUrls { get; set; } = new();
 
     public Guid SubmittedBy { get; set; }
     public string? RejectionReason { get; set; }

@@ -17,5 +17,5 @@ public interface IPostService
     Task<bool> DeletePostAsync(Guid postId);
     Task<bool> PublishPostAsync(Guid postId) => Task.FromResult(false);
     Task<bool> UnPublishPostAsync(Guid postId) => Task.FromResult(false);
-    
+    Task IncrementViewCountAsync(Guid id);
 }

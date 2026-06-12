@@ -144,9 +144,6 @@ namespace DotnetNiger.UI.Services.Mock
             if (post == null)
                 return await Task.FromResult<PostDto?>(null);
 
-            // Incr�menter les vues
-            post.ViewCount++;
-
             return await Task.FromResult<PostDto?>(post);
         }
 
@@ -157,10 +154,14 @@ namespace DotnetNiger.UI.Services.Mock
             if (post == null)
                 return await Task.FromResult<PostDto?>(null);
 
-            // Incr�menter les vues
-            post.ViewCount++;
-
             return await Task.FromResult<PostDto?>(post);
+        }
+
+        public async Task IncrementViewCountAsync(Guid id)
+        {
+            var post = _posts.FirstOrDefault(p => p.Id == id);
+            if (post is not null) post.ViewCount++;
+            await Task.CompletedTask;
         }
 
         public async Task<PostDto?> UpdatePostAsync(Guid id, UpdatePostRequest request)

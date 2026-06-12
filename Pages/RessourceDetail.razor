@@ -1,8 +1,25 @@
 @page "/ressource/{Slug}"
 @inject IResourceService ResourceService
 @inject NavigationManager Navigation
+@inject ILocalStorageService LocalStorage
+@using DotnetNiger.UI.Services.Contracts
 
 <PageTitle>@(resource?.Title ?? "Ressource") - .NET Niger</PageTitle>
+
+@if (resource is not null)
+{
+	<HeadContent>
+		<meta property="og:title" content="@resource.Title" />
+		<meta property="og:description" content="@resource.Description" />
+		<meta property="og:image" content="@GetAbsoluteUrl("/Logo.svg")" />
+		<meta property="og:url" content="@GetAbsoluteUrl(Navigation.Uri)" />
+		<meta property="og:type" content="article" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="@resource.Title" />
+		<meta name="twitter:description" content="@resource.Description" />
+		<meta name="twitter:image" content="@GetAbsoluteUrl("/Logo.svg")" />
+	</HeadContent>
+}
 
 @if (isLoading)
 {
@@ -94,6 +111,10 @@ else
                             Retour aux ressources
                         </a>
                     </div>
+
+                    <ShareButtons Title="@resource.Title"
+                                  Url="@GetAbsoluteUrl(Navigation.Uri)"
+                                  Description="@resource.Description" />
                 </div>
             </div>
         </div>
@@ -120,7 +141,13 @@ else
             resource = await ResourceService.GetResourceBySlugAsync(Slug);
             if (resource is not null && resource.Id != Guid.Empty)
             {
-                await ResourceService.IncrementViewCountAsync(resource.Id);
+                bool alreadyViewed = await LocalStorage.GetItemAsync<bool>($"viewed_resource_{resource.Id}");
+                if (!alreadyViewed)
+                {
+                    resource.ViewCount++;
+                    _ = ResourceService.IncrementViewCountAsync(resource.Id);
+                    await LocalStorage.SetItemAsync($"viewed_resource_{resource.Id}", true);
+                }
             }
         }
         catch
@@ -165,4 +192,11 @@ else
         "Tous niveaux" => "fas fa-users",
         _ => "fas fa-tag"
     };
+
+    private string GetAbsoluteUrl(string relativeUrl)
+    {
+        var baseUri = Navigation.BaseUri.TrimEnd('/');
+        var url = relativeUrl.TrimStart('/');
+        return $"{baseUri}/{url}";
+    }
 }

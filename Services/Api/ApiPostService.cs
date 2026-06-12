@@ -106,6 +106,11 @@ public class ApiPostService : IPostService
         });
     }
 
+    public async Task IncrementViewCountAsync(Guid id)
+    {
+        await _http.PostAsync($"{PublicBase}/{id}/views", null);
+    }
+
     private async Task<List<T>> GetCollectionAsync<T>(string path, Dictionary<string, string?>? query = null)
     {
         var url = BuildUrl(path, query);

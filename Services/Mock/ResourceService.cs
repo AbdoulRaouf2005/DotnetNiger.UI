@@ -150,7 +150,6 @@ public class ResourceService : IResourceService
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
         var resource = _resources.FirstOrDefault(r => r.Slug == slug);
-        if (resource is not null) resource.ViewCount++;
         return await Task.FromResult(resource);
     }
 

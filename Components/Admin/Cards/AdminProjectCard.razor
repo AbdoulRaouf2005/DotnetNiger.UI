@@ -1,0 +1,112 @@
+@* Carte admin des projets avec menu d'actions. *@
+@using DotnetNiger.UI.Models.Responses
+@inject NavigationManager Navigation
+@inject IProjectService ProjectService
+@inject IToastService ToastService
+
+<div class="group overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+    <div class="relative h-44 w-full overflow-hidden bg-gradient-to-br from-[#512BD4] to-[#3F1FB3] flex items-center justify-center">
+        @if (!string.IsNullOrWhiteSpace(Project?.ImageUrl))
+        {
+            <img src="@Project.ImageUrl" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" alt="@Project?.Title">
+        }
+        else
+        {
+            <i class="fas fa-code-branch text-5xl text-white/40"></i>
+        }
+    </div>
+
+    <div class="p-5">
+        <div class="mb-3 flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h3 class="truncate text-lg font-semibold text-[#111827]">@Project?.Title</h3>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="rounded-full px-3 py-1 text-xs font-semibold @StatusCssClass">
+                        <span class="mr-1 inline-block h-2 w-2 rounded-full @StatusDotCssClass"></span>
+                        @StatusLabel
+                    </span>
+                </div>
+            </div>
+
+            <AdminActionDropdown ItemId="@(Project?.Id ?? Guid.Empty)"
+                                 Status="@(IsActive ? "Published" : "Pending")"
+                                 ViewLabel="Voir"
+                                 EditLabel="Modifier"
+                                 DeleteLabel="Supprimer"
+                                 OnView="EditProject"
+                                 OnEdit="EditProject"
+                                 OnDelete="DeleteProject" />
+        </div>
+
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-[#4b5563]">@Project?.Description</p>
+
+        @if (!string.IsNullOrWhiteSpace(Project?.Technologies))
+        {
+            <div class="mb-4 flex flex-wrap gap-1">
+                @foreach (var tech in Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(3))
+                {
+                    <span class="rounded-lg bg-[#F4F2F2] px-2 py-1 text-xs font-medium text-gray-700">@tech</span>
+                }
+                @if (Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length > 3)
+                {
+                    <span class="text-xs text-gray-400">+@(Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length - 3)</span>
+                }
+            </div>
+        }
+
+        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-[#4b5563]">
+            <span class="truncate font-medium">@Project?.AuthorName</span>
+            <div class="flex items-center gap-2">
+                @if (!string.IsNullOrWhiteSpace(Project?.GithubUrl))
+                {
+                    <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer" class="text-gray-400 transition hover:text-[#111827]" @onclick:stopPropagation>
+                        <i class="fab fa-github text-base"></i>
+                    </a>
+                }
+                <span class="whitespace-nowrap">@Project?.CreatedAt.ToString("dd/MM/yyyy")</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProjectResponse? Project { get; set; }
+
+    [Parameter]
+    public EventCallback OnProjectDeleted { get; set; }
+
+    private bool IsActive => Project?.Status == "active";
+
+    private string StatusLabel => IsActive ? "Actif" : "Archivé";
+
+    private string StatusCssClass => IsActive
+        ? "bg-green-100 text-green-700"
+        : "bg-gray-100 text-gray-700";
+
+    private string StatusDotCssClass => IsActive
+        ? "bg-green-500"
+        : "bg-gray-500";
+
+    private Task EditProject(Guid id)
+    {
+        if (Project is null) return Task.CompletedTask;
+        Navigation.NavigateTo($"/admin/projects/edit/{Project.Id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteProject(Guid id)
+    {
+        if (Project is null) return;
+        var deleted = await ProjectService.DeleteAsync(Project.Id);
+        if (deleted)
+        {
+            ToastService.ShowToast("Projet supprimé.", ToastLevel.Success);
+            await OnProjectDeleted.InvokeAsync();
+        }
+        else
+        {
+            ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
+        }
+    }
+}

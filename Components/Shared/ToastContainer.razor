@@ -1,0 +1,77 @@
+@* Conteneur de toasts : affiche les notifications avec animation slide-in et auto-dismiss. *@
+@using DotnetNiger.UI.Services.Contracts
+@inject IToastService ToastService
+
+<div class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-3">
+    @foreach (var toast in _toasts)
+    {
+        <div class="@GetToastWrapperClass(toast.Level) @(toast.Id == _latestToastId ? "animate-slide-in" : "")"
+             @onclick="() => DismissToast(toast.Id)">
+            <div class="flex items-center gap-3">
+                <i class="@GetToastIcon(toast.Level) text-lg"></i>
+                <span class="text-sm font-medium">@toast.Message</span>
+                <button type="button" class="ml-auto text-current opacity-60 hover:opacity-100" @onclick="() => DismissToast(toast.Id)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ToastMessage> _toasts = new();
+    private Guid _latestToastId;
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += HandleToast;
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= HandleToast;
+    }
+
+    private void HandleToast(ToastMessage toast)
+    {
+        _latestToastId = toast.Id;
+        _toasts.Add(toast);
+        InvokeAsync(StateHasChanged);
+
+        _ = AutoDismissAsync(toast.Id);
+    }
+
+    private async Task AutoDismissAsync(Guid id)
+    {
+        await Task.Delay(4000);
+        await InvokeAsync(() => DismissToast(id));
+    }
+
+    private void DismissToast(Guid id)
+    {
+        var toast = _toasts.FirstOrDefault(t => t.Id == id);
+        if (toast is not null)
+        {
+            _toasts.Remove(toast);
+            StateHasChanged();
+        }
+    }
+
+    private static string GetToastWrapperClass(ToastLevel level) => level switch
+    {
+        ToastLevel.Success => "min-w-[320px] max-w-md rounded-lg px-5 py-4 shadow-lg text-white cursor-pointer bg-emerald-600",
+        ToastLevel.Error => "min-w-[320px] max-w-md rounded-lg px-5 py-4 shadow-lg text-white cursor-pointer bg-red-600",
+        ToastLevel.Warning => "min-w-[320px] max-w-md rounded-lg px-5 py-4 shadow-lg text-white cursor-pointer bg-amber-500",
+        ToastLevel.Info => "min-w-[320px] max-w-md rounded-lg px-5 py-4 shadow-lg text-white cursor-pointer bg-blue-600",
+        _ => "min-w-[320px] max-w-md rounded-lg px-5 py-4 shadow-lg text-white cursor-pointer bg-gray-700"
+    };
+
+    private static string GetToastIcon(ToastLevel level) => level switch
+    {
+        ToastLevel.Success => "fas fa-check-circle",
+        ToastLevel.Error => "fas fa-times-circle",
+        ToastLevel.Warning => "fas fa-exclamation-triangle",
+        ToastLevel.Info => "fas fa-info-circle",
+        _ => "fas fa-bell"
+    };
+}

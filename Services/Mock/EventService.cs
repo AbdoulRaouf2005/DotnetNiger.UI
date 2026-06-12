@@ -84,7 +84,8 @@ public class EventService : IEventService
                 Medias = new List<EventMediaDto>
                 {
                     new EventMediaDto { Id = Guid.NewGuid(), Type = "Image", Url = "/Images/evenement.jpg", Title = "Photo de l'événement" }
-                }
+                },
+                GalleryImageUrls = new List<string> { "/Images/evenement.jpg" }
             }
         };
 
@@ -205,7 +206,14 @@ public class EventService : IEventService
             CoverImageUrl = request.CoverImageUrl ?? "/images/events/default.jpg",
             Capacity = request.Capacity,
             MeetupLink = request.MeetupLink ?? "",
-            // Medias = request.Medias,
+            Medias = request.GalleryImageUrls.Select(url => new EventMediaDto
+            {
+                Id = Guid.NewGuid(),
+                Type = "Image",
+                Url = url,
+                Title = "Galerie"
+            }).ToList(),
+            GalleryImageUrls = request.GalleryImageUrls,
             CreatedBy = currentUserId,
             OrganizerName = "À déterminer", // on pourrait compléter après
             RegisteredCount = 0,
@@ -306,6 +314,14 @@ public class EventService : IEventService
         ev.CoverImageUrl = request.CoverImageUrl;
         ev.Capacity = request.Capacity;
         ev.MeetupLink = request.MeetupLink;
+        ev.GalleryImageUrls = request.GalleryImageUrls;
+        ev.Medias = request.GalleryImageUrls.Select(url => new EventMediaDto
+        {
+            Id = Guid.NewGuid(),
+            Type = "Image",
+            Url = url,
+            Title = "Galerie"
+        }).ToList();
 
         return await Task.FromResult<EventDto?>(ev);
     }

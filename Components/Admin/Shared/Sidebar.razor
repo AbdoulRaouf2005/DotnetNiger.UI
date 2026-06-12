@@ -65,6 +65,14 @@
                                     <span class="Link">Ressources</span>
                               }
                         </NavLink>
+
+                        <NavLink href="/admin/projects" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active">
+                              <i class="fas fa-code-branch w-8 text-2xl"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span class="Link">Projets</span>
+                              }
+                        </NavLink>
                   </nav>
             </div>
 
@@ -130,6 +138,11 @@
                         <NavLink href="/admin/ressources" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
                               <i class="fas fa-folder w-8 text-2xl"></i>
                               <span class="Link">Ressources</span>
+                        </NavLink>
+
+                        <NavLink href="/admin/projects" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
+                              <i class="fas fa-code-branch w-8 text-2xl"></i>
+                              <span class="Link">Projets</span>
                         </NavLink>
                   </nav>
             </div>

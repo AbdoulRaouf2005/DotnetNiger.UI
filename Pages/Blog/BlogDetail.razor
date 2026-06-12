@@ -4,8 +4,26 @@
 @using DotnetNiger.UI.Components
 @inject IPostService PostService
 @inject ICommentService CommentService
+@inject ILocalStorageService LocalStorage
+
+@inject NavigationManager NavManager
 
 <PageTitle>@(post?.Title ?? "Blog") - .NET Niger</PageTitle>
+
+@if (post is not null)
+{
+	<HeadContent>
+		<meta property="og:title" content="@post.Title" />
+		<meta property="og:description" content="@post.Excerpt" />
+		<meta property="og:image" content="@GetAbsoluteUrl(GetCoverImage())" />
+		<meta property="og:url" content="@GetAbsoluteUrl(NavManager.Uri)" />
+		<meta property="og:type" content="article" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="@post.Title" />
+		<meta name="twitter:description" content="@post.Excerpt" />
+		<meta name="twitter:image" content="@GetAbsoluteUrl(GetCoverImage())" />
+	</HeadContent>
+}
 
 <section class="bg-[#f6f3f7] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 	<div class="mx-auto w-full max-w-3xl">
@@ -103,7 +121,11 @@
 						}
 					</div>
 
-					<div class="rounded-xl bg-white border-t p-4 sm:p-6 border-gray-200">
+					<ShareButtons Title="@post.Title"
+							  Url="@GetAbsoluteUrl(NavManager.Uri)"
+							  Description="@post.Excerpt" />
+
+				<div class="rounded-xl bg-white border-t p-4 sm:p-6 border-gray-200">
 						<div class="flex items-center justify-between ">
 							<h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Commentaires & Feedback</h2>
 							@if (comments.Any())
@@ -174,6 +196,17 @@
 			post = await PostService.GetPostBySlugAsync(Id);
 		}
 
+		if (post is not null)
+		{
+			bool alreadyViewed = await LocalStorage.GetItemAsync<bool>($"viewed_post_{post.Id}");
+			if (!alreadyViewed)
+			{
+				post.ViewCount++;
+				_ = PostService.IncrementViewCountAsync(post.Id);
+				await LocalStorage.SetItemAsync($"viewed_post_{post.Id}", true);
+			}
+		}
+
 		isLoading = false;
 
 		// Load comments for this post
@@ -203,5 +236,12 @@
 	private static string GetInitial(string? value)
 	{
 		return string.IsNullOrWhiteSpace(value) ? "?" : value.Trim()[0].ToString().ToUpperInvariant();
+	}
+
+	private string GetAbsoluteUrl(string relativeUrl)
+	{
+		var baseUri = NavManager.BaseUri.TrimEnd('/');
+		var url = relativeUrl.TrimStart('/');
+		return $"{baseUri}/{url}";
 	}
 }

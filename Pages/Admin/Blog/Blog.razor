@@ -42,20 +42,11 @@
                 <option value="published">Publié</option>
             </select>
 
-            <div class="flex gap-2">
-                <button @onclick='() => viewMode = "list"'
-                        class='@(viewMode == "list" ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm'>
-                    <i class="fas fa-list text-lg"></i>
-                </button>
-                <button @onclick='() => viewMode = "grid"'
-                        class='@(viewMode == "grid" ? "bg-[#111827] text-white" : "bg-white text-[#111827] ring-1 ring-black/10") inline-flex items-center justify-center rounded-2xl px-4 py-3 transition hover:shadow-sm'>
-                    <i class="fas fa-th text-lg"></i>
-                </button>
-            </div>
+            <ViewToggle @bind-IsListView="isListView" />
         </section>
 
         <div class="overflow-y-hidden">
-            @if (viewMode == "list")
+            @if (isListView)
             {
                 <BlogTable Posts="@pagedPosts" OnChanged="LoadPostsAsync" />
             }
@@ -77,7 +68,7 @@
 </div>
  
 @code {
-    private string viewMode = "list";
+    private bool isListView = true;
     private string searchQueryValue = string.Empty;
     private string selectedTypeValue = string.Empty;
     private string selectedStatusValue = string.Empty;

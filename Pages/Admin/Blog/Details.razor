@@ -11,6 +11,7 @@
 @inject IPostService PostService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IToastService ToastService
 
 <section class="bg-[#f6f3f7] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 	<div class="mx-auto w-full max-w-3xl">
@@ -240,11 +241,12 @@
             try
             {
                 await PostService.DeletePostAsync(postId);
+                ToastService.ShowToast("Article supprimé.", ToastLevel.Success);
                 NavigationManager.NavigateTo("/admin/blog");
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Erreur lors de la suppression: {ex.Message}");
+                ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
             }
         }
     }
@@ -253,43 +255,59 @@
     {
         if (post is null) return;
 
-        var request = new UpdatePostRequest
+        try
         {
-            Title = post.Title,
-            Content = post.Content,
-            Excerpt = post.Excerpt,
-            CoverImageUrl = post.CoverImageUrl,
-            PostType = post.PostType,
-            SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
-            CategoryIds = post.Categories?.Select(c => c.Id).ToList() ?? new(),
-            TagNames = post.Tags?.Select(t => t.Name).ToList() ?? new(),
-            IsPublished = true
-        };
+            var request = new UpdatePostRequest
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Excerpt = post.Excerpt,
+                CoverImageUrl = post.CoverImageUrl,
+                PostType = post.PostType,
+                SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
+                CategoryIds = post.Categories?.Select(c => c.Id).ToList() ?? new(),
+                TagNames = post.Tags?.Select(t => t.Name).ToList() ?? new(),
+                IsPublished = true
+            };
 
-        await PostService.UpdatePostAsync(postId, request);
-        post.PublishedAt = DateTime.UtcNow;
-        await InvokeAsync(StateHasChanged);
+            await PostService.UpdatePostAsync(postId, request);
+            post.PublishedAt = DateTime.UtcNow;
+            ToastService.ShowToast("Article publié.", ToastLevel.Success);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de la publication.", ToastLevel.Error);
+        }
     }
 
     private async Task UnpublishPost(Guid postId)
     {
         if (post is null) return;
 
-        var request = new UpdatePostRequest
+        try
         {
-            Title = post.Title,
-            Content = post.Content,
-            Excerpt = post.Excerpt,
-            CoverImageUrl = post.CoverImageUrl,
-            PostType = post.PostType,
-            SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
-            CategoryIds = post.Categories?.Select(c => c.Id).ToList() ?? new(),
-            TagNames = post.Tags?.Select(t => t.Name).ToList() ?? new(),
-            IsPublished = false
-        };
+            var request = new UpdatePostRequest
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Excerpt = post.Excerpt,
+                CoverImageUrl = post.CoverImageUrl,
+                PostType = post.PostType,
+                SeoDescription = string.IsNullOrWhiteSpace(post.Excerpt) ? post.Title : post.Excerpt,
+                CategoryIds = post.Categories?.Select(c => c.Id).ToList() ?? new(),
+                TagNames = post.Tags?.Select(t => t.Name).ToList() ?? new(),
+                IsPublished = false
+            };
 
-        await PostService.UpdatePostAsync(postId, request);
-        post.PublishedAt = DateTime.MinValue;
-        await InvokeAsync(StateHasChanged);
+            await PostService.UpdatePostAsync(postId, request);
+            post.PublishedAt = DateTime.MinValue;
+            ToastService.ShowToast("Article dépublié.", ToastLevel.Success);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de la dépublication.", ToastLevel.Error);
+        }
     }
 }

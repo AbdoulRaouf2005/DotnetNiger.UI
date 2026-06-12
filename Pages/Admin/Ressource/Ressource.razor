@@ -2,7 +2,9 @@
 @* Page admin : gestion CRUD des ressources via drawer latéral. *@
 @inject NavigationManager Navigation
 @inject IResourceService ResourceService
+@inject IToastService ToastService
 @using DotnetNiger.UI.Components.Admin.Cards
+@using DotnetNiger.UI.Components.Admin.Shared
 
 <div class="p-6 bg-[#F4F2F2]">
 <div class="flex justify-between items-center mb-6">
@@ -119,16 +121,7 @@
         </select>
     </div>
 
-    <div class="flex gap-2 mb-6">
-        <button @onclick="() => isListView = true"
-                class="@(isListView ? "bg-black text-white" : "bg-white text-black border border-gray-300") px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-list text-2xl"></i>
-        </button>
-        <button @onclick="() => isListView = false"
-                class="@(!isListView ? "bg-black text-white" : "bg-white text-black border border-gray-300") px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-th text-2xl"></i>
-        </button>
-    </div>
+    <ViewToggle @bind-IsListView="isListView" />
 
     @if (isListView)
     {
@@ -160,14 +153,11 @@
                             </td>
                             <td class="px-6 py-4 text-sm">@resource.ViewCount</td>
                             <td class="px-6 py-4 text-sm">
-                                <div class="flex gap-2">
-                                    <button @onclick="() => EditResource(resource)" class="text-gray-600 hover:text-blue-600" title="&#201;diter">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button @onclick="() => DeleteResource(resource.Id)" class="text-gray-600 hover:text-red-600" title="Supprimer">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                                <AdminActionDropdown ItemId="resource.Id"
+                                                     EditLabel="Modifier"
+                                                     DeleteLabel="Supprimer"
+                                                     OnEdit="EditResourceById"
+                                                     OnDelete="DeleteResource" />
                             </td>
                         </tr>
                     }
@@ -186,12 +176,11 @@
                             <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">@resource.Level</span>
                         </div>
                         <div class="absolute top-3 right-3">
-                            <button @onclick="() => EditResource(resource)" class="text-white hover:bg-white/20 rounded-full p-1.5">
-                                <i class="fas fa-edit text-sm"></i>
-                            </button>
-                            <button @onclick="() => DeleteResource(resource.Id)" class="text-white hover:bg-white/20 rounded-full p-1.5">
-                                <i class="fas fa-trash text-sm"></i>
-                            </button>
+                            <AdminActionDropdown ItemId="resource.Id"
+                                                 EditLabel="Modifier"
+                                                 DeleteLabel="Supprimer"
+                                                 OnEdit="EditResourceById"
+                                                 OnDelete="DeleteResource" />
                         </div>
                         <i class="fas fa-file text-white text-5xl"></i>
                     </div>
@@ -294,6 +283,13 @@
         isDrawerOpen = true;
     }
 
+    private void EditResourceById(Guid id)
+    {
+        var resource = allResources.FirstOrDefault(r => r.Id == id);
+        if (resource is not null)
+            EditResource(resource);
+    }
+
     private void EditResource(ResourceDto resource)
     {
         editingId = resource.Id;
@@ -321,9 +317,15 @@
         try
         {
             if (editingId.HasValue)
+            {
                 await ResourceService.UpdateResourceAsync(editingId.Value, resourceRequest);
+                ToastService.ShowToast("Ressource mise à jour.", ToastLevel.Success);
+            }
             else
+            {
                 await ResourceService.CreateResourceAsync(resourceRequest);
+                ToastService.ShowToast("Ressource créée.", ToastLevel.Success);
+            }
 
             allResources = await ResourceService.GetAllResourcesAsync();
             CloseDrawer();
@@ -331,12 +333,21 @@
         catch (Exception ex)
         {
             drawerError = ex.Message;
+            ToastService.ShowToast("Erreur lors de l'enregistrement.", ToastLevel.Error);
         }
     }
 
     private async Task DeleteResource(Guid id)
     {
-        await ResourceService.DeleteResourceAsync(id);
-        allResources = await ResourceService.GetAllResourcesAsync();
+        try
+        {
+            await ResourceService.DeleteResourceAsync(id);
+            ToastService.ShowToast("Ressource supprimée.", ToastLevel.Success);
+            allResources = await ResourceService.GetAllResourcesAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
+        }
     }
 }

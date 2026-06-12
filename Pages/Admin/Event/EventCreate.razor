@@ -9,6 +9,7 @@
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject IEventService EventService
+@inject IToastService ToastService
 
 <div class="p-6 bg-[#F4F2F2]">
     <!-- Header -->
@@ -26,7 +27,7 @@
         <EditForm Model="@eventRequest" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Titre -->
                 <div>
                     <label class="block text-sm font-semibold mb-2">Titre</label>
@@ -34,14 +35,6 @@
                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
                               placeholder="Titre de l'événement" />
                     <ValidationMessage For="@(() => eventRequest.Title)" class="text-red-500 text-sm mt-1" />
-                </div>
-
-                <!-- Lieu -->
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Lieu</label>
-                    <InputText @bind-Value="eventRequest.Location" 
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                              placeholder="Lieu de l'événement" />
                 </div>
 
                 <!-- Capacité -->
@@ -90,15 +83,61 @@
                     <ValidationMessage For="@(() => eventRequest.EventType)" class="text-red-500 text-sm mt-1" />
                 </div>
 
-                <!-- Type (Online/Présentiel/Hybride) -->
+            </div>
+
+            <!-- Mode (En ligne / Présentiel / Hybride) -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3">Mode de l'événement</label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button type="button" @onclick='() => SetEventMode("online")'
+                            class='flex items-center gap-3 rounded-xl border-2 p-4 transition @(eventMode == "online" ? "border-secondary bg-secondary/5 ring-2 ring-secondary/20" : "border-gray-200 bg-white hover:border-gray-300")'>
+                        <div class='flex h-10 w-10 items-center justify-center rounded-lg @(eventMode == "online" ? "bg-secondary text-white" : "bg-gray-100 text-gray-500")'>
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class='text-sm font-semibold @(eventMode == "online" ? "text-secondary" : "text-gray-800")'>En ligne</p>
+                            <p class="text-xs text-gray-500">Lien de visioconférence</p>
+                        </div>
+                    </button>
+                    <button type="button" @onclick='() => SetEventMode("physical")'
+                            class='flex items-center gap-3 rounded-xl border-2 p-4 transition @(eventMode == "physical" ? "border-secondary bg-secondary/5 ring-2 ring-secondary/20" : "border-gray-200 bg-white hover:border-gray-300")'>
+                        <div class='flex h-10 w-10 items-center justify-center rounded-lg @(eventMode == "physical" ? "bg-secondary text-white" : "bg-gray-100 text-gray-500")'>
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class='text-sm font-semibold @(eventMode == "physical" ? "text-secondary" : "text-gray-800")'>Présentiel</p>
+                            <p class="text-xs text-gray-500">Lieu physique</p>
+                        </div>
+                    </button>
+                    <button type="button" @onclick='() => SetEventMode("hybrid")'
+                            class='flex items-center gap-3 rounded-xl border-2 p-4 transition @(eventMode == "hybrid" ? "border-secondary bg-secondary/5 ring-2 ring-secondary/20" : "border-gray-200 bg-white hover:border-gray-300")'>
+                        <div class='flex h-10 w-10 items-center justify-center rounded-lg @(eventMode == "hybrid" ? "bg-secondary text-white" : "bg-gray-100 text-gray-500")'>
+                            <i class="fas fa-globe"></i><i class="fas fa-plus text-[8px] mx-0.5"></i><i class="fas fa-building"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class='text-sm font-semibold @(eventMode == "hybrid" ? "text-secondary" : "text-gray-800")'>Hybride</p>
+                            <p class="text-xs text-gray-500">Lieu + Lien en ligne</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Champs dynamiques selon le mode -->
+            <div class='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 @((eventMode == "online") ? "hidden" : "")'>
                 <div>
-                    <label class="block text-sm font-semibold mb-2">Type</label>
-                    <InputSelect @bind-Value="eventRequest.MeetupLink" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        <option value="">Présentiel</option>
-                        <option value="online">En ligne</option>
-                        <option value="hybrid">Hybride</option>
-                    </InputSelect>
+                    <label class="block text-sm font-semibold mb-2">Lieu</label>
+                    <InputText @bind-Value="eventRequest.Location"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                               placeholder="Adresse du lieu" />
+                </div>
+            </div>
+
+            <div class='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 @((eventMode == "physical") ? "hidden" : "")'>
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Lien de visioconférence</label>
+                    <InputText @bind-Value="eventRequest.MeetupLink"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
+                               placeholder="https://meet.example.com/..." />
                 </div>
             </div>
 
@@ -151,7 +190,8 @@
                 </button>
                
                 <button type="button"                
-                       class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
+                        @onclick="PreviewEvent"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
                     <i class="fas fa-eye"></i>
                     Aperçu
                 </button>
@@ -174,6 +214,28 @@
     private string errorMessage = string.Empty;
     private bool   showDescriptionError;
     private Editor EditorRef = default!;
+
+    private string eventMode = "physical";
+
+    private void SetEventMode(string mode)
+    {
+        eventMode = mode;
+        eventRequest.EventType = mode switch
+        {
+            "online" => "Online",
+            "physical" => "Physical",
+            "hybrid" => "Hybrid",
+            _ => eventRequest.EventType
+        };
+        if (mode == "physical")
+        {
+            eventRequest.MeetupLink = "";
+        }
+        else if (mode == "online")
+        {
+            eventRequest.Location = "";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -223,17 +285,34 @@
             return;
         }
 
-        // 3. Laisser DataAnnotations valider le reste
+        // 3. Mapper le mode sélectionné dans EventType
+        eventRequest.EventType = eventMode switch
+        {
+            "online" => "Online",
+            "physical" => "Physical",
+            "hybrid" => "Hybrid",
+            _ => eventRequest.EventType
+        };
+
+        // 4. Laisser DataAnnotations valider le reste
         //    (Title, EventType, dates… via le validator inline)
         try
         {
             await EventService.CreateEventAsync(eventRequest, currentUserId, false);
+            ToastService.ShowToast("Événement créé avec succès.", ToastLevel.Success);
             Navigation.NavigateTo("/admin/events");
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la création.", ToastLevel.Error);
         }
+    }
+
+    private void PreviewEvent()
+    {
+        // TODO: implémenter l'aperçu de l'événement
+        ToastService.ShowToast("Aperçu pas encore disponible.", ToastLevel.Info);
     }
 
 }

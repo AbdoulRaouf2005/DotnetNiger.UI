@@ -5,6 +5,7 @@
 @inject IResourceService ResourceService
 @inject IUserService UserService
 @inject IUserStateService UserStateService
+@inject IProjectService ProjectService
 @inject NavigationManager Navigation
 
 <div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
@@ -236,6 +237,53 @@
 				</div>
 			</article>
 
+			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex items-center gap-3">
+						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+							<i class="fas fa-code-branch text-lg"></i>
+						</div>
+						<div>
+							<h2 class="text-lg font-semibold text-[#111827]">Projets récents</h2>
+							<p class="text-sm text-[#6b7280]">Derniers projets publiés</p>
+						</div>
+					</div>
+					<button type="button" class="text-sm font-semibold text-[#5b4df5] transition hover:text-[#4837e0]" @onclick='() => Navigation.NavigateTo("/admin/projects")'>Voir tout</button>
+				</div>
+
+				<div class="mt-5 space-y-3">
+					@if (RecentProjects.Count == 0)
+					{
+						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun projet récent disponible.</p>
+					}
+					else
+					{
+						@foreach (var item in RecentProjects)
+						{
+							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-3">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+										<i class="fas fa-code-branch text-base"></i>
+									</div>
+									<div class="min-w-0">
+										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
+										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+									</div>
+								</div>
+								<AdminActionDropdown ItemId="item.Id"
+												Status="Published"
+												ViewLabel="Voir"
+												EditLabel="Modifier"
+												DeleteLabel="Supprimer"
+												OnView="HandleViewAsync"
+												OnEdit="HandleEditAsync"
+												OnDelete="HandleDeleteAsync" />
+							</div>
+						}
+					}
+				</div>
+			</article>
+
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6 xl:col-span-2">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
@@ -307,13 +355,15 @@
 		new() { IconClass = "fas fa-users", Value = 0, Label = "Utilisateurs", Url = "/admin/Users" },
 		new() { IconClass = "fas fa-calendar-alt", Value = 0, Label = "Événements", Url = "/admin/events" },
 		new() { IconClass = "fas fa-newspaper", Value = 0, Label = "Blogs", Url = "/admin/blog" },
-		new() { IconClass = "fas fa-folder-open", Value = 0, Label = "Ressources", Url = "/admin/ressources" }
+		new() { IconClass = "fas fa-folder-open", Value = 0, Label = "Ressources", Url = "/admin/ressources" },
+		new() { IconClass = "fas fa-code-branch", Value = 0, Label = "Projets", Url = "/admin/projects" }
 	];
 
 	private List<DashboardItem> PendingPosts { get; set; } = [];
 	private List<DashboardItem> PendingUsers { get; set; } = [];
 	private List<EventDto> PendingEvents { get; set; } = [];
 	private List<DashboardItem> RecentResources { get; set; } = [];
+	private List<DashboardItem> RecentProjects { get; set; } = [];
 	private List<DashboardItem> RecentEvents { get; set; } = [];
 	private UserDto? CurrentProfile { get; set; }
 	private UserDto? CurrentUser => UserStateService.CurrentUser;
@@ -353,6 +403,7 @@
 			var events = await EventService.GetAllEventsAsync();
 			var resources = await ResourceService.GetAllResourcesAsync();
 			var users = await UserService.GetPendingUsersAsync();
+			var projects = await ProjectService.GetAllAsync(null, null);
 			// UserStateService est la source unique de vérité pour le profil courant.
 			CurrentProfile = UserStateService.CurrentUser;
 			IsCurrentUserLoaded = UserStateService.CurrentUser is not null;
@@ -363,7 +414,8 @@
 				new() { IconClass = "fas fa-users", Value = CurrentProfile is null ? 0 : 1, Label = "Utilisateurs", Url = "/admin/Users" },
 				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "Événements", Url = "/admin/events" },
 				new() { IconClass = "fas fa-newspaper", Value = posts.Count, Label = "Blogs", Url = "/admin/blog" },
-				new() { IconClass = "fas fa-folder-open", Value = resources.Count, Label = "Ressources", Url = "/admin/ressources" }
+				new() { IconClass = "fas fa-folder-open", Value = resources.Count, Label = "Ressources", Url = "/admin/ressources" },
+				new() { IconClass = "fas fa-code-branch", Value = projects.Items.Count, Label = "Projets", Url = "/admin/projects" }
 			];
 
 			PendingUsers = users
@@ -398,6 +450,21 @@
 					ViewRoute = "/admin/ressources",
 					EditRoute = "/admin/ressources",
 					ManageRoute = "/admin/ressources"
+				}).ToList();
+
+			RecentProjects = projects.Items
+				.OrderByDescending(p => p.CreatedAt)
+				.Take(4)
+				.Select(p => new DashboardItem
+				{
+					Kind = DashboardItemKind.Project,
+					Id = p.Id,
+					Title = p.Title,
+					Subtitle = $"{p.AuthorName} · {p.Technologies}",
+					ViewRoute = $"/admin/projects/edit/{p.Id}",
+					EditRoute = $"/admin/projects/edit/{p.Id}",
+					ManageRoute = "/admin/projects",
+					IsPublished = p.Status == "active",
 				}).ToList();
 
 			RecentEvents = events
@@ -515,6 +582,9 @@
 				break;
 			case DashboardItemKind.Resource:
 				await ResourceService.DeleteResourceAsync(id);
+				break;
+		case DashboardItemKind.Project:
+				await ProjectService.DeleteAsync(id);
 				break;
 		}
 
@@ -651,7 +721,8 @@
 		User,
 		Post,
 		Event,
-		Resource
+		Resource,
+		Project
 	}
 }
 

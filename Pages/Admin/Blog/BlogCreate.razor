@@ -5,6 +5,7 @@
 @inject IPostService PostService
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
+@inject IToastService ToastService
 
 <div class="min-h-screen bg-[#F4F2F2] p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -141,11 +142,13 @@
         {
             postRequest.Excerpt = BuildExcerpt(postRequest.Content);
             await PostService.CreatePostAsync(postRequest, currentUserId);
+            ToastService.ShowToast("Article créé avec succès.", ToastLevel.Success);
             NavigationManager.NavigateTo("/admin/blog");
         }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la création.", ToastLevel.Error);
         }
     }
 

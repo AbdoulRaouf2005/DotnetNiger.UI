@@ -3,6 +3,7 @@
 @using DotnetNiger.UI.Components.Admin.Shared
 @inject IUserService UserService
 @inject NavigationManager Navigation
+@inject IToastService ToastService
 
 <div class="min-h-screen p-6">
     <div class="mb-8 flex items-center justify-between gap-4">
@@ -50,16 +51,7 @@
             <option value="Member">Member</option>
         </select>
 
-        <div class="flex gap-3">
-            <button @onclick='() => viewMode = "list"'
-                    class='@(viewMode == "list" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-900") rounded-lg px-4 py-2 font-semibold transition hover:shadow-md'>
-                <i class="fas fa-list text-2xl"></i>
-            </button>
-            <button @onclick='() => viewMode = "grid"'
-                    class='@(viewMode == "grid" ? "bg-gray-900 text-white" : "border border-gray-300 bg-white text-gray-900") rounded-lg px-4 py-2 font-semibold transition hover:shadow-md'>
-                <i class="fas fa-th text-2xl"></i>
-            </button>
-        </div>
+        <ViewToggle @bind-IsListView="isListView" />
     </div>
 
     <section class="mb-8 rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
@@ -103,21 +95,23 @@
             }
         </section>
 
-        @if (viewMode == "list")
+        @if (isListView)
         {
-            <UsersTable Users="filteredUsers" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
+            <UsersTable Users="pagedUsers" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
                         OnToggleStatus="ToggleStatusAsync" />
         }
         else
         {
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach (var user in filteredUsers)
+                @foreach (var user in pagedUsers)
                 {
-                    <AdminUsersCard Users="filteredUsers" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
+                    <AdminUsersCard User="user" OnView="ViewAsync" OnEdit="EditAsync" OnDelete="DeleteAsync"
                                     OnToggleStatus="ToggleStatusAsync" />
                 }
             </div>
         }
+
+        <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
 
         @if (isFormOpen)
         {
@@ -170,7 +164,7 @@
     </div>
 
 @code {
-    private string viewMode = "list";
+    private bool isListView = true;
     private string searchQuery = string.Empty;
     private string selectedRole = string.Empty;
     private string editPrimaryRole = "Member";
@@ -180,6 +174,15 @@
     private List<UserDto> pendingUsers = new();
     private int totalUsers;
     private int activeUsers;
+
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredUsers.Count / pageSize));
+    private int SafeCurrentPage => Math.Clamp(currentPage, 1, totalPages);
+    private List<UserDto> pagedUsers => filteredUsers
+        .Skip((SafeCurrentPage - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
 
     private bool isFormOpen;
     private Guid? editingUserId;
@@ -213,6 +216,7 @@ StringComparison.OrdinalIgnoreCase))).ToList();
         }
 
         filteredUsers = users;
+        currentPage = 1;
     }
 
     private Task HandleSearchInput(ChangeEventArgs args)
@@ -232,31 +236,63 @@ StringComparison.OrdinalIgnoreCase))).ToList();
 
     private async Task ApproveAsync(Guid userId)
     {
-        await UserService.ApproveUserAsync(userId);
-        await ReloadAsync();
+        try
+        {
+            await UserService.ApproveUserAsync(userId);
+            ToastService.ShowToast("Utilisateur approuvé.", ToastLevel.Success);
+            await ReloadAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de l'approbation.", ToastLevel.Error);
+        }
     }
 
     private async Task RejectAsync(Guid userId)
     {
-        await UserService.RejectUserAsync(userId);
-        await ReloadAsync();
+        try
+        {
+            await UserService.RejectUserAsync(userId);
+            ToastService.ShowToast("Utilisateur rejeté.", ToastLevel.Success);
+            await ReloadAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors du rejet.", ToastLevel.Error);
+        }
     }
 
     private async Task DeleteAsync(Guid userId)
     {
-        await UserService.DeleteUserAsync(userId);
-        await ReloadAsync();
+        try
+        {
+            await UserService.DeleteUserAsync(userId);
+            ToastService.ShowToast("Utilisateur supprimé.", ToastLevel.Success);
+            await ReloadAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
+        }
     }
 
     private async Task ToggleStatusAsync(Guid userId)
     {
-        var user = await UserService.GetUserByIdAsync(userId);
-        if (user is null)
-            return;
+        try
+        {
+            var user = await UserService.GetUserByIdAsync(userId);
+            if (user is null)
+                return;
 
-        user.IsActive = !user.IsActive;
-        await UserService.UpdateUserAsync(user);
-        await ReloadAsync();
+            user.IsActive = !user.IsActive;
+            await UserService.UpdateUserAsync(user);
+            ToastService.ShowToast(user.IsActive ? "Utilisateur activé." : "Utilisateur désactivé.", ToastLevel.Success);
+            await ReloadAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors du changement de statut.", ToastLevel.Error);
+        }
     }
 
     private async Task ViewAsync(Guid userId)
@@ -299,20 +335,29 @@ StringComparison.OrdinalIgnoreCase))).ToList();
 
     private async Task SaveAsync()
     {
-        editModel.Roles = new List<string> { editPrimaryRole };
-
-        if (editingUserId is null)
+        try
         {
-            await UserService.CreateUserAsync(CreateUser);
-        }
-        else
-        {
-            editModel.Id = editingUserId.Value;
-            await UserService.UpdateUserAsync(editModel);
-        }
+            editModel.Roles = new List<string> { editPrimaryRole };
 
-        CloseForm();
-        await ReloadAsync();
+            if (editingUserId is null)
+            {
+                await UserService.CreateUserAsync(CreateUser);
+                ToastService.ShowToast("Utilisateur créé.", ToastLevel.Success);
+            }
+            else
+            {
+                editModel.Id = editingUserId.Value;
+                await UserService.UpdateUserAsync(editModel);
+                ToastService.ShowToast("Utilisateur mis à jour.", ToastLevel.Success);
+            }
+
+            CloseForm();
+            await ReloadAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de l'enregistrement.", ToastLevel.Error);
+        }
     }
 
     private static UserDto CloneUser(UserDto user)

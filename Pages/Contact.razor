@@ -1,1 +1,144 @@
-@* TODO: Page publique "Contact" à implémenter. *@
+@page "/contact"
+
+@using Microsoft.AspNetCore.Components.Forms
+@inject IContactService ContactService
+@inject NavigationManager Navigation
+
+<PageTitle>Contact - .NET Niger</PageTitle>
+
+<div class="bg-[#F4F2F2] text-slate-800 min-h-screen">
+    <section class="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(81,43,212,0.10),_transparent_36%),linear-gradient(180deg,_#fbfafc_0%,_#f4f2f2_100%)]"></div>
+        <div class="absolute left-1/2 top-10 h-72 w-72 -translate-x-1/2 rounded-full bg-[#7c5cff]/10 blur-3xl"></div>
+
+        <div class="relative mx-auto flex max-w-4xl flex-col items-center text-center">
+            <h1 class="max-w-3xl text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl md:text-4xl lg:text-5xl">
+                Contactez-nous
+            </h1>
+            <p class="mt-4 sm:mt-6 max-w-3xl text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7 md:text-base lg:text-lg">
+                Une question, une suggestion ou une collaboration ? Envoyez-nous un message, nous vous répondrons dans les plus brefs délais.
+            </p>
+        </div>
+    </section>
+
+    <section class="px-4 pb-20 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl">
+            @if (isSuccess)
+            {
+                <div class="rounded-2xl bg-white p-10 shadow-xl text-center">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                        <i class="fas fa-check text-2xl text-green-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900">Message envoyé !</h2>
+                    <p class="mt-2 text-sm text-slate-600">Merci de nous avoir contactés. Nous reviendrons vers vous rapidement.</p>
+                    <button @onclick="ResetForm" class="mt-6 inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-[#6a4df0]">
+                        Envoyer un autre message
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="rounded-2xl bg-white p-8 sm:p-10 shadow-xl">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
+                            @errorMessage
+                        </div>
+                    }
+
+                    <EditForm Model="model" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-5">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">NOM COMPLET</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fas fa-user"></i></span>
+                                <InputText @bind-Value="model.FullName"
+                                    class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                    placeholder="Votre nom" />
+                            </div>
+                            <ValidationMessage For="@(() => model.FullName)" class="text-xs text-red-500 mt-1" />
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">ADRESSE EMAIL</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fas fa-envelope"></i></span>
+                                <InputText @bind-Value="model.Email" type="email"
+                                    class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                    placeholder="nom@exemple.com" />
+                            </div>
+                            <ValidationMessage For="@(() => model.Email)" class="text-xs text-red-500 mt-1" />
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">SUJET</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i class="fas fa-tag"></i></span>
+                                <InputText @bind-Value="model.Subject"
+                                    class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                    placeholder="Sujet de votre message" />
+                            </div>
+                            <ValidationMessage For="@(() => model.Subject)" class="text-xs text-red-500 mt-1" />
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-xs font-medium text-gray-600 mb-2">MESSAGE</label>
+                            <InputTextArea @bind-Value="model.Message" rows="5"
+                                class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition resize-y"
+                                placeholder="Votre message..." />
+                            <ValidationMessage For="@(() => model.Message)" class="text-xs text-red-500 mt-1" />
+                        </div>
+
+                        <button type="submit" disabled="@isLoading"
+                            class="w-full rounded-xl bg-secondary hover:bg-[#6a4df0] text-white py-3 font-medium shadow-md transition disabled:opacity-60">
+                            @(isLoading ? "Envoi en cours..." : "Envoyer le message")
+                        </button>
+                    </EditForm>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    private ContactRequest model = new();
+    private bool isLoading = false;
+    private bool isSuccess = false;
+    private string errorMessage = string.Empty;
+
+    private async Task HandleSubmit()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var success = await ContactService.SendAsync(model);
+            if (success)
+            {
+                isSuccess = true;
+            }
+            else
+            {
+                errorMessage = "Une erreur est survenue. Veuillez réessayer.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Une erreur est survenue. Veuillez réessayer.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        model = new();
+        isSuccess = false;
+        errorMessage = string.Empty;
+        isLoading = false;
+    }
+}

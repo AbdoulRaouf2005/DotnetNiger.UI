@@ -2,6 +2,7 @@
 @page "/evenements/{Id:guid}"
 @inject IEventService EventService
 @inject ICommentService CommentService
+@inject NavigationManager NavManager
 @using System.Globalization
 @using DotnetNiger.UI.Models.Requests;
 @using DotnetNiger.UI.Models.Responses;
@@ -9,6 +10,21 @@
 
 <PageTitle>@(CurrentEvent is null ? "Détails de l'événement - .NET Niger" : $"{CurrentEvent.Title} - .NET Niger")
 </PageTitle>
+
+@if (CurrentEvent is not null)
+{
+	<HeadContent>
+		<meta property="og:title" content="@CurrentEvent.Title" />
+		<meta property="og:description" content="@CurrentEvent.Description" />
+		<meta property="og:image" content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
+		<meta property="og:url" content="@GetAbsoluteUrl(CurrentPageUrl)" />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="@CurrentEvent.Title" />
+		<meta name="twitter:description" content="@CurrentEvent.Description" />
+		<meta name="twitter:image" content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
+	</HeadContent>
+}
 
 <section class="min-h-screen bg-[#ececef] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl space-y-4">
@@ -103,32 +119,9 @@
 												</div>
 											</div>
 
-											<div class="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
-												<button type="button"
-													  class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-													  aria-label="Partager sur X">
-													<i class="fa-brands fa-x-twitter"></i>
-													<span class="hidden sm:inline">X</span>
-												</button>
-												<button type="button"
-													  class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-													  aria-label="Partager sur Discord">
-													<i class="fa-brands fa-discord"></i>
-													<span class="hidden sm:inline">Discord</span>
-												</button>
-												<button type="button"
-													  class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-2 text-xs sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-													  aria-label="Partager sur LinkedIn">
-													<i class="fa-brands fa-linkedin-in"></i>
-													<span class="hidden sm:inline">LinkedIn</span>
-												</button>
-											</div>
-
-											<a href="@CurrentPageUrl"
-												   class="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-50 text-xs sm:text-sm font-semibold text-secondary transition hover:bg-indigo-100">
-												<i class="fa-solid fa-link"></i>
-												Copier le lien
-											</a>
+											<ShareButtons Title="@CurrentEvent.Title"
+														  Url="@GetAbsoluteUrl(CurrentPageUrl)"
+														  Description="@CurrentEvent.Description" />
 										</aside>
 
 										<div class="fixed inset-0 z-10 bg-black/50 sm:hidden @(Closed ? string.Empty : "hidden")"
@@ -150,29 +143,9 @@
 												</button>
 											</div>
 
-											<div class="mt-4 grid grid-cols-3 gap-2">
-												<button type="button"
-													  class="inline-flex h-10 items-center justify-center rounded-xl bg-gray-100 text-[11px] sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
-													  aria-label="Partager sur X">
-													<i class="fa-brands fa-x-twitter"></i>
-												</button>
-												<button type="button"
-													  class="inline-flex h-10 items-center justify-center rounded-xl bg-gray-100 text-[11px] sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
-													  aria-label="Partager sur Discord">
-													<i class="fa-brands fa-discord"></i>
-												</button>
-												<button type="button"
-													  class="inline-flex h-10 items-center justify-center rounded-xl bg-gray-100 text-[11px] sm:text-sm font-semibold text-gray-700 transition hover:bg-gray-200"
-													  aria-label="Partager sur LinkedIn">
-													<i class="fa-brands fa-linkedin-in"></i>
-												</button>
-											</div>
-
-											<a href="@CurrentPageUrl"
-												   class="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-indigo-50 text-xs sm:text-sm font-semibold text-secondary transition hover:bg-indigo-100">
-												<i class="fa-solid fa-link"></i>
-												Copier le lien
-											</a>
+											<ShareButtons Title="@CurrentEvent.Title"
+														  Url="@GetAbsoluteUrl(CurrentPageUrl)"
+														  Description="@CurrentEvent.Description" />
 										</aside>
 									</div>
 
@@ -198,11 +171,48 @@
 																<p class="text-[10px] sm:text-xs text-gray-500">@speaker.Role</p>
 															</div>
 														}
-													</div>
-												</article>
-											</div>
+                                            </div>
+                                        </article>
+                                    </div>
 
-											<div class="grid grid-cols-1 gap-4 lg:grid-cols-3" id="inscription">
+                                    @* Galerie photos *@
+                                    @if (_galleryImages.Count > 0)
+                                    {
+                                        <div class="grid grid-cols-1 gap-4">
+                                            <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                                                <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Galerie photos</h2>
+                                                <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                                    @foreach (var img in _galleryImages)
+                                                    {
+                                                        <a href="@img" target="_blank" class="block">
+                                                            <img src="@img"
+                                                                 class="h-28 sm:h-32 w-full rounded-xl object-cover border border-gray-200 hover:opacity-90 transition" />
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </article>
+                                        </div>
+                                    }
+                                    else if (_isPastEvent)
+                                    {
+                                        @* Événement passé sans photos *@
+                                    }
+                                    else
+                                    {
+                                        <div class="grid grid-cols-1 gap-4">
+                                            <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                                                <div class="flex flex-col items-center justify-center py-10 text-center">
+                                                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                                        <i class="fas fa-images text-2xl text-gray-400"></i>
+                                                    </div>
+                                                    <h3 class="mt-4 text-base sm:text-lg font-bold text-gray-700">Galerie de l'événement à venir</h3>
+                                                    <p class="mt-1 text-xs sm:text-sm text-gray-500">Les photos souvenirs seront disponibles après l'événement.</p>
+                                                </div>
+                                            </article>
+                                        </div>
+                                    }
+
+                                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3" id="inscription">
 												<article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
 													<h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Commentaires & Feedback
 													</h2>
@@ -250,6 +260,8 @@
 	private bool Closed { get; set; } = false;
 	private string? LoadError { get; set; }
 	private string CurrentPageUrl { get; set; } = "/evenements";
+	private List<string> _galleryImages { get; set; } = new();
+	private bool _isPastEvent { get; set; }
 
 
 	void ToggleSharePanel()
@@ -297,6 +309,9 @@
 			CurrentPageUrl = !string.IsNullOrWhiteSpace(CurrentEvent.Slug)
 				? $"/evenements/{CurrentEvent.Slug}"
 				: $"/evenements/{CurrentEvent.Id}";
+
+		_galleryImages = CurrentEvent.GalleryImageUrls ?? new();
+		_isPastEvent = CurrentEvent.EndDate < DateTime.Now;
 		}
 		catch
 		{
@@ -334,4 +349,11 @@
 	];
 
 	private sealed record SpeakerViewModel(string Name, string Role, string Initials);
+
+	private string GetAbsoluteUrl(string relativeUrl)
+	{
+		var baseUri = NavManager.BaseUri.TrimEnd('/');
+		var url = relativeUrl.TrimStart('/');
+		return $"{baseUri}/{url}";
+	}
 }
