@@ -5,6 +5,7 @@
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject INotificationService NotificationService
+@inject IConfiguration Config
 
 <AuthorizeView>
     <Authorized Context="authState">
@@ -105,7 +106,9 @@
     private async Task NavigateToLoginAsync()
     {
         await NotifyActionCompletedAsync();
-        Navigation.NavigateTo("/login");
+        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+        var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        Navigation.NavigateTo(loginUrl);
     }
 
     private async Task NavigateToProfileAsync(ClaimsPrincipal user)

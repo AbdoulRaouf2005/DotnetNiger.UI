@@ -2,6 +2,7 @@
 @* Page d'authentification : vérification d'email via paramètres de requête. *@
 @inject IAuthService Auth
 @inject NavigationManager Navigation
+@inject IConfiguration Config
 
 <PageTitle>Vérification e-mail - .NET Niger</PageTitle>
 
@@ -21,7 +22,7 @@
             <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-700 text-sm">
                 Votre email a été vérifié avec succès. Vous pouvez maintenant vous connecter.
             </div>
-            <button @onclick='() => Navigation.NavigateTo("/login")'
+            <button @onclick='NavigateToLogin'
                     class="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition">
                 Aller à la connexion
             </button>
@@ -85,5 +86,12 @@
         errorMessage = sent
             ? "Un nouveau lien de vérification a été envoyé. Vérifiez votre boîte mail."
             : "Impossible de renvoyer l'email de vérification pour le moment.";
+    }
+
+    private void NavigateToLogin()
+    {
+        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+        var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        Navigation.NavigateTo(loginUrl);
     }
 }

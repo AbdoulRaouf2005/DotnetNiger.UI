@@ -1,6 +1,7 @@
 ﻿@* Composant admin : barre supérieure avec profil et actions rapides. *@
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
+@inject IConfiguration Config
 
 <header class="sticky z-20 w-full flex h-16 items-center justify-between bg-white px-8 sm:px-4 md:px-6 shadow-md">
       <div class="flex gap-4">
@@ -31,7 +32,9 @@
       private async Task HandleLogout()
       {
             await AuthService.LogoutAsync();
-            NavigationManager.NavigateTo("/login", forceLoad: true);
+            var returnUrl = $"{NavigationManager.BaseUri.TrimEnd('/')}/auth/external-callback";
+            var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+            NavigationManager.NavigateTo(loginUrl, forceLoad: true);
       }
 
 }

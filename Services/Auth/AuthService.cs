@@ -245,8 +245,8 @@ public class AuthService : IAuthService
                     {
                         Id = Guid.TryParse(userId, out var uid) ? uid : Guid.Empty,
                         Email = email ?? request.Email,
-                        FullName = request.FullName,
-                        Username = request.FullName
+                        FullName = request.FullName ?? "",
+                        Username = request.FullName ?? ""
                     }
                 }
             };

@@ -1,9 +1,13 @@
-@* Composant utilitaire : redirection automatique vers la page de connexion. *@
+@* Redirects to the gateway login page when auth fails. *@
 @inject NavigationManager Navigation
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 
 @code {
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo("/login", forceLoad: true);
+        var apiBase = Config["ApiBaseUrl"] ?? "http://localhost:5000";
+        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+        var loginUrl = $"{apiBase}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        Navigation.NavigateTo(loginUrl, forceLoad: true);
     }
 }

@@ -36,34 +36,23 @@
     [Parameter]
     public EventCallback OnCommentAdded { get; set; }
 
-    private bool isSubmitting;
     private string commentContent = string.Empty;
-    private ElementReference textareaRef;
 
     private async Task HandleSubmit()
     {
         if (string.IsNullOrWhiteSpace(commentContent))
             return;
 
-        isSubmitting = true;
-
-        try
+        var request = new CreateCommentRequest
         {
-            var request = new CreateCommentRequest
-            {
-                Content = commentContent.Trim(),
-                PostId = Guid.TryParse(PostId, out var postGuid) ? postGuid : null,
-                EventId = EventId,
-                ParentCommentId = null
-            };
+            Content = commentContent.Trim(),
+            PostId = Guid.TryParse(PostId, out var postGuid) ? postGuid : null,
+            EventId = EventId,
+            ParentCommentId = null
+        };
 
-            await CommentService.CreateCommentAsync(request);
-            commentContent = string.Empty;
-            await OnCommentAdded.InvokeAsync();
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
+        await CommentService.CreateCommentAsync(request);
+        commentContent = string.Empty;
+        await OnCommentAdded.InvokeAsync();
     }
 }

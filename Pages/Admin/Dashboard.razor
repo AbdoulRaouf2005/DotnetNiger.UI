@@ -494,7 +494,7 @@
 
 	private static string GetPublishLabel(DateTime? publishedAt)
 	{
-		return publishedAt == DateTime.MinValue ? "En attente" : publishedAt?.ToString("dd/MM/yyyy HH:mm");
+		return publishedAt == DateTime.MinValue ? "En attente" : publishedAt?.ToString("dd/MM/yyyy HH:mm") ?? "";
 	}
 
 	private static string GetEventStatusLabel(DashboardItem item)
@@ -612,18 +612,18 @@
 		await LoadDashboardAsync();
 	}
 
-	private async Task HandleRejectAsync(Guid id)
+	private Task HandleRejectAsync(Guid id)
 	{
-		// Ouvrir la modale de rejet pour saisir une raison
 		var item = FindItem(id);
 		if (item is null)
-			return;
+			return Task.CompletedTask;
 
 		// On garde l'id ciblé et on affiche la modale
 		rejectTargetId = id;
 		rejectReason = string.Empty;
 		showRejectModal = true;
 		StateHasChanged();
+		return Task.CompletedTask;
 	}
 
 	private Guid? rejectTargetId;
