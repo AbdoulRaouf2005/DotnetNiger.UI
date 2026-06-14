@@ -302,37 +302,49 @@ public class AuthService : IAuthService
         await _authProvider.ClearTokensAsync();
     }
 
+    private static readonly SemaphoreSlim _refreshLock = new(1, 1);
+
     /// <summary>
     /// Renouvelle l'access token depuis le refresh token stocké.
     /// Efface la session si le refresh token est invalide ou expiré.
     /// </summary>
     public async Task<AuthDto?> RefreshTokenAsync()
     {
-        var refreshToken = await _authProvider.GetRefreshTokenAsync();
-        if (string.IsNullOrWhiteSpace(refreshToken))
+        if (!await _refreshLock.WaitAsync(0))
             return null;
 
-        var formData = new Dictionary<string, string>
+        try
         {
-            ["grant_type"] = "refresh_token",
-            ["refresh_token"] = refreshToken,
-            ["scope"] = "openid profile email roles offline_access"
-        };
+            var refreshToken = await _authProvider.GetRefreshTokenAsync();
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                return null;
 
-        var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+            var formData = new Dictionary<string, string>
+            {
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = refreshToken,
+                ["scope"] = "openid profile email roles offline_access"
+            };
 
-        if (!response.IsSuccessStatusCode)
-        {
-        await _authProvider.ClearTokensAsync();
-        OnAuthStateChanged?.Invoke();
-            return null;
+            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await _authProvider.ClearTokensAsync();
+                OnAuthStateChanged?.Invoke();
+                return null;
+            }
+
+            var (authDto, _) = await ParseTokenResponseAsync(response);
+            if (authDto?.Token is not null)
+                await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+
+            return authDto;
         }
-
-        var (authDto, _) = await ParseTokenResponseAsync(response);
-        if (authDto?.Token is not null)
-            await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
-
-        return authDto;
+        finally
+        {
+            _refreshLock.Release();
+        }
     }
 
 	public async Task<UserDto?> GetCurrentUserAsync()

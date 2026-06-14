@@ -24,6 +24,7 @@ builder.Services.AddScoped<AuthService>(sp => new AuthService(
         apiBaseUrl,
         sp.GetRequiredService<ClientIdentifierProvider>(),
         sp.GetRequiredService<CustomAuthStateProvider>(),
+        sp,
         sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
     sp.GetRequiredService<CustomAuthStateProvider>()
 ));
@@ -67,18 +68,21 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
     builder.Services.AddScoped<IPostService>(sp =>
         new ApiPostService(CreateGatewayHttpClient(
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
     builder.Services.AddScoped<IEventService>(sp =>
         new ApiEventService(CreateGatewayHttpClient(
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
             sp.GetRequiredService<CustomAuthStateProvider>(),
             sp.GetRequiredService<IAuthService>()));
@@ -87,6 +91,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<IProfileService>(sp =>
@@ -94,8 +99,9 @@ else
             CreateGatewayHttpClient(
                 apiBaseUrl,
                 sp.GetRequiredService<ClientIdentifierProvider>(),
-                sp.GetRequiredService<CustomAuthStateProvider>(),
-                sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
             sp.GetRequiredService<CustomAuthStateProvider>()));
 
     builder.Services.AddScoped<ICommentService>(sp =>
@@ -103,8 +109,9 @@ else
             CreateGatewayHttpClient(
                 apiBaseUrl,
                 sp.GetRequiredService<ClientIdentifierProvider>(),
-                sp.GetRequiredService<CustomAuthStateProvider>(),
-                sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
             sp.GetRequiredService<CustomAuthStateProvider>()));
 
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
@@ -115,6 +122,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<IPartnerService>(sp =>
@@ -122,6 +130,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<INewsletterService>(sp =>
@@ -129,6 +138,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<IMemberDirectoryService>(sp =>
@@ -136,6 +146,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<ISearchService>(sp =>
@@ -143,6 +154,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<IUserStateService, MockUserStateService>();
@@ -152,6 +164,7 @@ else
             apiBaseUrl,
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 }
 
@@ -161,9 +174,10 @@ static HttpClient CreateGatewayHttpClient(
     string baseUrl,
     ClientIdentifierProvider clientIdentifierProvider,
     CustomAuthStateProvider authStateProvider,
+    IServiceProvider serviceProvider,
     ILogger<ClientIdHeaderHandler> logger)
 {
-    var headerHandler = new ClientIdHeaderHandler(clientIdentifierProvider, authStateProvider, logger)
+    var headerHandler = new ClientIdHeaderHandler(clientIdentifierProvider, authStateProvider, serviceProvider, logger)
     {
         InnerHandler = new HttpClientHandler()
     };
