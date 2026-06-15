@@ -4,6 +4,7 @@
 @inject IProfileService ProfileService
 @inject INotificationService NotificationService
 @inject NavigationManager Navigation
+@inject IConfiguration Config
 
 <div class="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-8">
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -120,7 +121,9 @@
             if (CurrentUserId == Guid.Empty)
             {
                 notifications.Clear();
-                Navigation.NavigateTo("/login");
+                var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+                var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+                Navigation.NavigateTo(loginUrl);
                 return;
             }
 

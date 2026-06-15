@@ -2,6 +2,7 @@
 @inject IAuthService Auth
 @inject IRegistrationService RegistrationService
 @inject NavigationManager Navigation
+@inject IConfiguration Config
 
 <PageTitle>Inscription - .NET Niger</PageTitle>
 
@@ -104,7 +105,7 @@
 </div>
 
 @code {
-    private static readonly Uri IdentityRegisterUri = new("http://localhost:5075/Account/Register");
+    private Uri IdentityRegisterUri => new($"{Config["ApiBaseUrl"] ?? Navigation.BaseUri.TrimEnd('/')}/Account/Register");
 
     private readonly CertificateSubmissionDto step3Model = new();
     private CertificateStatusDto? step3Status;
@@ -180,10 +181,11 @@
         return Task.CompletedTask;
     }
 
-    private Task NavigateToLogin()
+    private void NavigateToLogin()
     {
         isStep3Loading = true;
-        Navigation.NavigateTo("/login");
-        return Task.CompletedTask;
+        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+        var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        Navigation.NavigateTo(loginUrl);
     }
 }

@@ -2,18 +2,23 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Auth;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
     private readonly IJSRuntime _js;
+    private readonly IServiceProvider _serviceProvider;
     private static readonly AuthenticationState Anonymous =
         new(new ClaimsPrincipal(new ClaimsIdentity()));
 
-    public CustomAuthStateProvider(IJSRuntime js)
+    private bool _isRefreshing;
+
+    public CustomAuthStateProvider(IJSRuntime js, IServiceProvider serviceProvider)
     {
         _js = js;
+        _serviceProvider = serviceProvider;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -23,6 +28,41 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             return Anonymous;
 
         var claims = ParseClaimsFromJwt(token);
+        var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+
+        if (expClaim != null && long.TryParse(expClaim, out var expUnix))
+        {
+            var expDate = DateTimeOffset.FromUnixTimeSeconds(expUnix);
+            if (expDate <= DateTimeOffset.UtcNow && !_isRefreshing)
+            {
+                _isRefreshing = true;
+                try
+                {
+                    var authService = _serviceProvider.GetRequiredService<IAuthService>();
+                    var refreshed = await authService.RefreshTokenAsync();
+                    if (refreshed?.Token?.AccessToken is not null)
+                    {
+                        token = refreshed.Token.AccessToken;
+                        claims = ParseClaimsFromJwt(token);
+                    }
+                    else
+                    {
+                        await ClearTokensAsync();
+                        return Anonymous;
+                    }
+                }
+                catch
+                {
+                    await ClearTokensAsync();
+                    return Anonymous;
+                }
+                finally
+                {
+                    _isRefreshing = false;
+                }
+            }
+        }
+
         var identity = new ClaimsIdentity(claims, "jwt");
         return new AuthenticationState(new ClaimsPrincipal(identity));
     }

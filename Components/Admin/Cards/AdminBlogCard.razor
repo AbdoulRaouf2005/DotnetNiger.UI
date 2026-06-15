@@ -143,6 +143,6 @@
 
     private string GetDateLabel()
     {
-        return IsPublished ? post!.PublishedAt?.ToString("dd/MM/yyyy HH:mm") : "En attente";
+        return IsPublished ? post!.PublishedAt?.ToString("dd/MM/yyyy HH:mm") ?? "" : "En attente";
     }
 }

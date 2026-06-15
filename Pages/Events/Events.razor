@@ -96,10 +96,5 @@
 		return $"/evenements/{eventDto.Id}";
 	}
 
-	private async Task NavigateToEvent(EventDto eventDto)
-	{
-		var url = BuildEventUrl(eventDto);
-		// Navigation will be handled through normal link navigation
-		// This method is called from EventCard on button click
-	}
+	@* Suppressed: NavigateToEvent was a no-op. Navigation via EventCard link. *@
 }
