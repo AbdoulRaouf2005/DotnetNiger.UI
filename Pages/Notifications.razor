@@ -101,7 +101,8 @@
         if (UserStateService.CurrentUser is null)
         {
             var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
         }
 
         await LoadAsync();
@@ -122,7 +123,10 @@
             {
                 notifications.Clear();
                 var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
-                var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+                var apiBase = Config["ApiBaseUrl"];
+                if (string.IsNullOrWhiteSpace(apiBase)) return;
+                var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+                var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
                 Navigation.NavigateTo(loginUrl);
                 return;
             }

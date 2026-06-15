@@ -37,9 +37,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             var session = await response.Content.ReadFromJsonAsync<SessionResponse>();
             if (session?.Authenticated == true && session.Claims is { Count: >0 })
             {
-                var claims = session.Claims
-                    .Select(c => new Claim(c.Type, c.Value))
-                    .ToList();
+            var claims = session.Claims
+                .Select(c => new Claim(c.Type,
+                    c.Type == ClaimTypes.Role && c.Value.Length > 0
+                        ? char.ToUpperInvariant(c.Value[0]) + c.Value[1..]
+                        : c.Value))
+                .ToList();
 
                 _cachedState = new AuthenticationState(
                     new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));

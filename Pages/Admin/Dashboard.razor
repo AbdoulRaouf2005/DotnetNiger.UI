@@ -359,12 +359,12 @@
 		new() { IconClass = "fas fa-code-branch", Value = 0, Label = "Projets", Url = "/admin/projects" }
 	];
 
-	private List<DashboardItem> PendingPosts { get; set; } = [];
-	private List<DashboardItem> PendingUsers { get; set; } = [];
-	private List<EventDto> PendingEvents { get; set; } = [];
-	private List<DashboardItem> RecentResources { get; set; } = [];
-	private List<DashboardItem> RecentProjects { get; set; } = [];
-	private List<DashboardItem> RecentEvents { get; set; } = [];
+	private List<DashboardItem> PendingPosts { get; set; } = new();
+	private List<DashboardItem> PendingUsers { get; set; } = new();
+	private List<EventDto> PendingEvents { get; set; } = new();
+	private List<DashboardItem> RecentResources { get; set; } = new();
+	private List<DashboardItem> RecentProjects { get; set; } = new();
+	private List<DashboardItem> RecentEvents { get; set; } = new();
 	private UserDto? CurrentProfile { get; set; }
 	private UserDto? CurrentUser => UserStateService.CurrentUser;
 	private bool IsCurrentUserLoaded { get; set; }
@@ -398,20 +398,18 @@
 	{
 		try
 		{
-			// Chargement via services (mock ou API selon Program.cs / appsettings.json).
+			CurrentProfile = UserStateService.CurrentUser;
+			IsCurrentUserLoaded = UserStateService.CurrentUser is not null;
+
 			var posts = await PostService.GetAllPostsAsync();
 			var events = await EventService.GetAllEventsAsync();
 			var resources = await ResourceService.GetAllResourcesAsync();
 			var users = await UserService.GetPendingUsersAsync();
 			var projects = await ProjectService.GetAllAsync(null, null);
-			// UserStateService est la source unique de vérité pour le profil courant.
-			CurrentProfile = UserStateService.CurrentUser;
-			IsCurrentUserLoaded = UserStateService.CurrentUser is not null;
 
-			// Mise à jour des compteurs KPI.
 			Metrics =
 			[
-				new() { IconClass = "fas fa-users", Value = CurrentProfile is null ? 0 : 1, Label = "Utilisateurs", Url = "/admin/Users" },
+				new() { IconClass = "fas fa-users", Value = users.Count, Label = "Utilisateurs", Url = "/admin/Users" },
 				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "Événements", Url = "/admin/events" },
 				new() { IconClass = "fas fa-newspaper", Value = posts.Count, Label = "Blogs", Url = "/admin/blog" },
 				new() { IconClass = "fas fa-folder-open", Value = resources.Count, Label = "Ressources", Url = "/admin/ressources" },
@@ -426,10 +424,10 @@
 					Kind = DashboardItemKind.User,
 					Id = user.Id,
 					Title = user.FullName,
-						DisplayName = user.FullName,
-						Email = user.Email,
-						PrimaryRole = user.Roles.Count == 0 ? "Membre" : user.Roles.First(),
-					Subtitle = string.IsNullOrWhiteSpace(user.Email) ? "Demande d’intégration" : user.Email,
+					DisplayName = user.FullName,
+					Email = user.Email,
+					PrimaryRole = user.Roles.Count == 0 ? "Membre" : user.Roles.First(),
+					Subtitle = string.IsNullOrWhiteSpace(user.Email) ? "Demande d'intégration" : user.Email,
 					AvatarUrl = user.AvatarUrl ?? string.Empty,
 					ViewRoute = "/admin/Users",
 					EditRoute = "/admin/Users",
@@ -437,7 +435,7 @@
 					IsPublished = user.IsActive
 				}).ToList();
 
-			PendingEvents = await EventService.GetPendingEventsAsync(); 
+			PendingEvents = await EventService.GetPendingEventsAsync();
 			RecentResources = resources
 				.OrderByDescending(r => r.ViewCount)
 				.Take(4)
@@ -690,40 +688,6 @@
 		await PostService.UpdatePostAsync(id, updateRequest);
 	}
 
-	private sealed class DashboardMetric
-	{
-		public required string IconClass { get; set; }
-		public int Value { get; set; }
-		public required string Label { get; set; }
-		public required string Url { get; set; }
-	}
-
-	private sealed class DashboardItem
-	{
-		public DashboardItemKind Kind { get; set; }
-		public Guid Id { get; set; }
-		public required string Title { get; set; }
-		public string DisplayName { get; set; } = string.Empty;
-		public string Email { get; set; } = string.Empty;
-		public string PrimaryRole { get; set; } = string.Empty;
-		public string Subtitle { get; set; } = string.Empty;
-		public string AvatarUrl { get; set; } = string.Empty;
-		public string CoverImageUrl { get; set; } = string.Empty;
-		public string ViewRoute { get; set; } = string.Empty;
-		public string EditRoute { get; set; } = string.Empty;
-		public string ManageRoute { get; set; } = string.Empty;
-		public bool IsPublished { get; set; }
-		public bool IsArchived { get; set; }
-	}
-
-	private enum DashboardItemKind
-	{
-		User,
-		Post,
-		Event,
-		Resource,
-		Project
-	}
 }
 
 @* Modal de saisie de raison pour le rejet *@

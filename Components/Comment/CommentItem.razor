@@ -360,7 +360,12 @@
 
     private string GetTimeLabel(DateTime createdAt)
     {
-        var now = DateTime.Now;
+        if (createdAt.Kind == DateTimeKind.Local)
+            createdAt = createdAt.ToUniversalTime();
+        else if (createdAt.Kind == DateTimeKind.Unspecified)
+            createdAt = DateTime.SpecifyKind(createdAt, DateTimeKind.Utc);
+
+        var now = DateTime.UtcNow;
         var diff = now - createdAt;
 
         if (diff.TotalMinutes < 1)

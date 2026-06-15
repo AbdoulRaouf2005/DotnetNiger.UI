@@ -162,7 +162,7 @@
             PostType = post.PostType,
             CategoryIds = post.Categories.Select(c => c.Id).ToList(),
             TagNames = post.Tags.Select(t => t.Name).ToList(),
-            IsPublished = post.PublishedAt != DateTime.MinValue
+            IsPublished = post.PublishedAt.HasValue
         };
     }
 }

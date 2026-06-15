@@ -130,8 +130,8 @@ public class ApiEventService : IEventService
             return false;
 
         var endpoint = current.IsPublished
-            ? $"{AdminBase}/{id}/unpublish"
-            : $"{AdminBase}/{id}/publish";
+            ? $"{PublicBase}/{id}/unpublish"
+            : $"{PublicBase}/{id}/publish";
 
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
@@ -163,7 +163,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetPendingEventsAsync()
     {
-        var response = await _http.GetAsync($"{AdminBase}?status=pending");
+        var response = await _http.GetAsync($"{PublicBase}/pending");
         if (!response.IsSuccessStatusCode)
             return new List<EventDto>();
 
@@ -173,8 +173,8 @@ public class ApiEventService : IEventService
     public async Task<bool> ApproveEventAsync(Guid eventId, string? adminComment = null)
     {
         var endpoint = string.IsNullOrWhiteSpace(adminComment)
-            ? $"{AdminBase}/{eventId}/approve"
-            : $"{AdminBase}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
+            ? $"{PublicBase}/{eventId}/approve"
+            : $"{PublicBase}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
 
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
@@ -182,7 +182,7 @@ public class ApiEventService : IEventService
 
     public async Task<bool> RejectEventAsync(Guid eventId, string reason)
     {
-        var endpoint = $"{AdminBase}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
+        var endpoint = $"{PublicBase}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
     }

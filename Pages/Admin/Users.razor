@@ -141,6 +141,7 @@
                             <div>
                                 <label class="block text-sm font-medium mb-1">Mot de Passe</label>
                                 <InputText @bind-Value="CreateUser.Password"
+                                           type="password"
                                            class="w-full border rounded-lg px-4 py-2 focus:outline-none"
                                            placeholder="le mot de passe temporaire" />
                             </div>
@@ -309,6 +310,9 @@ StringComparison.OrdinalIgnoreCase))).ToList();
 
         editingUserId = userId;
         editModel = CloneUser(user);
+        CreateUser.FullName = user.FullName;
+        CreateUser.Email = user.Email;
+        CreateUser.Password = string.Empty;
         editPrimaryRole = GetPrimaryRole(user);
         isFormOpen = true;
     }
@@ -346,6 +350,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             }
             else
             {
+                editModel.FullName = CreateUser.FullName;
+                editModel.Email = CreateUser.Email;
                 editModel.Id = editingUserId.Value;
                 await UserService.UpdateUserAsync(editModel);
                 ToastService.ShowToast("Utilisateur mis à jour.", ToastLevel.Success);

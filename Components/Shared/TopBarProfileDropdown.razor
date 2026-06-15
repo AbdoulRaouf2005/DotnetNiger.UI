@@ -252,7 +252,8 @@
             if (UserStateService.CurrentUser is null)
             {
                 var fetched = await ProfileService.GetProfileAsync();
-                await UserStateService.SetUserAsync(fetched);
+                if (fetched.Id != Guid.Empty)
+                    await UserStateService.SetUserAsync(fetched);
             }
 
             profile = UserStateService.CurrentUser;

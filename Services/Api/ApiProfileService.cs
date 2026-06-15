@@ -74,7 +74,8 @@ public class ApiProfileService : IProfileService
         if (result is not null)
         {
             var profile = await GetProfileAsync();
-            await _userStateService.UpdateUserAsync(profile);
+            if (profile.Id != Guid.Empty)
+                await _userStateService.UpdateUserAsync(profile);
         }
 
         return result;
@@ -86,7 +87,8 @@ public class ApiProfileService : IProfileService
         if (response.IsSuccessStatusCode)
         {
             var profile = await GetProfileAsync();
-            await _userStateService.UpdateUserAsync(profile);
+            if (profile.Id != Guid.Empty)
+                await _userStateService.UpdateUserAsync(profile);
         }
         return response.IsSuccessStatusCode;
     }

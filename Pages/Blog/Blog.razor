@@ -23,16 +23,16 @@
 					<span class="pointer-events-none absolute inset-y-0 left-3 sm:left-4 flex items-center text-gray-400">
 						<i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
 					</span>
-					<input type="search" placeholder="Rechercher un article..."
+					<input type="search" @bind="searchQuery" @bind:event="oninput" placeholder="Rechercher un article..."
 						class="h-10 sm:h-12 w-full rounded-md border border-gray-100 bg-white pl-10 sm:pl-12 pr-3 sm:pr-4 text-xs sm:text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
 				</label>
 
-				<select
+				<select @bind="selectedCategory"
 					class="h-10 sm:h-10 min-w-[170px] sm:min-w-[140px] rounded-lg border border-gray-100 bg-white px-3 sm:px-4 text-xs sm:text-sm text-gray-700 shadow-sm focus:border-secondary focus:outline-none flex-shrink-0">
-					<option>Catégorie</option>
-					<option>Auteur</option>
-					<option>Lecteur</option>
-					<option>Mentor</option>
+					<option value="">Catégorie</option>
+					<option value="Auteur">Auteur</option>
+					<option value="Lecteur">Lecteur</option>
+					<option value="Mentor">Mentor</option>
 				</select>
 			</div>
 
@@ -72,8 +72,35 @@
 	private int currentPage = 1;
 	private bool IsLoading { get; set; } = true;
 	private string? LoadError { get; set; }
+	private string searchQuery = string.Empty;
+	private string selectedCategory = string.Empty;
 
 	private int pageSize = 7;
+
+	private List<PostDto> filteredPosts
+	{
+		get
+		{
+			var posts = allPosts ?? new List<PostDto>();
+			if (!string.IsNullOrWhiteSpace(searchQuery))
+			{
+				var q = searchQuery.ToLowerInvariant();
+				posts = posts.Where(p =>
+					(p.Title?.ToLowerInvariant().Contains(q) ?? false) ||
+					(p.Excerpt?.ToLowerInvariant().Contains(q) ?? false) ||
+					(p.AuthorName?.ToLowerInvariant().Contains(q) ?? false))
+					.ToList();
+			}
+			if (!string.IsNullOrWhiteSpace(selectedCategory))
+			{
+				posts = posts.Where(p =>
+					string.Equals(p.PostType, selectedCategory, StringComparison.OrdinalIgnoreCase))
+					.ToList();
+			}
+			return posts;
+		}
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		IsLoading = true;
@@ -81,12 +108,10 @@
 		{
 			allPosts = await PostService.GetPublishedPostsAsync();
 			currentPage = 1;
-			await JS.InvokeVoidAsync("console.log", $"Blog: loaded {allPosts?.Count ?? 0} posts");
 		}
 		catch (Exception ex)
 		{
 			LoadError = "Impossible de charger les articles du blog.";
-			await JS.InvokeVoidAsync("console.error", ex.ToString());
 		}
 		finally
 		{
@@ -94,14 +119,12 @@
 		}
 	}
 
-	private int totalPages => Math.Max(1, (int)Math.Ceiling((double)(allPosts?.Count ?? 0) / pageSize));
+	private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredPosts.Count / pageSize));
 
-	private List<PostDto> pagedPosts => (allPosts ?? new List<PostDto>())
+	private List<PostDto> pagedPosts => filteredPosts
 		.Skip((SafeCurrentPage - 1) * pageSize)
 		.Take(pageSize)
 		.ToList();
 
 	private int SafeCurrentPage => Math.Clamp(currentPage, 1, totalPages);
-
-	[Inject] private IJSRuntime JS { get; set; } = default!;
 }

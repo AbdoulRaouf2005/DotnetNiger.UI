@@ -234,7 +234,7 @@
                                             }
                                             else
                                             {
-                                                <span class="text-secondary font-bold text-xs">@member.FullName[..1].ToUpper()</span>
+                                                <span class="text-secondary font-bold text-xs">@(string.IsNullOrWhiteSpace(member.FullName) ? "?" : member.FullName[..1].ToUpper())</span>
                                             }
                                         </div>
                                         <div>
@@ -398,7 +398,8 @@
         if (UserStateService.CurrentUser is null)
         {
             var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
         }
 
         currentUserId    = UserStateService.UserId;

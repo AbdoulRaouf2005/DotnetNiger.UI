@@ -61,7 +61,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5 lg:gap-6">
                 @foreach (var ev in pagedEvents)
                 {
-                    <AdminEventCard Event="@ev"
+                    <AdminEventCard @key="ev.Id" Event="@ev"
                                OnEventDeleted="LoadEventsAsync"
                                OnSetPending="SetPending"
                                OnSetPublished="SetPublished"
@@ -235,6 +235,18 @@
             CoverImageUrl = ev.CoverImageUrl,
             Capacity = ev.Capacity,
             MeetupLink = ev.MeetupLink,
+            IsPublished = isPublished,
+            IsArchived = isArchived,
+            Category = ev.Category,
+            GalleryImageUrls = ev.GalleryImageUrls?.ToList() ?? new(),
+            Speakers = ev.Speakers?.Select(s => new SpeakerDto
+            {
+                UserId = s.UserId,
+                Name = s.Name,
+                Role = s.Role,
+                AvatarUrl = s.AvatarUrl
+            }).ToList() ?? new(),
+            TagNames = ev.Tags?.Select(t => t.Name).ToList() ?? new(),
         };
 
         try

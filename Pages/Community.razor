@@ -4,6 +4,7 @@
 @using DotnetNiger.UI.Services.Contracts
 @inject IEventService EventService
 @inject NavigationManager Navigation
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
 @* Page publique : espace communauté — implémentation fidèle au design fourni *@
 
 <div class="bg-gray-50 text-gray-800">
@@ -22,7 +23,7 @@
 			}
 			else if (upcomingEvents?.Count > 0)
 			{
-				@foreach (var eventItem in upcomingEvents.Take(6))
+				@foreach (var eventItem in upcomingEvents.Take(maxUpcomingEvents))
 				{
 					<EventCard Event="eventItem"/>
 				}
@@ -69,6 +70,7 @@
 @code {
 	private List<EventDto> upcomingEvents = new();
 	private bool isLoading = true;
+	private int maxUpcomingEvents => int.TryParse(Config["Community:MaxUpcomingEvents"], out var val) ? val : 6;
 
 	protected override async Task OnInitializedAsync()
 	{

@@ -207,7 +207,7 @@
                                             }
                                             else
                                             {
-                                                <span class="text-secondary font-bold text-xs">@member.FullName[..1].ToUpper()</span>
+                                                <span class="text-secondary font-bold text-xs">@(string.IsNullOrWhiteSpace(member.FullName) ? "?" : member.FullName[..1].ToUpper())</span>
                                             }
                                         </div>
                                         <div>
@@ -449,6 +449,7 @@
             CoverImageUrl = ev.CoverImageUrl,
             Capacity = ev.Capacity,
             MeetupLink = ev.MeetupLink,
+            IsPublished = ev.IsPublished,
             GalleryImageUrls = ev.GalleryImageUrls?.ToList() ?? new(),
             Speakers = ev.Speakers?.Select(s => new SpeakerDto
             {

@@ -88,7 +88,8 @@
         if (UserStateService.CurrentUser is null)
         {
             var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
         }
 
         currentUserId = UserStateService.UserId;
@@ -133,6 +134,7 @@
         
         try
         {
+            postRequest.IsPublished = true;
             postRequest.Excerpt = BuildExcerpt(postRequest.Content);
             await PostService.CreatePostAsync(postRequest, currentUserId);
             ToastService.ShowToast("Article créé avec succès.", ToastLevel.Success);

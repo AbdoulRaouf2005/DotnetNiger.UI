@@ -198,7 +198,7 @@ public class EventService : IEventService
                 AvatarUrl = s.AvatarUrl
             }).ToList() ?? new(),
             CreatedBy = currentUserId,
-            OrganizerName = "À déterminer", // on pourrait compléter après
+            OrganizerName = (await _authService.GetCurrentUserAsync())?.FullName ?? "Organisateur",
             RegisteredCount = 0,
             SubmittedBy = currentUserId,
             SubmittedAt = now

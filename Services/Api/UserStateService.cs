@@ -13,7 +13,7 @@ public class UserStateService : IUserStateService
     public bool IsAuthenticated => _currentUser is { IsActive: true };
     public Guid UserId => _currentUser?.Id ?? Guid.Empty;
     public string UserName => _currentUser?.FullName ?? string.Empty;
-    public bool IsAdmin => _currentUser?.Roles.Contains("Admin") ?? false;
+    public bool IsAdmin => _currentUser?.Roles.Contains("Admin", StringComparer.OrdinalIgnoreCase) ?? false;
     public string? UserRole => _currentUser?.Roles.FirstOrDefault();
 
     public Task LoadUserFromStorageAsync()

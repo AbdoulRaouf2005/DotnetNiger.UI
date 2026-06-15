@@ -54,8 +54,9 @@
         }
         else
         {
-            isProcessing = false;
             errorMessage = response.Message ?? "Erreur lors de la connexion externe.";
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/login");
         }
     }
 }

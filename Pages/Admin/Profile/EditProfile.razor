@@ -170,7 +170,8 @@
         if (UserStateService.CurrentUser is null)
         {
             var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
         }
 
         SyncFormFromState();
