@@ -1,0 +1,194 @@
+@page "/member/{Id:guid}"
+@inject IUserService UserService
+@inject NavigationManager Navigation
+
+<div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+    <div class="mb-6">
+        <button @onclick="GoBack"
+                class="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+            <i class="fas fa-arrow-left"></i>
+            Retour
+        </button>
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl">Profil membre</h1>
+    </div>
+
+    @if (loading)
+    {
+        <div class="flex items-center justify-center py-20">
+            <div class="flex items-center gap-3 text-slate-500">
+                <i class="fa-solid fa-spinner fa-spin text-xl"></i>
+                <span class="text-sm">Chargement du profil...</span>
+            </div>
+        </div>
+    }
+    else if (error)
+    {
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <i class="fa-solid fa-exclamation-triangle text-4xl text-amber-500"></i>
+            <p class="mt-4 text-lg text-slate-600">Impossible de charger le profil de ce membre.</p>
+            <button @onclick="LoadMemberAsync"
+                    class="mt-4 inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#6a4df0]">
+                <i class="fa-solid fa-rotate"></i> Réessayer
+            </button>
+        </div>
+    }
+    else if (member is null)
+    {
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <i class="fa-solid fa-user-slash text-4xl text-slate-300"></i>
+            <p class="mt-4 text-lg text-slate-500">Ce membre n'existe pas.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-5 flex justify-center">
+                        <div class="relative">
+                            <img src="@GetAvatarUrl(member.AvatarUrl)"
+                                 alt="@member.FullName"
+                                 class="h-40 w-40 rounded-full border-4 border-indigo-100 object-cover" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-center">
+                        <h2 class="text-xl font-semibold tracking-tight text-slate-800 sm:text-4xl">@DisplayOrFallback(member.FullName, member.Username ?? "Membre")</h2>
+                        <p class="text-lg text-slate-500">@DisplayPrimaryRole(member.Roles)</p>
+                    </div>
+
+                    <div class="mt-7 space-y-3 text-sm text-slate-700">
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-map-marker-alt text-slate-500"></i>
+                            <span>@BuildLocation(member.City, member.Country)</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-envelope text-slate-500"></i>
+                            <span>@DisplayOrFallback(member.Email, "Email non renseigne")</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-phone text-slate-500"></i>
+                            <span>@DisplayOrFallback(member.PhoneNumber, "Telephone non renseigne")</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-calendar-alt text-slate-500"></i>
+                            <span>Membre depuis @FormatMemberSince(member.CreatedAt)</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full @((member.IsActive) ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600") px-4 py-2">
+                            <span class="h-2.5 w-2.5 rounded-full @((member.IsActive) ? "bg-emerald-500" : "bg-slate-400")"></span>
+                            <span>@(member.IsActive ? "En ligne" : "Hors ligne")</span>
+                        </div>
+                    </div>
+                </section>
+
+                @if (member.SocialLinks?.Count > 0)
+                {
+                    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-slate-700">Reseaux sociaux</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            @foreach (var link in member.SocialLinks)
+                            {
+                                <a href="@link.Url"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-600 text-xl text-white transition hover:bg-indigo-500"
+                                   title="@link.Platform">
+                                    <i class="@link.Icone"></i>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+
+            <div class="space-y-6">
+                <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-center justify-between gap-4">
+                        <h2 class="text-lg font-semibold tracking-tight text-slate-800">A propos</h2>
+                    </div>
+                    <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(member.Bio, "Aucune biographie renseignee.")</p>
+                </section>
+
+                <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-start justify-between gap-4">
+                        <h2 class="text-lg font-semibold tracking-tight text-slate-800">Skills and Technologies</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach (var skill in ResolveSkills(member.Skills))
+                        {
+                            <span class="rounded-md bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
+                        }
+                    </div>
+                </section>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private UserDto? member;
+    private bool loading = true;
+    private bool error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMemberAsync();
+    }
+
+    private async Task LoadMemberAsync()
+    {
+        loading = true;
+        error = false;
+        try
+        {
+            member = await UserService.GetUserByIdAsync(Id);
+        }
+        catch
+        {
+            error = true;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/propos");
+    }
+
+    private static string DisplayOrFallback(string? value, string fallback)
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static string BuildLocation(string? city, string? country)
+    {
+        var hasCity = !string.IsNullOrWhiteSpace(city);
+        var hasCountry = !string.IsNullOrWhiteSpace(country);
+        return (hasCity, hasCountry) switch
+        {
+            (true, true) => $"{city}, {country}",
+            (true, false) => city!,
+            (false, true) => country!,
+            _ => "Non renseignee"
+        };
+    }
+
+    private static IEnumerable<string> ResolveSkills(List<string>? skills)
+        => (skills is { Count: > 0 }) ? skills
+            : new List<string> { "C# / .NET 8", "ASP.NET Core", "Azure Cloud", "Entity Framework", "Microservices", "Docker", "Blazor", "TypeScript" };
+
+    private static string DisplayPrimaryRole(List<string>? roles)
+        => (roles is { Count: > 0 }) ? roles[0] : "Membre .NET Niger";
+
+    private static string GetAvatarUrl(string? avatarUrl)
+        => string.IsNullOrWhiteSpace(avatarUrl) ? "/Images/Fond.jpeg" : avatarUrl;
+
+    private static string FormatMemberSince(DateTime? createdAt)
+        => createdAt.HasValue ? createdAt.Value.ToString("MMMM yyyy") : "Date inconnue";
+}

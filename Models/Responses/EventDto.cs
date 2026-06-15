@@ -8,6 +8,7 @@ public class EventDto
     public string Description { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
     public string EventType { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string CoverImageUrl { get; set; } = string.Empty;
@@ -16,7 +17,6 @@ public class EventDto
     public int Capacity { get; set; }
     public int RegisteredCount { get; set; }
     public bool IsPublished { get; set; }
-    public bool IsArchived { get; set; }
     public string MeetupLink { get; set; } = string.Empty;
     public List<EventMediaDto> Medias { get; set; } = new();
     public List<string> GalleryImageUrls { get; set; } = new();
@@ -27,4 +27,5 @@ public class EventDto
     public DateTime? PublishedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<TagDto> Tags { get; set; } = new();
+    public List<SpeakerDto> Speakers { get; set; } = new();
 }
