@@ -6,15 +6,17 @@ namespace DotnetNiger.UI.Services.Mock;
 
 public class CommentService : ICommentService
 {
-    private static readonly Guid CurrentUserGuid = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private const string CurrentUserName = "Vous";
     private const string CurrentUserAvatar = "/Images/default-avatar.jpg";
     private List<CommentResponse> _comments = new();
+    private readonly IUserStateService _userStateService;
 
-    public Guid CurrentUserId => CurrentUserGuid;
+    public Guid CurrentUserId =>
+        _userStateService.CurrentUser?.Id ?? Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-    public CommentService()
+    public CommentService(IUserStateService userStateService)
     {
+        _userStateService = userStateService;
         InitializeComments();
     }
 
@@ -101,7 +103,7 @@ public class CommentService : ICommentService
                 Id = Guid.NewGuid(),
                 EventId = eventId1,
                 PostId = Guid.Empty,
-                UserId = CurrentUserGuid,
+            UserId = CurrentUserId,
                 AuthorName = CurrentUserName,
                 AuthorAvatar = CurrentUserAvatar,
                 Content = "Je confirme ma présence pour cet événement.",
@@ -204,7 +206,7 @@ public class CommentService : ICommentService
             Id = Guid.NewGuid(),
             EventId = request.EventId ?? Guid.Empty,
             PostId = request.PostId ?? Guid.Empty,
-            UserId = CurrentUserGuid,
+            UserId = CurrentUserId,
             AuthorName = CurrentUserName,
             AuthorAvatar = CurrentUserAvatar,
             Content = request.Content,
@@ -235,7 +237,7 @@ public class CommentService : ICommentService
         if (comment == null)
             return Task.FromResult<CommentResponse?>(null);
 
-        if (comment.UserId != CurrentUserGuid)
+        if (comment.UserId != CurrentUserId)
             return Task.FromResult<CommentResponse?>(null);
 
         comment.Content = request.Content ?? comment.Content;
@@ -249,7 +251,7 @@ public class CommentService : ICommentService
         if (comment == null)
             return Task.FromResult(false);
 
-        if (comment.UserId != CurrentUserGuid)
+        if (comment.UserId != CurrentUserId)
             return Task.FromResult(false);
 
         if (request.DeleteAllReplies)

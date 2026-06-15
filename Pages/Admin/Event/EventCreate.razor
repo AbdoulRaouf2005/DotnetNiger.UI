@@ -10,6 +10,7 @@
 @inject IProfileService ProfileService
 @inject IEventService EventService
 @inject IToastService ToastService
+@inject IUserService UserService
 
 <div class="p-6 bg-[#F4F2F2]">
     <!-- Header -->
@@ -69,7 +70,7 @@
                 <!-- Catégorie -->
                 <div>
                     <label class="block text-sm font-semibold mb-2">Catégorie</label>
-                    <InputSelect @bind-Value="eventRequest.EventType" 
+                    <InputSelect @bind-Value="eventRequest.Category" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                         <option value="">Sélectionner une catégorie</option>
                         <option value="Présentation">Présentation</option>
@@ -80,7 +81,7 @@
                         <option value="Workshop">Workshop</option>
                         <option value="Webinaire">Webinaire</option>
                     </InputSelect>
-                    <ValidationMessage For="@(() => eventRequest.EventType)" class="text-red-500 text-sm mt-1" />
+                    <ValidationMessage For="@(() => eventRequest.Category)" class="text-red-500 text-sm mt-1" />
                 </div>
 
             </div>
@@ -176,9 +177,108 @@
                 }
             </div>
 
+            @* Intervenants *@
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-3">Intervenants</label>
+
+                @* Liste des intervenants déjà ajoutés *@
+                <div class="space-y-3 mb-4">
+                    @for (int i = 0; i < speakers.Count; i++)
+                    {
+                        <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center overflow-hidden">
+                                @if (!string.IsNullOrWhiteSpace(speakers[i].AvatarUrl))
+                                {
+                                    <img src="@speakers[i].AvatarUrl" alt="@speakers[i].Name" class="h-full w-full object-cover" />
+                                }
+                                else
+                                {
+                                    <span class="text-secondary font-bold text-sm">
+                                        @(speakers[i].Name.Length > 0 ? speakers[i].Name[..1].ToUpper() : "?")
+                                    </span>
+                                }
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-gray-800">@speakers[i].Name</p>
+                                <input @bind="speakers[i].Role"
+                                       class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1"
+                                       placeholder="Rôle (ex: Intervenant)" />
+                            </div>
+                            <button type="button" @onclick="() => RemoveSpeaker(i)"
+                                    class="text-red-500 hover:text-red-700 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                @* Recherche et ajout de membres *@
+                @if (showMemberSearch)
+                {
+                    <div class="relative">
+                        <input value="@memberSearchQuery"
+                               @oninput="OnMemberSearchChanged"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                               placeholder="Rechercher un membre..." />
+                        @if (filteredMembers.Count > 0)
+                        {
+                            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                @foreach (var member in filteredMembers)
+                                {
+                                    <button type="button" @onclick="() => AddSpeakerFromMember(member)"
+                                            class="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-gray-50 text-left">
+                                        <div class="w-8 h-8 rounded-full bg-secondary/10 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                            @if (!string.IsNullOrWhiteSpace(member.AvatarUrl))
+                                            {
+                                                <img src="@member.AvatarUrl" alt="@member.FullName" class="h-full w-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary font-bold text-xs">@member.FullName[..1].ToUpper()</span>
+                                            }
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-semibold text-gray-800">@member.FullName</p>
+                                            <p class="text-xs text-gray-500">@@@member.Username</p>
+                                        </div>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(memberSearchQuery))
+                        {
+                            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg p-4 text-sm text-gray-500 text-center">
+                                Aucun membre trouvé.
+                            </div>
+                        }
+                    </div>
+                    <button type="button" @onclick="() => showMemberSearch = false"
+                            class="mt-2 text-xs text-gray-500 hover:text-gray-700">
+                        Annuler
+                    </button>
+                }
+                else
+                {
+                    <button type="button" @onclick="ToggleMemberSearch"
+                            class="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:text-[#6a4df0]">
+                        <i class="fas fa-plus-circle"></i>
+                        Ajouter un intervenant
+                    </button>
+                }
+            </div>
+
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
                 <div class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
+            }
+
+            <!-- Info statut -->
+            @if (!IsCurrentUserAdmin)
+            {
+                <div class="mb-4 rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-700">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    En tant que membre, votre événement sera soumis pour validation avant d'être publié.
+                </div>
             }
 
             <!-- Action Buttons -->
@@ -186,7 +286,7 @@
                 <button type="submit" 
                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
                     <i class="fas fa-paper-plane"></i>
-                    Publier
+                    @(IsCurrentUserAdmin ? "Publier" : "Soumettre pour validation")
                 </button>
                
                 <button type="button"                
@@ -210,12 +310,64 @@
     
     private Guid currentUserId;
     private string organizerName = string.Empty;
+    private bool IsCurrentUserAdmin;
 
     private string errorMessage = string.Empty;
     private bool   showDescriptionError;
     private Editor EditorRef = default!;
 
     private string eventMode = "physical";
+    private List<SpeakerDto> speakers = new();
+    private List<UserDto> allMembers = new();
+    private List<UserDto> filteredMembers = new();
+    private bool showMemberSearch;
+    private string memberSearchQuery = string.Empty;
+
+    private void RemoveSpeaker(int index)
+    {
+        speakers.RemoveAt(index);
+    }
+
+    private void ToggleMemberSearch()
+    {
+        showMemberSearch = !showMemberSearch;
+        if (showMemberSearch)
+        {
+            memberSearchQuery = string.Empty;
+            UpdateFilteredMembers();
+        }
+    }
+
+    private void OnMemberSearchChanged(ChangeEventArgs e)
+    {
+        memberSearchQuery = e.Value?.ToString() ?? string.Empty;
+        UpdateFilteredMembers();
+    }
+
+    private void UpdateFilteredMembers()
+    {
+        var query = memberSearchQuery?.ToLowerInvariant() ?? string.Empty;
+        var selectedIds = speakers.Select(s => s.UserId).ToHashSet();
+        filteredMembers = allMembers
+            .Where(m => !selectedIds.Contains(m.Id))
+            .Where(m => string.IsNullOrWhiteSpace(query) ||
+                        m.FullName.ToLowerInvariant().Contains(query) ||
+                        m.Username.ToLowerInvariant().Contains(query))
+            .ToList();
+    }
+
+    private void AddSpeakerFromMember(UserDto member)
+    {
+        speakers.Add(new SpeakerDto
+        {
+            UserId = member.Id,
+            Name = member.FullName,
+            AvatarUrl = member.AvatarUrl ?? string.Empty,
+            Role = "Intervenant"
+        });
+        showMemberSearch = false;
+        memberSearchQuery = string.Empty;
+    }
 
     private void SetEventMode(string mode)
     {
@@ -249,8 +401,11 @@
             await UserStateService.SetUserAsync(profil);
         }
 
-        currentUserId  = UserStateService.UserId;
-        organizerName  = UserStateService.UserName;
+        currentUserId    = UserStateService.UserId;
+        organizerName    = UserStateService.UserName;
+        IsCurrentUserAdmin = UserStateService.IsAdmin;
+
+        allMembers = await UserService.GetUsersAsync();
     }
 
     private void GoBack()
@@ -294,11 +449,14 @@
             _ => eventRequest.EventType
         };
 
-        // 4. Laisser DataAnnotations valider le reste
+        // 4. Ajouter les intervenants
+        eventRequest.Speakers = speakers.ToList();
+
+        // 5. Laisser DataAnnotations valider le reste
         //    (Title, EventType, dates… via le validator inline)
         try
         {
-            await EventService.CreateEventAsync(eventRequest, currentUserId, false);
+            await EventService.CreateEventAsync(eventRequest, currentUserId, IsCurrentUserAdmin);
             ToastService.ShowToast("Événement créé avec succès.", ToastLevel.Success);
             Navigation.NavigateTo("/admin/events");
         }

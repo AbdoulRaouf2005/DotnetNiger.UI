@@ -10,42 +10,7 @@
 
 <PageTitle>Accueil - .NET Niger</PageTitle>
 
-@* <!-- HERO SECTION -->
-<div class="relative min-h-screen sm:min-h-screen md:h-screen bg-[url('/Images/Fond1.jpeg')] bg-contain sm:bg-cover bg-no-repeat bg-center px-4 py-8 sm:py-6 md:px-8 md:py-8">
-    <div class="absolute inset-0 bg-black/10 sm:bg-black/25"></div>
-    <div class="relative flex flex-col items-center justify-center text-center px-4 sm:px-6 min-h-screen sm:min-h-screen md:h-screen">
-        <!-- Logo -->
-        <div class="mb-8">
-            <NavLink href="/" class="flex items-center justify-center">
-                <img src="Logo.svg" alt="logo dotnet.niger" class="h-24 w-24" />
-            </NavLink>
-        </div>
 
-        <!-- Title & Paragraph -->
-        <div class="flex flex-col items-center justify-center max-w-3xl">
-            <h1 class="font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white drop-shadow-lg">
-                La communauté des développeurs .NET au Niger
-            </h1>
-            <p class="text-sm sm:text-base md:text-lg lg:text-lg text-white mt-4 sm:mt-6 leading-relaxed drop-shadow-md">
-                Connecter les développeurs .NET, organiser des événements, partager
-                des ressources techniques. La communauté Dotnet Niger est une équipe passionnée par le développement
-                web et les nouvelles technologies.
-            </p>
-        </div>
-
-        <!-- Buttons -->
-        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
-            <button
-                class="px-6 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold bg-secondary text-white rounded-lg hover:bg-blue-700 transition shadow-lg">
-                Rejoindre la communauté
-            </button>
-            <button @onclick='() => navigation.NavigateTo("/ressources")'
-                class="px-6 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold bg-white text-secondary rounded-lg hover:bg-gray-100 transition shadow-lg">
-                Explorer les ressources
-            </button>
-        </div>
-    </div>
-</div> *@
 <section class="min-h-screen flex items-center">
     <div class="max-w-6xl mx-auto px-6">
 
@@ -56,17 +21,17 @@
 
                 <!-- Grande image -->
                 <img src="/Images/Hero/Fond1.jpeg"
-                     class="absolute w-72 md:w-96 rounded-3xl shadow-2xl z-10"
+                     class="absolute w-64 md:w-96 rounded-3xl shadow-2xl z-10"
                      alt="">
 
                 <!-- Image qui monte sur la première -->
                 <img src="/Images/Hero/Fond2.jpg"
-                     class="absolute top-24 left-40 w-56 md:w-72 rounded-3xl shadow-2xl border-4 border-white z-20"
+                     class="absolute top-24 left-40 w-52 md:w-72 rounded-3xl shadow-2xl border-4 border-[#F4F2F2] z-20"
                      alt="">
 
                 <!-- Troisième image -->
                 <img src="/Images/Hero/Fond3.jpg"
-                     class="absolute top-72 left-20 w-52 md:w-64 rounded-3xl shadow-2xl border-4 border-white z-30"
+                     class="absolute top-72 left-20 w-52 md:w-64 rounded-3xl shadow-2xl border-4 border-[#F4F2F2] z-30"
                      alt="">
 
             </div>
@@ -83,10 +48,10 @@
 
                 <!-- Title & Paragraph -->
                 <div class="flex flex-col items-center justify-center max-w-3xl">
-                    <h1 class="font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-white drop-shadow-lg">
+                    <h1 class="font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-secondary drop-shadow-lg">
                         La communauté des développeurs .NET au Niger
                     </h1>
-                    <p class="text-sm sm:text-base md:text-lg lg:text-lg text-white mt-4 sm:mt-6 leading-relaxed drop-shadow-md">
+                    <p class="text-sm sm:text-base md:text-lg lg:text-lg text-gray-600 mt-4 sm:mt-6 leading-relaxed drop-shadow-md">
                         Connecter les développeurs .NET, organiser des événements, partager
                         des ressources techniques. La communauté Dotnet Niger est une équipe passionnée par le développement
                         web et les nouvelles technologies.
@@ -95,7 +60,7 @@
 
                 <!-- Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
-                    <button class="px-6 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold bg-secondary text-white rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <button @onclick='() => navigation.NavigateTo("/register")' class="px-6 sm:px-8 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold bg-secondary text-white rounded-lg hover:bg-blue-700 transition shadow-lg">
                         Rejoindre la communauté
                     </button>
                     <button @onclick='() => navigation.NavigateTo("/ressources")'
@@ -192,10 +157,10 @@
         }
         else if (AllEvents.Any())
         {
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 @foreach (var evt in AllEvents)
                 {
-                    <EventCard Event="@evt" />
+                    <EventCard Event="@evt" Registrations="@(EventRegistrations.GetValueOrDefault(evt.Id))" />
                 }
             </div>
         }
@@ -261,21 +226,19 @@
         <!-- Social Links -->
         <div class="flex justify-center gap-4 sm:gap-6 mb-8 sm:mb-12">
             <a href="#" class="text-2xl sm:text-3xl md:text-4xl text-secondary hover:scale-110 transition" title="Discord"><i
-                class="fab fa-discord"></i></a>
-                <a href="#" class="text-2xl sm:text-3xl md:text-4xl text-secondary hover:scale-110 transition" title="Community"><i
-                    class="fas fa-users"></i></a>
+                class="fab fa-facebook"></i></a>
                     <a href="#" class="text-2xl sm:text-3xl md:text-4xl text-secondary hover:scale-110 transition" title="LinkedIn"><i
                         class="fab fa-linkedin"></i></a>
                         <a href="#" class="text-2xl sm:text-3xl md:text-4xl text-secondary hover:scale-110 transition" title="X (Twitter)"><i
-                            class="fab fa-x-twitter"></i></a>
-                            <a href="#" class="text-2xl sm:text-3xl md:text-4xl text-secondary hover:scale-110 transition" title="Instagram"><i
-                                class="fab fa-instagram"></i></a>
+                            class="fab fa-whatsapp"></i></a>
+                            
                             </div>
                         </div>
                     </section>
 
 @code {
     public List<EventDto> AllEvents = new();
+    private Dictionary<Guid, List<EventRegistrationDto>> EventRegistrations = new();
     private bool IsLoading { get; set; } = true;
     private string? LoadError { get; set; }
 
@@ -289,8 +252,13 @@
         IsLoadingResources = true;
         try
         {
-            AllEvents = await EventService.GetPublishedEventsAsync();
-            await JS.InvokeVoidAsync("console.log", AllEvents);
+            var events = (await EventService.GetPublishedEventsAsync()).Take(3).ToList();
+            AllEvents = events;
+            foreach (var evt in events)
+            {
+                var registrations = await EventService.GetRegistrationsByEventAsync(evt.Id);
+                EventRegistrations[evt.Id] = registrations;
+            }
         }
         catch (Exception ex)
         {

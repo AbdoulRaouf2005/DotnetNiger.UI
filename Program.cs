@@ -54,6 +54,7 @@ if (useMock)
     builder.Services.AddScoped<INewsletterService, MockNewsletterService>();
     builder.Services.AddScoped<IMemberDirectoryService, MockMemberDirectoryService>();
     builder.Services.AddScoped<ISearchService, MockSearchService>();
+    builder.Services.AddScoped<IContactService, MockContactService>();
 }
 else
 {

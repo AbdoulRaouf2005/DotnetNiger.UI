@@ -1,8 +1,10 @@
 @page "/admin/blog/edit/{Id:guid}"
 @* Page admin : édition d'article avec éditeur riche. *@
+@using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Components.Admin
+@using DotnetNiger.UI.Components.Shared
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 @inject IToastService ToastService
@@ -29,13 +31,10 @@
             </div>
             <div>
                 <label class="mb-2 block text-sm font-semibold text-gray-700">Image de couverture</label>
-                <div class="flex items-center overflow-hidden rounded-lg border border-gray-300">
-                    <label class="cursor-pointer bg-gray-200 px-4 py-3 text-sm text-gray-700">
-                        Choisir un fichier
-                        <InputFile type="file" accept="image/*"  class="hidden" Onchange="HandleImage"/>
-                    </label>
-                    <span class="px-3 text-sm text-gray-500">@postRequest.CoverImageUrl</span>
-                </div>
+                <ImageUploader UploadType="UploadType.Blog"
+                               ExistingImageUrl="@postRequest.CoverImageUrl"
+                               OnImageUploaded="HandleImageUploaded"
+                               OnImageDeleted="HandleImageDeleted" />
             </div>
         </div>
 
@@ -87,20 +86,14 @@
 
         postRequest = MapToUpdateRequest(post);
     }
-     private async Task HandleImage(InputFileChangeEventArgs eventArgs)
+    private void HandleImageUploaded(string imageUrl)
     {
-        var file = eventArgs.File;
-        if (file is null)
-        {
-            return;
-        }
+        postRequest.CoverImageUrl = imageUrl;
+    }
 
-        const long maxFileSize = 2 * 1024 * 1024;
-        await using var stream = file.OpenReadStream(maxFileSize);
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-
-        postRequest.CoverImageUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(memoryStream.ToArray())}";
+    private void HandleImageDeleted()
+    {
+        postRequest.CoverImageUrl = string.Empty;
     }
 
     private async Task SaveDraft()

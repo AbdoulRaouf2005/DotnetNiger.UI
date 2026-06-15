@@ -2,358 +2,569 @@
 @page "/evenements/{Id:guid}"
 @inject IEventService EventService
 @inject ICommentService CommentService
+@inject IUserStateService UserStateService
+@inject IToastService ToastService
 @inject NavigationManager NavManager
 @using System.Globalization
 @using DotnetNiger.UI.Models.Requests;
 @using DotnetNiger.UI.Models.Responses;
 @using DotnetNiger.UI.Components;
 
-<PageTitle>@(CurrentEvent is null ? "Détails de l'événement - .NET Niger" : $"{CurrentEvent.Title} - .NET Niger")
-</PageTitle>
+<PageTitle>@(CurrentEvent is null ? "Détails de l'événement - .NET Niger" : $"{CurrentEvent.Title} - .NET Niger")</PageTitle>
 
 @if (CurrentEvent is not null)
 {
-	<HeadContent>
-		<meta property="og:title" content="@CurrentEvent.Title" />
-		<meta property="og:description" content="@CurrentEvent.Description" />
-		<meta property="og:image" content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
-		<meta property="og:url" content="@GetAbsoluteUrl(CurrentPageUrl)" />
-		<meta property="og:type" content="website" />
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="@CurrentEvent.Title" />
-		<meta name="twitter:description" content="@CurrentEvent.Description" />
-		<meta name="twitter:image" content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
-	</HeadContent>
+    <HeadContent>
+        <meta property="og:title" content="@CurrentEvent.Title" />
+        <meta property="og:description" content="@CurrentEvent.Description" />
+        <meta property="og:image"
+              content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
+        <meta property="og:url" content="@GetAbsoluteUrl(CurrentPageUrl)" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="@CurrentEvent.Title" />
+        <meta name="twitter:description" content="@CurrentEvent.Description" />
+        <meta name="twitter:image"
+              content="@GetAbsoluteUrl(string.IsNullOrWhiteSpace(CurrentEvent.CoverImageUrl) ? "/Images/Fond1.jpeg" : CurrentEvent.CoverImageUrl)" />
+    </HeadContent>
 }
 
 <section class="min-h-screen bg-[#ececef] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
-	<div class="mx-auto w-full max-w-6xl space-y-4">
-		@if (IsLoading)
-		{
-			<div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement de
-				l'événement...</div>
-			}
-		else if (!string.IsNullOrWhiteSpace(LoadError))
-			{
-				<div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@LoadError</div>
-				<a href="/evenements"
-					   class="inline-flex text-xs sm:text-sm font-semibold text-secondary hover:underline">Retour aux
-					événements</a>
-				}
-		else if (CurrentEvent is not null)
-				{
-					<article class="overflow-hidden rounded-xl bg-white shadow-sm">
-						<div class="h-64 bg-cover bg-center sm:h-80"
-						     style="@BuildCoverStyle(CurrentEvent.CoverImageUrl)"></div>
-						<div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
-							<div class="flex justify-between items-center">
-								<span
-									class="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
-									<i class="fa-solid fa-satellite-dish text-[9px] sm:text-[10px]"></i>
-									@GetEventTypeLabel(CurrentEvent.EventType)
-								</span>
-								<button type="button"
-									  class=" items-center rounded-lg bg-white text-black transition hover:bg-gray-800 lg:hidden"
-									  aria-label="Partager l'événement" aria-expanded="@IsShared"
-									  aria-controls="mobile-share-panel" @onclick="ToggleSharePanel">
-									<i class="fa-solid fa-share-nodes text-[12px] sm:text-[13px]"></i>
-								</button>
-							</div>
+    <div class="mx-auto w-full max-w-6xl space-y-4">
+        @if (IsLoading)
+        {
+            <div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">
+                Chargement de l'événement...
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(LoadError))
+        {
+            <div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">
+                @LoadError
+            </div>
+            <a href="/evenements" class="inline-flex text-xs sm:text-sm font-semibold text-secondary hover:underline">
+                Retour aux événements
+            </a>
+        }
+        else if (CurrentEvent is not null)
+        {
+            @* ── Hero card ── *@
+            <article class="overflow-hidden rounded-xl bg-white shadow-sm">
+                <div class="h-64 bg-cover bg-center sm:h-80" style="@BuildCoverStyle(CurrentEvent.CoverImageUrl)"></div>
+                <div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
+                    <div class="flex justify-between items-center">
+                        <span class="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
+                            <i class="fa-solid fa-satellite-dish text-[9px] sm:text-[10px]"></i>
+                            @GetEventTypeLabel(CurrentEvent.EventType)
+                        </span>
+                        <button type="button"
+                                class="items-center rounded-lg bg-white text-black transition hover:bg-gray-800 lg:hidden"
+                                aria-label="Partager l'événement" aria-expanded="@IsShared"
+                                aria-controls="mobile-share-panel" @onclick="ToggleSharePanel">
+                            <i class="fa-solid fa-share-nodes text-[12px] sm:text-[13px]"></i>
+                        </button>
+                    </div>
 
-							<h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-gray-700">
-								@CurrentEvent.Title</h1>
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold leading-tight text-gray-700">
+                        @CurrentEvent.Title
+                    </h1>
 
-								<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
-									<span class="inline-flex items-center gap-1.5 sm:gap-2">
-										<i class="fa-regular fa-calendar text-secondary"></i>
-										@CurrentEvent.StartDate.ToString("dd MMMM yyyy HH:mm", FrCulture)
-									</span>
-									<span class="inline-flex items-center gap-1.5 sm:gap-2">
-										<i class="fa-solid fa-location-dot text-secondary"></i>
-										@CurrentEvent.Location
-									</span>
-								</div>
+                    <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
+                        <span class="inline-flex items-center gap-1.5 sm:gap-2">
+                            <i class="fa-regular fa-calendar text-secondary"></i>
+                            @CurrentEvent.StartDate.ToString("dd MMMM yyyy HH:mm", FrCulture)
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 sm:gap-2">
+                            <i class="fa-solid fa-location-dot text-secondary"></i>
+                            @CurrentEvent.Location
+                        </span>
+                    </div>
 
-								<div class="flex flex-wrap items-center gap-3 pt-1">
-									<a href="#inscription"
-										   class="inline-flex h-10 sm:h-11 items-center justify-center rounded-lg bg-secondary px-4 sm:px-6 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110">Réserver
-										ma place</a>
-										<div>
-											<p class="text-xs sm:text-sm font-semibold text-gray-700">
-												@CurrentEvent.RegisteredCount
-												inscrits</p>
-												<p class="text-[11px] sm:text-xs text-gray-500">Capacité : @CurrentEvent.Capacity
-												</p>
-											</div>
-										</div>
-									</div>
-								</article>
+                    @* Meetup link *@
+                    @if (!string.IsNullOrWhiteSpace(CurrentEvent.MeetupLink) && CurrentEvent.EventType is "Online" or "Hybrid")
+                    {
+                        <a href="@CurrentEvent.MeetupLink" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110">
+                            <i class="fa-solid fa-video"></i>
+                            Rejoindre en @(CurrentEvent.EventType == "Online" ? "ligne" : "visioconférence")
+                        </a>
+                    }
 
-								<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 relative">
-									<article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
-										<h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">À propos de l'événement</h2>
-										<p class="mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed text-gray-600 sm:text-base">
-											@CurrentEvent.Description
-										</p>
-									</article>
+                    @* Registration *@
+                    @if (_isPastEvent)
+                    {
+                        <div class="flex flex-wrap items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+                            <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-gray-500">
+                                <i class="fa-regular fa-clock"></i>
+                                Événement passé
+                            </span>
+                            @if (IsRegistered)
+                            {
+                                <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-gray-500">
+                                    <i class="fa-solid fa-check"></i>
+                                    Vous étiez inscrit
+                                </span>
+                            }
+                            <div class="flex items-center gap-2 ml-auto">
+                                <div class="flex -space-x-2">
+                                    @{
+                                        var pastAvatars = Registrations?.Take(3).ToList() ?? new();
+                                    }
+                                    @foreach (var reg in pastAvatars)
+                                    {
+                                        <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-[8px] sm:text-xs font-bold flex-shrink-0 overflow-hidden @(string.IsNullOrWhiteSpace(reg.AvatarUrl) ? "bg-green-100" : "")">
+                                            @if (!string.IsNullOrWhiteSpace(reg.AvatarUrl))
+                                            {
+                                                <img src="@reg.AvatarUrl" alt="@reg.UserName" class="h-full w-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-gray-600">
+                                                    @(reg.UserName.Length > 0 ? reg.UserName[0].ToString() : "?")
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    @for (int i = pastAvatars.Count; i < 3; i++)
+                                    {
+                                        <div class="w-6 h-6 sm:w-7 sm:h-7 bg-green-100 rounded-full border-2 border-white flex-shrink-0"></div>
+                                    }
+                                </div>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-semibold text-gray-700">
+                                        @CurrentEvent.RegisteredCount inscrits
+                                    </p>
+                                    <p class="text-[11px] sm:text-xs text-gray-500">
+                                        Capacité : @CurrentEvent.Capacity
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex flex-wrap items-center gap-3 pt-1">
+                            @if (IsRegistered)
+                            {
+                                <button type="button" @onclick="HandleCancelRegistration"
+                                        disabled="@IsCancelling"
+                                        class="inline-flex h-10 sm:h-11 items-center justify-center rounded-lg bg-red-500 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110 @(IsCancelling ? "opacity-50 cursor-not-allowed" : "")">
+                                    @if (IsCancelling)
+                                    {
+                                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                                    }
+                                    Se désinscrire
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" @onclick="HandleRegister"
+                                        disabled="@IsRegistering"
+                                        class="inline-flex h-10 sm:h-11 items-center justify-center rounded-lg bg-secondary px-4 sm:px-6 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110 @(IsRegistering ? "opacity-50 cursor-not-allowed" : "")">
+                                    @if (IsRegistering)
+                                    {
+                                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                                    }
+                                    S'inscrire
+                                </button>
+                            }
+                            <div class="flex items-center gap-2">
+                                <div class="flex -space-x-2">
+                                    @{
+                                        var currentAvatars = Registrations?.Take(3).ToList() ?? new();
+                                    }
+                                    @foreach (var reg in currentAvatars)
+                                    {
+                                        <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-[8px] sm:text-xs font-bold flex-shrink-0 overflow-hidden @(string.IsNullOrWhiteSpace(reg.AvatarUrl) ? "bg-green-100" : "")">
+                                            @if (!string.IsNullOrWhiteSpace(reg.AvatarUrl))
+                                            {
+                                                <img src="@reg.AvatarUrl" alt="@reg.UserName" class="h-full w-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-gray-600">
+                                                    @(reg.UserName.Length > 0 ? reg.UserName[0].ToString() : "?")
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    @for (int i = currentAvatars.Count; i < 3; i++)
+                                    {
+                                        <div class="w-6 h-6 sm:w-7 sm:h-7 bg-green-100 rounded-full border-2 border-white flex-shrink-0"></div>
+                                    }
+                                </div>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-semibold text-gray-700">
+                                        @CurrentEvent.RegisteredCount inscrits
+                                    </p>
+                                    <p class="text-[11px] sm:text-xs text-gray-500">
+                                        Capacité : @CurrentEvent.Capacity
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </article>
 
-									@* Format desktop *@
+            @* ── À propos + Partage desktop ── *@
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 relative">
+                <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                    <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
+                        À propos de l'événement
+                    </h2>
+                    <p class="mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed text-gray-600 sm:text-base">
+                        @CurrentEvent.Description
+                    </p>
+                </article>
 
-									<aside
-										class="hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:sticky lg:top-0 lg:block">
-										<div class="flex items-start justify-between gap-4">
-											<div>
-												<p
-													class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-													Partage
-												</p>
-												<h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">Partager cet événement
-												</h2>
-												<p class="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">Diffusez
-													l'événement sur vos
-													réseaux ou copiez le lien direct.</p>
-												</div>
-												<div
-													class="flex h-11 w-11 items-center justify-center rounded-md bg-indigo-50 text-secondary">
-													<i class="fa-solid fa-share-nodes"></i>
-												</div>
-											</div>
+                <aside class="hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:sticky lg:top-0 lg:block">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
+                                Partage
+                            </p>
+                            <h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
+                                Partager cet événement
+                            </h2>
+                            <p class="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">
+                                Diffusez l'événement sur vos réseaux ou copiez le lien direct.
+                            </p>
+                        </div>
+                        <div class="flex h-11 w-11 items-center justify-center rounded-md bg-indigo-50 text-secondary">
+                            <i class="fa-solid fa-share-nodes"></i>
+                        </div>
+                    </div>
+                    <ShareButtons Title="@CurrentEvent.Title" Url="@GetAbsoluteUrl(CurrentPageUrl)"
+                                  Description="@CurrentEvent.Description" />
+                </aside>
+            </div>
 
-											<ShareButtons Title="@CurrentEvent.Title"
-														  Url="@GetAbsoluteUrl(CurrentPageUrl)"
-														  Description="@CurrentEvent.Description" />
-										</aside>
+            @* ── Mobile share overlay ── *@
+            <div class="fixed inset-0 z-10 bg-black/50 sm:hidden @(IsShared ? "" : "hidden")"
+                 @onclick="ToggleSharePanel"></div>
+            <aside id="mobile-share-panel"
+                   class="overflow-hidden z-20 w-[91%] fixed top-20 rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 lg:hidden @(IsShared ? "max-h-80 p-4 opacity-100 pointer-events-auto translate-x-0" : "max-h-0 p-0 opacity-0 pointer-events-none translate-x-full")">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+                            Partage
+                        </p>
+                        <h2 class="mt-1 text-base sm:text-lg font-bold text-gray-800">
+                            Partager cet événement
+                        </h2>
+                    </div>
+                    <button type="button"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
+                            aria-label="Fermer le partage" @onclick="ToggleSharePanel">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <ShareButtons Title="@CurrentEvent.Title" Url="@GetAbsoluteUrl(CurrentPageUrl)"
+                              Description="@CurrentEvent.Description" />
+            </aside>
 
-										<div class="fixed inset-0 z-10 bg-black/50 sm:hidden @(Closed ? string.Empty : "hidden")"
-										     @onclick="ToggleSharePanel"></div>
-										<aside id="mobile-share-panel"
-											 class="overflow-hidden z-20 w-[91%] fixed top-20 rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 lg:hidden @(IsShared ? "max-h-80 p-4 opacity-100 pointer-events-auto translate-x-0" : "max-h-0 p-0 opacity-0 pointer-events-none translate-x-full")">
-											<div class="flex items-center justify-between gap-3">
-												<div>
-													<p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-														Partage
-													</p>
-													<h2 class="mt-1 text-base sm:text-lg font-bold text-gray-800">Partager cet événement
-													</h2>
-												</div>
-												<button type="button"
-													  class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
-													  aria-label="Fermer le partage" @onclick="ToggleSharePanel">
-													<i class="fa-solid fa-xmark"></i>
-												</button>
-											</div>
-
-											<ShareButtons Title="@CurrentEvent.Title"
-														  Url="@GetAbsoluteUrl(CurrentPageUrl)"
-														  Description="@CurrentEvent.Description" />
-										</aside>
-									</div>
-
-									<div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-										<article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
-											<div class="text-center">
-												<h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Intervenants</h2>
-												<p class="mt-2 text-xs sm:text-sm text-gray-500 sm:text-base">Des experts passionnés
-													partageant leur
-													savoir.</p>
-												</div>
-
-												<div class="mt-5 sm:mt-7 grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-4">
-													@foreach (var speaker in Speakers)
-													{
-														<div class="text-center">
-															<div
-																class="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-indigo-700 text-sm sm:text-lg font-bold text-white ring-2 ring-indigo-200">
-																@speaker.Initials
-															</div>
-															<h3 class="mt-2 sm:mt-3 text-xs sm:text-sm font-semibold text-gray-700">
-																@speaker.Name</h3>
-																<p class="text-[10px] sm:text-xs text-gray-500">@speaker.Role</p>
-															</div>
-														}
-                                            </div>
-                                        </article>
+            @* ── Intervenants ── *@
+            @if (CurrentEvent.Speakers.Count > 0)
+            {
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                        <div class="text-center">
+                            <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Intervenants</h2>
+                            <p class="mt-2 text-xs sm:text-sm text-gray-500 sm:text-base">
+                                Des experts passionnés partageant leur savoir.
+                            </p>
+                        </div>
+                        <div class="mt-5 sm:mt-7 grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-4">
+                            @foreach (var speaker in CurrentEvent.Speakers)
+                            {
+                                <div class="text-center">
+                                    <div class="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-indigo-700 text-sm sm:text-lg font-bold text-white ring-2 ring-indigo-200 overflow-hidden">
+                                        @if (!string.IsNullOrWhiteSpace(speaker.AvatarUrl))
+                                        {
+                                            <img src="@speaker.AvatarUrl" alt="@speaker.Name" class="h-full w-full object-cover" />
+                                        }
+                                        else
+                                        {
+                                            <span>@(speaker.Name.Length > 0 ? speaker.Name[..1].ToUpper() : "?")</span>
+                                        }
                                     </div>
+                                    <h3 class="mt-2 sm:mt-3 text-xs sm:text-sm font-semibold text-gray-700">
+                                        @speaker.Name
+                                    </h3>
+                                    <p class="text-[10px] sm:text-xs text-gray-500">@speaker.Role</p>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                </div>
+            }
 
-                                    @* Galerie photos *@
-                                    @if (_galleryImages.Count > 0)
-                                    {
-                                        <div class="grid grid-cols-1 gap-4">
-                                            <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
-                                                <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Galerie photos</h2>
-                                                <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                                    @foreach (var img in _galleryImages)
-                                                    {
-                                                        <a href="@img" target="_blank" class="block">
-                                                            <img src="@img"
-                                                                 class="h-28 sm:h-32 w-full rounded-xl object-cover border border-gray-200 hover:opacity-90 transition" />
-                                                        </a>
-                                                    }
-                                                </div>
-                                            </article>
-                                        </div>
-                                    }
-                                    else if (_isPastEvent)
-                                    {
-                                        @* Événement passé sans photos *@
-                                    }
-                                    else
-                                    {
-                                        <div class="grid grid-cols-1 gap-4">
-                                            <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
-                                                <div class="flex flex-col items-center justify-center py-10 text-center">
-                                                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                                        <i class="fas fa-images text-2xl text-gray-400"></i>
-                                                    </div>
-                                                    <h3 class="mt-4 text-base sm:text-lg font-bold text-gray-700">Galerie de l'événement à venir</h3>
-                                                    <p class="mt-1 text-xs sm:text-sm text-gray-500">Les photos souvenirs seront disponibles après l'événement.</p>
-                                                </div>
-                                            </article>
-                                        </div>
-                                    }
+            @* ── Galerie photos ── *@
+            @if (_galleryImages.Count > 0)
+            {
+                <div class="grid grid-cols-1 gap-4">
+                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                        <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Galerie photos</h2>
+                        <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            @foreach (var img in _galleryImages)
+                            {
+                                <a href="@img" target="_blank" class="block">
+                                    <img src="@img"
+                                         class="h-28 sm:h-32 w-full rounded-xl object-cover border border-gray-200 hover:opacity-90 transition" />
+                                </a>
+                            }
+                        </div>
+                    </article>
+                </div>
+            }
+            else if (_isPastEvent)
+            {
+                <div class="grid grid-cols-1 gap-4">
+                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                        <div class="flex flex-col items-center justify-center py-10 text-center">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                <i class="fas fa-images text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="mt-4 text-base sm:text-lg font-bold text-gray-700">
+                                Aucune photo disponible
+                            </h3>
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
+                                Cet événement ne dispose pas de galerie photos.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            }
+            else
+            {
+                <div class="grid grid-cols-1 gap-4">
+                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                        <div class="flex flex-col items-center justify-center py-10 text-center">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                <i class="fas fa-images text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="mt-4 text-base sm:text-lg font-bold text-gray-700">
+                                Galerie de l'événement à venir
+                            </h3>
+                            <p class="mt-1 text-xs sm:text-sm text-gray-500">
+                                Les photos souvenirs seront disponibles après l'événement.
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            }
 
-                                    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3" id="inscription">
-												<article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
-													<h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Commentaires & Feedback
-													</h2>
+            @* ── Commentaires ── *@
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                    <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
+                        Commentaires & Feedback
+                    </h2>
 
-													@if (CurrentEvent is not null)
-													{
-														<div class="mt-5">
-															<CommentForm EventId="CurrentEvent.Id" OnCommentAdded="RefreshComments" />
-														</div>
+                    <div class="mt-5">
+                        <CommentForm EventId="CurrentEvent.Id" OnCommentAdded="RefreshComments" />
+                    </div>
 
-														<div class="mt-7">
-															@if (EventComments.Count == 0)
-															{
-																<p class="text-xs sm:text-sm text-gray-500">Aucun commentaire pour le moment. Soyez le
-																	premier à
-																	commenter !</p>
-																}
-											else
-																{
-																	<CommentThread Comments="EventComments" OnReplySubmitted="RefreshComments"
-																			   OnCommentUpdated="RefreshComments" OnCommentDeleted="RefreshComments" />
-																}
-															</div>
-
-															<a href="#"
-																   class="mt-6 sm:mt-8 inline-flex text-xs sm:text-sm font-semibold text-secondary hover:underline">Voir
-																plus de commentaires</a>
-															}
-														</article>
-													</div>
-												}
-											</div>
-										</section>
-
+                    <div class="mt-7">
+                        @if (EventComments.Count == 0)
+                        {
+                            <p class="text-xs sm:text-sm text-gray-500">
+                                Aucun commentaire pour le moment. Soyez le premier à commenter !
+                            </p>
+                        }
+                        else
+                        {
+                            <CommentThread Comments="EventComments"
+                                           OnReplySubmitted="RefreshComments"
+                                           OnCommentUpdated="RefreshComments"
+                                           OnCommentDeleted="RefreshComments" />
+                        }
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+</section>
 
 @code {
-	[Parameter] public string? Slug { get; set; }
-	[Parameter] public Guid? Id { get; set; }
+    [Parameter] public string? Slug { get; set; }
+    [Parameter] public Guid? Id { get; set; }
 
-	private static readonly CultureInfo FrCulture = CultureInfo.GetCultureInfo("fr-FR");
-	private EventDto? CurrentEvent { get; set; }
-	private List<CommentResponse> EventComments { get; set; } = new();
-	private bool IsLoading { get; set; }
-	private bool IsShared { get; set; } = false;
-	private bool Closed { get; set; } = false;
-	private string? LoadError { get; set; }
-	private string CurrentPageUrl { get; set; } = "/evenements";
-	private List<string> _galleryImages { get; set; } = new();
-	private bool _isPastEvent { get; set; }
+    private static readonly CultureInfo FrCulture = CultureInfo.GetCultureInfo("fr-FR");
+    private EventDto? CurrentEvent { get; set; }
+    private List<CommentResponse> EventComments { get; set; } = new();
+    private bool IsLoading { get; set; }
+    private bool IsShared { get; set; }
+    private string? LoadError { get; set; }
+    private string CurrentPageUrl { get; set; } = "/evenements";
+    private List<string> _galleryImages { get; set; } = new();
+    private bool _isPastEvent { get; set; }
+    private List<EventRegistrationDto> Registrations { get; set; } = new();
+    private bool IsRegistered { get; set; }
+    private bool IsRegistering { get; set; }
+    private bool IsCancelling { get; set; }
 
+    private async Task HandleRegister()
+    {
+        if (CurrentEvent is null) return;
 
-	void ToggleSharePanel()
-	{
-		IsShared = !IsShared;
-		Closed = !Closed;
+        if (!UserStateService.IsAuthenticated)
+        {
+            ToastService.ShowToast("Vous devez être connecté pour vous inscrire.", ToastLevel.Warning);
+            NavManager.NavigateTo("/auth/login");
+            return;
+        }
 
-	}
+        if (IsRegistered)
+        {
+            ToastService.ShowToast("Vous êtes déjà inscrit à cet événement.", ToastLevel.Info);
+            return;
+        }
 
-	private async Task RefreshComments()
-	{
-		if (CurrentEvent is null)
-			return;
+        IsRegistering = true;
+        try
+        {
+            var avatarUrl = UserStateService.CurrentUser?.AvatarUrl ?? string.Empty;
+            var request = new RegisterEventRequest { EventId = CurrentEvent.Id, AvatarUrl = avatarUrl };
+            var result = await EventService.RegisterToEventAsync(request, UserStateService.UserId, UserStateService.UserName);
 
-		EventComments = await CommentService.GetCommentsByEventIdAsync(CurrentEvent.Id);
-	}
+            if (result is null)
+            {
+                ToastService.ShowToast("Impossible de s'inscrire. L'événement est peut-être complet.", ToastLevel.Error);
+                return;
+            }
 
-	protected override async Task OnParametersSetAsync()
-	{
-		IsLoading = true;
-		LoadError = null;
-		CurrentEvent = null;
-		EventComments = new();
+            ToastService.ShowToast("Inscription réussie !", ToastLevel.Success);
+            IsRegistered = true;
+            CurrentEvent.RegisteredCount++;
+            Registrations = await EventService.GetRegistrationsByEventAsync(CurrentEvent.Id);
+            StateHasChanged();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de l'inscription.", ToastLevel.Error);
+        }
+        finally
+        {
+            IsRegistering = false;
+        }
+    }
 
-		try
-		{
-			if (Id.HasValue)
-			{
-				CurrentEvent = await EventService.GetEventByIdAsync(Id.Value);
-			}
-			else if (!string.IsNullOrWhiteSpace(Slug))
-			{
-				CurrentEvent = await EventService.GetEventBySlugAsync(Slug);
-			}
+    private async Task HandleCancelRegistration()
+    {
+        if (CurrentEvent is null) return;
 
-			if (CurrentEvent is null)
-			{
-				LoadError = "Événement introuvable.";
-				return;
-			}
+        if (!UserStateService.IsAuthenticated) return;
 
-			// Charger les commentaires pour cet événement
-			EventComments = await CommentService.GetCommentsByEventIdAsync(CurrentEvent.Id);
+        IsCancelling = true;
+        try
+        {
+            var success = await EventService.CancelRegistrationAsync(CurrentEvent.Id, UserStateService.UserId);
 
-			CurrentPageUrl = !string.IsNullOrWhiteSpace(CurrentEvent.Slug)
-				? $"/evenements/{CurrentEvent.Slug}"
-				: $"/evenements/{CurrentEvent.Id}";
+            if (!success)
+            {
+                ToastService.ShowToast("Impossible d'annuler l'inscription.", ToastLevel.Error);
+                return;
+            }
 
-		_galleryImages = CurrentEvent.GalleryImageUrls ?? new();
-		_isPastEvent = CurrentEvent.EndDate < DateTime.Now;
-		}
-		catch
-		{
-			LoadError = "Impossible de charger cet événement pour le moment.";
-		}
-		finally
-		{
-			IsLoading = false;
-		}
-	}
+            ToastService.ShowToast("Inscription annulée.", ToastLevel.Success);
+            IsRegistered = false;
+            CurrentEvent.RegisteredCount--;
+            Registrations = await EventService.GetRegistrationsByEventAsync(CurrentEvent.Id);
+            StateHasChanged();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de l'annulation.", ToastLevel.Error);
+        }
+        finally
+        {
+            IsCancelling = false;
+        }
+    }
 
-	private static string BuildCoverStyle(string coverImageUrl)
-	{
-		var img = string.IsNullOrWhiteSpace(coverImageUrl) ? "/Images/Fond1.jpeg" : coverImageUrl;
-		return $"background-image: linear-gradient(rgba(46, 26, 122, 0.45), rgba(46, 26, 122, 0.45)), url('{img}');";
-	}
+    private void ToggleSharePanel()
+    {
+        IsShared = !IsShared;
+    }
 
-	private static string GetEventTypeLabel(string eventType)
-	{
-		return eventType.ToLowerInvariant() switch
-		{
-			"online" => "En ligne",
-			"physical" => "Présentiel",
-			"hybrid" => "Hybride",
-			_ => string.IsNullOrWhiteSpace(eventType) ? "Événement" : eventType
-		};
-	}
+    private async Task RefreshComments()
+    {
+        if (CurrentEvent is null) return;
 
-	private static readonly IReadOnlyList<SpeakerViewModel> Speakers =
-	[
-		new("Ahmed Moussa", "Senior .NET Architect", "AM"),
-		new("Awa Issa", "Cloud Engineer", "AI"),
-		new("Boubacar Adamou", "Tech Lead", "BA"),
-		new("Mariam Oumarou", "AI Specialist", "MO")
-	];
+        EventComments = await CommentService.GetCommentsByEventIdAsync(CurrentEvent.Id);
+    }
 
-	private sealed record SpeakerViewModel(string Name, string Role, string Initials);
+    protected override async Task OnParametersSetAsync()
+    {
+        IsLoading = true;
+        LoadError = null;
+        CurrentEvent = null;
+        EventComments = new();
 
-	private string GetAbsoluteUrl(string relativeUrl)
-	{
-		var baseUri = NavManager.BaseUri.TrimEnd('/');
-		var url = relativeUrl.TrimStart('/');
-		return $"{baseUri}/{url}";
-	}
+        if (UserStateService.CurrentUser is null)
+            await UserStateService.LoadUserFromStorageAsync();
+
+        try
+        {
+            if (Id.HasValue)
+            {
+                CurrentEvent = await EventService.GetEventByIdAsync(Id.Value);
+            }
+            else if (!string.IsNullOrWhiteSpace(Slug))
+            {
+                CurrentEvent = await EventService.GetEventBySlugAsync(Slug);
+            }
+
+            if (CurrentEvent is null)
+            {
+                LoadError = "Événement introuvable.";
+                return;
+            }
+
+            EventComments = await CommentService.GetCommentsByEventIdAsync(CurrentEvent.Id);
+
+            CurrentPageUrl = !string.IsNullOrWhiteSpace(CurrentEvent.Slug)
+                ? $"/evenements/{CurrentEvent.Slug}"
+                : $"/evenements/{CurrentEvent.Id}";
+
+            _galleryImages = CurrentEvent.GalleryImageUrls ?? new();
+            _isPastEvent = CurrentEvent.EndDate < DateTime.Now;
+            Registrations = await EventService.GetRegistrationsByEventAsync(CurrentEvent.Id);
+            IsRegistered = UserStateService.IsAuthenticated && Registrations.Any(r => r.UserId == UserStateService.UserId);
+        }
+        catch
+        {
+            LoadError = "Impossible de charger cet événement pour le moment.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private static string BuildCoverStyle(string coverImageUrl)
+    {
+        var img = string.IsNullOrWhiteSpace(coverImageUrl) ? "/Images/Fond1.jpeg" : coverImageUrl;
+        return $"background-image: linear-gradient(rgba(46, 26, 122, 0.45), rgba(46, 26, 122, 0.45)), url('{img}');";
+    }
+
+    private static string GetEventTypeLabel(string eventType)
+    {
+        return eventType.ToLowerInvariant() switch
+        {
+            "online" => "En ligne",
+            "physical" => "Présentiel",
+            "hybrid" => "Hybride",
+            _ => string.IsNullOrWhiteSpace(eventType) ? "Événement" : eventType
+        };
+    }
+
+    private string GetAbsoluteUrl(string relativeUrl)
+    {
+        var baseUri = NavManager.BaseUri.TrimEnd('/');
+        var url = relativeUrl.TrimStart('/');
+        return $"{baseUri}/{url}";
+    }
 }

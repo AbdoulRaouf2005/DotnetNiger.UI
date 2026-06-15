@@ -158,31 +158,6 @@ public class EventService : IEventService
 
     // ── Création / Mise à jour / Suppression ───────────────────
 
-    // public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
-    // {
-    //     var newEvent = new EventDto
-    //     {
-    //         Id = Guid.NewGuid(),
-    //         Title = request.Title,
-    //         Slug = GenerateSlug(request.Title),
-    //         Description = request.Description,
-    //         Location = request.Location,
-    //         EventType = request.EventType,
-    //         StartDate = request.StartDate,
-    //         EndDate = request.EndDate,
-    //         CoverImageUrl = string.IsNullOrEmpty(request.CoverImageUrl)
-    //             ? "/Images/evenement.jpg"
-    //             : request.CoverImageUrl,
-    //         OrganizerName = "Admin",
-    //         Capacity = request.Capacity,
-    //         RegisteredCount = 0,
-    //         MeetupLink = request.MeetupLink,
-    //         Medias = new List<EventMediaDto>()
-    //     };
-
-    //     _events.Add(newEvent);
-    //     return await Task.FromResult(newEvent);
-    // }
 
     public async Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
     {
@@ -201,6 +176,7 @@ public class EventService : IEventService
             Description = request.Description,
             Location = request.Location,
             EventType = request.EventType,
+            Category = request.Category,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             CoverImageUrl = request.CoverImageUrl ?? "/images/events/default.jpg",
@@ -214,6 +190,13 @@ public class EventService : IEventService
                 Title = "Galerie"
             }).ToList(),
             GalleryImageUrls = request.GalleryImageUrls,
+            Speakers = request.Speakers?.Select(s => new SpeakerDto
+            {
+                UserId = s.UserId,
+                Name = s.Name,
+                Role = s.Role,
+                AvatarUrl = s.AvatarUrl
+            }).ToList() ?? new(),
             CreatedBy = currentUserId,
             OrganizerName = "À déterminer", // on pourrait compléter après
             RegisteredCount = 0,
@@ -296,6 +279,7 @@ public class EventService : IEventService
         ev.Description = request.Description;
         ev.Location = request.Location;
         ev.EventType = request.EventType;
+        ev.Category = request.Category;
         ev.StartDate = request.StartDate;
         ev.EndDate = request.EndDate;
         ev.CoverImageUrl = request.CoverImageUrl;
@@ -309,6 +293,14 @@ public class EventService : IEventService
             Url = url,
             Title = "Galerie"
         }).ToList();
+
+        ev.Speakers = request.Speakers?.Select(s => new SpeakerDto
+        {
+            UserId = s.UserId,
+            Name = s.Name,
+            Role = s.Role,
+            AvatarUrl = s.AvatarUrl
+        }).ToList() ?? new();
 
         return await Task.FromResult<EventDto?>(ev);
     }
@@ -350,6 +342,7 @@ public class EventService : IEventService
             EventTitle = ev.Title,
             UserId = userId,
             UserName = userName,
+            AvatarUrl = request.AvatarUrl,
             RegisteredAt = DateTime.Now,
             IsAttended = false,
             RegistrationStatus = "Confirmed"

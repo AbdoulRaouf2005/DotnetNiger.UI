@@ -3,28 +3,56 @@
 @using DotnetNiger.UI.Services.Contracts
 
 @inject ICommentService CommentService
+@inject IUserStateService UserStateService
+@inject IToastService ToastService
+
+@if (UserStateService.IsAuthenticated)
+{
     <div class="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <!-- User avatar -->
-        <div class="h-9 w-9 flex-shrink-0 rounded-full bg-[#e5edf9] flex items-center justify-center text-sm font-bold text-[#5b4df5]">
-            V
+        <div class="h-9 w-9 flex-shrink-0 rounded-full bg-[#e5edf9] flex items-center justify-center text-sm font-bold text-[#5b4df5] overflow-hidden">
+            @if (!string.IsNullOrWhiteSpace(userAvatar))
+            {
+                <img src="@userAvatar" alt="Avatar" class="h-full w-full object-cover" />
+            }
+            else
+            {
+                @userInitial
+            }
         </div>
 
         <div class="flex-1">
-            <input 
-                type="text" 
-                placeholder="Tapez votre commentaire..." 
+            <input
+                type="text"
+                placeholder="Tapez votre commentaire..."
                 class="w-full border-0 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
-                @onclick="async () => { if (!string.IsNullOrWhiteSpace(commentContent)) await HandleSubmit(); }"
-                @bind="commentContent" />
+                @bind="commentContent"
+                @bind:event="oninput"
+                maxlength="1000" />
         </div>
-            <button 
-                type="button" 
-                class="flex h-10 w-10 items-center justify-center rounded-full bg-[#5b4df5] text-white shadow-lg shadow-[#5b4df5]/30 hover:bg-[#4a3cd5] transition"
-                @onclick="async () => { if (!string.IsNullOrWhiteSpace(commentContent)) await HandleSubmit(); }">
-                <i class="fa-solid fa-paper-plane text-sm"></i>
-            </button>
-        
+        <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-[#5b4df5] text-white shadow-lg shadow-[#5b4df5]/30 hover:bg-[#4a3cd5] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled="@(isSubmitting || string.IsNullOrWhiteSpace(commentContent))"
+            @onclick="HandleSubmit">
+            <i class="fa-solid fa-paper-plane text-sm"></i>
+        </button>
     </div>
+}
+else
+{
+    <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 sm:p-6 text-center">
+        <i class="fa-solid fa-lock text-lg text-gray-400 mb-2 block"></i>
+        <p class="text-sm text-gray-500">
+            <a href="/login" class="text-secondary font-semibold hover:underline">Connectez-vous</a> pour laisser un commentaire.
+        </p>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <p class="mt-2 text-xs text-red-500">@errorMessage</p>
+}
 
 @code {
     [Parameter]
@@ -37,22 +65,53 @@
     public EventCallback OnCommentAdded { get; set; }
 
     private string commentContent = string.Empty;
+    private string errorMessage = string.Empty;
+    private string userAvatar = string.Empty;
+    private string userInitial = "?";
+
+    protected override void OnInitialized()
+    {
+        var user = UserStateService.CurrentUser;
+        if (user is not null)
+        {
+            userAvatar = user.AvatarUrl ?? string.Empty;
+            userInitial = string.IsNullOrWhiteSpace(user.FullName)
+                ? "?"
+                : user.FullName.Trim()[0].ToString().ToUpperInvariant();
+        }
+    }
 
     private async Task HandleSubmit()
     {
         if (string.IsNullOrWhiteSpace(commentContent))
             return;
 
-        var request = new CreateCommentRequest
-        {
-            Content = commentContent.Trim(),
-            PostId = Guid.TryParse(PostId, out var postGuid) ? postGuid : null,
-            EventId = EventId,
-            ParentCommentId = null
-        };
+        isSubmitting = true;
+        errorMessage = string.Empty;
 
-        await CommentService.CreateCommentAsync(request);
-        commentContent = string.Empty;
-        await OnCommentAdded.InvokeAsync();
+        try
+        {
+            var request = new CreateCommentRequest
+            {
+                Content = commentContent.Trim(),
+                PostId = Guid.TryParse(PostId, out var postGuid) ? postGuid : null,
+                EventId = EventId,
+                ParentCommentId = null
+            };
+
+            await CommentService.CreateCommentAsync(request);
+            commentContent = string.Empty;
+            ToastService.ShowToast("Commentaire ajouté.", ToastLevel.Success);
+            await OnCommentAdded.InvokeAsync();
+        }
+        catch
+        {
+            errorMessage = "Impossible d'envoyer le commentaire. Veuillez réessayer.";
+            ToastService.ShowToast("Erreur lors de l'envoi.", ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 }

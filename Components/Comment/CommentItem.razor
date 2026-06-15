@@ -2,8 +2,10 @@
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Services.Contracts
+@using System.Text.RegularExpressions
 
 @inject ICommentService CommentService
+@inject IToastService ToastService
 
 <div class="flex gap-4">
     <!-- Avatar -->
@@ -37,15 +39,15 @@
             @if (Comment.UserId == CurrentUserId && !isEditing && !showDeleteConfirm)
             {
                 <div class="flex items-center gap-2">
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         class="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
                         title="Modifier"
-                        @onclick="() => ToggleEdit()">
+                        @onclick="ToggleEdit">
                         <i class="fa-solid fa-edit text-sm"></i>
                     </button>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         class="text-xs text-red-400 hover:text-red-600 px-2 py-1"
                         title="Supprimer"
                         @onclick="ShowDeleteConfirmation">
@@ -53,28 +55,41 @@
                     </button>
                 </div>
             }
+
+            <!-- Report button (visible for everyone except the author) -->
+            @if (Comment.UserId != CurrentUserId)
+            {
+                <button
+                    type="button"
+                    class="text-xs text-gray-400 hover:text-yellow-600 px-2 py-1"
+                    title="Signaler"
+                    @onclick="HandleReport">
+                    <i class="fa-solid fa-flag text-sm"></i>
+                </button>
+            }
         </div>
 
         <!-- Edit form or content display -->
         @if (isEditing)
         {
             <div class="mt-3 space-y-3">
-                <textarea 
+                <textarea
                     @bind="editedContent"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
                     rows="3"
+                    maxlength="1000"
                     placeholder="Modifiez votre commentaire..."></textarea>
                 <div class="flex gap-2">
-                    <button 
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5]"
                         @onclick="HandleUpdate">
                         Enregistrer
                     </button>
-                    <button 
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                        @onclick="() => ToggleEdit()">
+                        @onclick="ToggleEdit">
                         Annuler
                     </button>
                 </div>
@@ -84,15 +99,19 @@
         {
             <div class="mt-3 space-y-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
                 <p class="text-sm text-red-800 font-semibold">Confirmer la suppression ?</p>
-                <p class="text-xs text-red-600">Cette action est irréversible. Tous les commentaires de réponses seront également supprimés.</p>
-                <div class="flex gap-2">
-                    <button 
+                <p class="text-xs text-red-600">Cette action est irréversible.</p>
+                <label class="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                    <input type="checkbox" @bind="deleteAllReplies" />
+                    Supprimer aussi les réponses
+                </label>
+                <div class="flex gap-2 mt-2">
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
                         @onclick="HandleDelete">
-                        Supprimer définitivement
+                        Supprimer
                     </button>
-                    <button 
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
                         @onclick="() => showDeleteConfirm = false">
@@ -103,16 +122,16 @@
         }
         else
         {
-            <p class="mt-2 text-sm leading-6 text-gray-700">@Comment.Content</p>
+            <div class="mt-2 text-sm leading-6 text-gray-700">@RenderContent(Comment.Content)</div>
         }
 
-        <!-- Action buttons -->
+        <!-- Reply button -->
         @if (!isEditing && !showDeleteConfirm)
         {
-            <button 
-                type="button" 
+            <button
+                type="button"
                 class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
-                @onclick="() => ToggleReplyForm()">
+                @onclick="ToggleReplyForm">
                 @(showReplyForm ? "Annuler" : "Répondre")
             </button>
         }
@@ -121,23 +140,24 @@
         @if (showReplyForm && !isEditing && !showDeleteConfirm)
         {
             <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <textarea 
+                <textarea
                     @bind="replyContent"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
                     rows="3"
+                    maxlength="1000"
                     placeholder="Écrivez votre réponse..."></textarea>
                 <div class="mt-3 flex gap-2">
-                    <button 
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5] disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled="@string.IsNullOrWhiteSpace(replyContent)"
+                        disabled="@(string.IsNullOrWhiteSpace(replyContent) || isSubmittingReply)"
                         @onclick="HandleReplySubmit">
-                        Envoyer la réponse
+                        @(isSubmittingReply ? "Envoi..." : "Envoyer la réponse")
                     </button>
-                    <button 
+                    <button
                         type="button"
                         class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-                        @onclick="() => ToggleReplyForm()">
+                        @onclick="ToggleReplyForm">
                         Annuler
                     </button>
                 </div>
@@ -150,7 +170,7 @@
             <div class="mt-6 border-l-2 border-gray-200 pl-4 space-y-4">
                 @foreach (var reply in Comment.Replies)
                 {
-                    <CommentItem 
+                    <CommentItem
                         Comment="reply"
                         OnReplySubmitted="OnReplySubmitted"
                         OnCommentUpdated="OnCommentUpdated"
@@ -185,8 +205,10 @@
     private bool showReplyForm;
     private bool isEditing;
     private bool showDeleteConfirm;
+    private bool deleteAllReplies = true;
     private string replyContent = string.Empty;
     private string editedContent = string.Empty;
+    private bool isSubmittingReply;
 
     private void ToggleReplyForm() => showReplyForm = !showReplyForm;
 
@@ -212,20 +234,45 @@
         if (string.IsNullOrWhiteSpace(replyContent))
             return;
 
-        var reply = await CommentService.CreateCommentAsync(new CreateCommentRequest
+        isSubmittingReply = true;
+
+        try
         {
-            Content = replyContent,
-            PostId = Comment.PostId != Guid.Empty ? Comment.PostId : null,
-            EventId = Comment.EventId != Guid.Empty ? Comment.EventId : null,
-            ParentCommentId = Comment.Id
-        });
+            var actualParentId = Comment.ParentCommentId ?? Comment.Id;
 
-        if (reply is not null)
-            Comment.Replies.Add(reply);
-        replyContent = string.Empty;
-        showReplyForm = false;
+            var reply = await CommentService.CreateCommentAsync(new CreateCommentRequest
+            {
+                Content = replyContent,
+                PostId = Comment.PostId != Guid.Empty ? Comment.PostId : null,
+                EventId = Comment.EventId != Guid.Empty ? Comment.EventId : null,
+                ParentCommentId = actualParentId
+            });
 
-        await OnReplySubmitted.InvokeAsync();
+            if (reply is null)
+            {
+                ToastService.ShowToast("Erreur lors de l'envoi de la réponse.", ToastLevel.Error);
+                return;
+            }
+
+            // Si c'est un commentaire racine, ajout local pour feedback immédiat
+            if (!Comment.ParentCommentId.HasValue)
+            {
+                Comment.Replies.Add(reply);
+            }
+
+            replyContent = string.Empty;
+            showReplyForm = false;
+            ToastService.ShowToast("Réponse ajoutée.", ToastLevel.Success);
+            await OnReplySubmitted.InvokeAsync();
+        }
+        catch
+        {
+            ToastService.ShowToast("Erreur lors de l'envoi de la réponse.", ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmittingReply = false;
+        }
     }
 
     private async Task HandleUpdate()
@@ -233,36 +280,82 @@
         if (string.IsNullOrWhiteSpace(editedContent))
             return;
 
-        var updated = await CommentService.UpdateCommentAsync(new UpdateCommentRequest
+        try
         {
-            Id = Comment.Id,
-            Content = editedContent
-        });
+            var updated = await CommentService.UpdateCommentAsync(new UpdateCommentRequest
+            {
+                Id = Comment.Id,
+                Content = editedContent
+            });
 
-        if (updated != null)
+            if (updated != null)
+            {
+                Comment.Content = updated.Content;
+                Comment.UpdatedAt = updated.UpdatedAt;
+                isEditing = false;
+                ToastService.ShowToast("Commentaire modifié.", ToastLevel.Success);
+                await OnCommentUpdated.InvokeAsync();
+            }
+            else
+            {
+                ToastService.ShowToast("Impossible de modifier le commentaire.", ToastLevel.Error);
+            }
+        }
+        catch
         {
-            Comment.Content = updated.Content;
-            Comment.UpdatedAt = updated.UpdatedAt;
-            isEditing = false;
-            await OnCommentUpdated.InvokeAsync();
+            ToastService.ShowToast("Erreur lors de la modification.", ToastLevel.Error);
         }
     }
 
     private async Task HandleDelete()
     {
-        var success = await CommentService.DeleteCommentAsync(new DeleteCommentRequest
+        try
         {
-            Id = Comment.Id,
-            DeleteAllReplies = true
-        });
+            var success = await CommentService.DeleteCommentAsync(new DeleteCommentRequest
+            {
+                Id = Comment.Id,
+                DeleteAllReplies = deleteAllReplies
+            });
 
-        if (success)
+            if (success)
+            {
+                ToastService.ShowToast("Commentaire supprimé.", ToastLevel.Success);
+                await OnCommentDeleted.InvokeAsync();
+            }
+            else
+            {
+                ToastService.ShowToast("Impossible de supprimer le commentaire.", ToastLevel.Error);
+            }
+        }
+        catch
         {
-            await OnCommentDeleted.InvokeAsync();
+            ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
         }
     }
 
-    private string GetInitial(string? value)
+    private async Task HandleReport()
+    {
+        ToastService.ShowToast("Commentaire signalé à l'équipe de modération.", ToastLevel.Info);
+    }
+
+    private MarkupString RenderContent(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return new MarkupString(string.Empty);
+
+        var html = System.Net.WebUtility.HtmlEncode(content)
+            .Replace("\r\n", "\n")
+            .Replace("\n", "<br />");
+
+        html = Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        html = Regex.Replace(html, @"\*(.+?)\*", "<em>$1</em>");
+        html = Regex.Replace(html, @"`(.+?)`", "<code class=\"bg-gray-100 px-1 rounded text-red-600 text-xs\">$1</code>");
+        html = Regex.Replace(html, @"\[([^\]]+)\]\(([^)]+)\)", "<a href=\"$2\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[#5b4df5] underline\">$1</a>");
+
+        return new MarkupString(html);
+    }
+
+    private static string GetInitial(string? value)
         => string.IsNullOrWhiteSpace(value) ? "?" : value.Trim()[0].ToString().ToUpperInvariant();
 
     private string GetTimeLabel(DateTime createdAt)
