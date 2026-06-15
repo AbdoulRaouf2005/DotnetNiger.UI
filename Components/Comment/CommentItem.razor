@@ -220,7 +220,8 @@
             ParentCommentId = Comment.Id
         });
 
-        Comment.Replies.Add(reply);
+        if (reply is not null)
+            Comment.Replies.Add(reply);
         replyContent = string.Empty;
         showReplyForm = false;
 

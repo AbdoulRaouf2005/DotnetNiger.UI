@@ -12,7 +12,7 @@ public interface IPostService
     Task<PostDto?> GetPostByIdAsync(Guid postId);
     Task<PostDto?> GetPostBySlugAsync(string slug);
     Task<List<PostDto>> SearchPostsAsync(string query);
-    Task<PostDto> CreatePostAsync(CreatePostRequest request,Guid UserId);
+    Task<PostDto?> CreatePostAsync(CreatePostRequest request,Guid UserId);
     Task<PostDto?> UpdatePostAsync(Guid postId, UpdatePostRequest request);
     Task<bool> DeletePostAsync(Guid postId);
     Task<bool> PublishPostAsync(Guid postId) => Task.FromResult(false);

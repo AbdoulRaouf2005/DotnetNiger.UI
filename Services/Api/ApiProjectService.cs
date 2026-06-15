@@ -40,12 +40,12 @@ public class ApiProjectService : IProjectService
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
-    public async Task<ProjectResponse> CreateAsync(CreateProjectRequest request)
+    public async Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {
         var response = await _http.PostAsJsonAsync(Base, request);
-        response.EnsureSuccessStatusCode();
-        return await ApiResponseReader.ReadAsync<ProjectResponse>(response)
-               ?? throw new InvalidOperationException("Réponse API vide pour la création du projet.");
+        if (!response.IsSuccessStatusCode)
+            return null;
+        return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
     public async Task<ProjectResponse?> UpdateAsync(Guid id, UpdateProjectRequest request)

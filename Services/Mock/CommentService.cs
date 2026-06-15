@@ -197,7 +197,7 @@ public class CommentService : ICommentService
         return Task.FromResult(comment);
     }
 
-    public Task<CommentResponse> CreateCommentAsync(CreateCommentRequest request)
+    public Task<CommentResponse?> CreateCommentAsync(CreateCommentRequest request)
     {
         var newComment = new CommentResponse
         {
@@ -226,7 +226,7 @@ public class CommentService : ICommentService
             }
         }
         
-        return Task.FromResult(newComment);
+        return Task.FromResult<CommentResponse?>(newComment);
     }
 
     public Task<CommentResponse?> UpdateCommentAsync(UpdateCommentRequest request)

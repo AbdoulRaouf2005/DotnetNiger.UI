@@ -13,8 +13,8 @@ public interface IResourceService
     Task<List<ResourceDto>> SearchResourcesAsync(string query);
     Task<List<string>> GetResourceTypesAsync();
     Task<List<string>> GetLevelsAsync();
-    Task<ResourceDto> CreateResourceAsync(CreateResourceRequest request);
-    Task<ResourceDto> AddResourceAsync(AddResourceRequest request);
+    Task<ResourceDto?> CreateResourceAsync(CreateResourceRequest request);
+    Task<ResourceDto?> AddResourceAsync(AddResourceRequest request);
     Task<ResourceDto?> UpdateResourceAsync(Guid id, CreateResourceRequest request);
     Task<bool> DeleteResourceAsync(Guid id);
     Task IncrementViewCountAsync(Guid id);

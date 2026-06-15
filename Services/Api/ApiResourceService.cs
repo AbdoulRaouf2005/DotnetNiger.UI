@@ -86,22 +86,22 @@ public class ApiResourceService : IResourceService
         return await ApiResponseReader.ReadCollectionAsync<string>(response);
     }
 
-    public async Task<ResourceDto> CreateResourceAsync(CreateResourceRequest request)
+    public async Task<ResourceDto?> CreateResourceAsync(CreateResourceRequest request)
     {
         var response = await _http.PostAsJsonAsync(PublicBase, request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await ApiResponseReader.ReadAsync<ResourceDto>(response)
-               ?? throw new InvalidOperationException("La réponse API est vide pour la création de la ressource.");
+        return await ApiResponseReader.ReadAsync<ResourceDto>(response);
     }
 
-    public async Task<ResourceDto> AddResourceAsync(AddResourceRequest request)
+    public async Task<ResourceDto?> AddResourceAsync(AddResourceRequest request)
     {
         var response = await _http.PostAsJsonAsync(PublicBase, request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await ApiResponseReader.ReadAsync<ResourceDto>(response)
-               ?? throw new InvalidOperationException("La réponse API est vide pour l'ajout de la ressource.");
+        return await ApiResponseReader.ReadAsync<ResourceDto>(response);
     }
 
     public async Task<ResourceDto?> UpdateResourceAsync(Guid id, CreateResourceRequest request)

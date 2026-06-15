@@ -51,7 +51,7 @@ public class MockProjectService : IProjectService
     public Task<ProjectResponse?> GetByIdAsync(Guid id) =>
         Task.FromResult(_projects.FirstOrDefault(p => p.Id == id));
 
-    public Task<ProjectResponse> CreateAsync(CreateProjectRequest request)
+    public Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {
         var project = new ProjectResponse
         {
@@ -70,7 +70,7 @@ public class MockProjectService : IProjectService
             AuthorName = "Vous"
         };
         _projects.Add(project);
-        return Task.FromResult(project);
+        return Task.FromResult<ProjectResponse?>(project);
     }
 
     public Task<ProjectResponse?> UpdateAsync(Guid id, UpdateProjectRequest request)

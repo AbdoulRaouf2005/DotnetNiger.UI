@@ -200,7 +200,7 @@ public class ResourceService : IResourceService
             }).ToList());
     }
 
-    public async Task<ResourceDto> CreateResourceAsync(CreateResourceRequest request)
+    public async Task<ResourceDto?> CreateResourceAsync(CreateResourceRequest request)
     {
         var newResource = new ResourceDto
         {
@@ -220,7 +220,7 @@ public class ResourceService : IResourceService
         return await Task.FromResult(newResource);
     }
 
-    public async Task<ResourceDto> AddResourceAsync(AddResourceRequest request)
+    public async Task<ResourceDto?> AddResourceAsync(AddResourceRequest request)
     {
         var newResource = new ResourceDto
         {

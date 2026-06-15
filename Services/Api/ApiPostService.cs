@@ -72,13 +72,13 @@ public class ApiPostService : IPostService
         return await ApiResponseReader.ReadAsync<PostDto>(response);
     }
 
-    public async Task<PostDto> CreatePostAsync(CreatePostRequest request , Guid currentId)
+    public async Task<PostDto?> CreatePostAsync(CreatePostRequest request , Guid currentId)
     {
         var response = await _http.PostAsJsonAsync(PublicBase, request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await ApiResponseReader.ReadAsync<PostDto>(response)
-               ?? throw new InvalidOperationException("La réponse API est vide pour la création du post.");
+        return await ApiResponseReader.ReadAsync<PostDto>(response);
     }
 
     public async Task<PostDto?> UpdatePostAsync(Guid id, UpdatePostRequest request)

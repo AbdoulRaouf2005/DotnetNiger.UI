@@ -1,7 +1,6 @@
 @page "/auth/external-callback"
 @using Microsoft.AspNetCore.Components
 @inject IAuthService AuthService
-@inject DotnetNiger.UI.Services.Auth.CustomAuthStateProvider AuthProvider
 @inject NavigationManager Navigation
 
 <PageTitle>Connexion en cours - .NET Niger</PageTitle>
@@ -51,10 +50,6 @@
 
         if (response.Success && response.Data != null)
         {
-            await AuthProvider.SaveTokensAsync(
-                response.Data.Token.AccessToken,
-                response.Data.Token.RefreshToken);
-
             Navigation.NavigateTo("/");
         }
         else

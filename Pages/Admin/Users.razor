@@ -197,9 +197,9 @@
     private async Task ReloadAsync()
     {
         allUsers = await UserService.GetUsersAsync();
-        pendingUsers = await UserService.GetPendingUsersAsync();
-        totalUsers = await UserService.GetUsersCountAsync();
-        activeUsers = await UserService.GetActiveUsersCountAsync();
+        totalUsers = allUsers.Count;
+        activeUsers = allUsers.Count(u => u.IsActive);
+        pendingUsers = allUsers.Where(u => !u.IsActive).ToList();
         await ApplyFiltersAsync();
     }
 

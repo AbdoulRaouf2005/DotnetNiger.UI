@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
-using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
@@ -9,12 +8,10 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiCommentService : ICommentService
 {
     private readonly HttpClient _http;
-    private readonly CustomAuthStateProvider _authProvider;
 
-    public ApiCommentService(HttpClient http, CustomAuthStateProvider authProvider)
+    public ApiCommentService(HttpClient http)
     {
         _http = http;
-        _authProvider = authProvider;
     }
 
     public Guid CurrentUserId { get; private set; }
@@ -46,13 +43,13 @@ public class ApiCommentService : ICommentService
         return await ApiResponseReader.ReadAsync<CommentResponse>(response);
     }
 
-    public async Task<CommentResponse> CreateCommentAsync(CreateCommentRequest request)
+    public async Task<CommentResponse?> CreateCommentAsync(CreateCommentRequest request)
     {
         var response = await _http.PostAsJsonAsync("api/v1/comments", request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await ApiResponseReader.ReadAsync<CommentResponse>(response)
-               ?? throw new InvalidOperationException("Empty API response for comment creation.");
+        return await ApiResponseReader.ReadAsync<CommentResponse>(response);
     }
 
     public async Task<CommentResponse?> UpdateCommentAsync(UpdateCommentRequest request)

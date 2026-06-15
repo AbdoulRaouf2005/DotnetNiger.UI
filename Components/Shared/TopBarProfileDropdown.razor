@@ -318,7 +318,14 @@
 
         _ = InvokeAsync(async () =>
         {
-            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(currentUserId);
+            try
+            {
+                unreadNotificationCount = await NotificationService.GetUnreadCountAsync(currentUserId);
+            }
+            catch
+            {
+                unreadNotificationCount = 0;
+            }
             StateHasChanged();
         });
     }

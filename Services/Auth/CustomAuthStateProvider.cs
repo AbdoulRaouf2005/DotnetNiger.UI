@@ -1,118 +1,68 @@
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
-using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Auth;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
-    private readonly IJSRuntime _js;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly HttpClient _http;
     private static readonly AuthenticationState Anonymous =
         new(new ClaimsPrincipal(new ClaimsIdentity()));
 
-    private bool _isRefreshing;
+    private AuthenticationState _cachedState = Anonymous;
+    private DateTime _cacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
-    public CustomAuthStateProvider(IJSRuntime js, IServiceProvider serviceProvider)
+    public CustomAuthStateProvider(HttpClient http)
     {
-        _js = js;
-        _serviceProvider = serviceProvider;
+        _http = http;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await GetAccessTokenAsync();
-        if (string.IsNullOrWhiteSpace(token))
-            return Anonymous;
+        if (_cachedState != Anonymous && DateTime.UtcNow < _cacheExpiry)
+            return _cachedState;
 
-        var claims = ParseClaimsFromJwt(token);
-        var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
-
-        if (expClaim != null && long.TryParse(expClaim, out var expUnix))
+        try
         {
-            var expDate = DateTimeOffset.FromUnixTimeSeconds(expUnix);
-            if (expDate <= DateTimeOffset.UtcNow && !_isRefreshing)
+            var response = await _http.GetAsync("api/auth/session");
+            if (!response.IsSuccessStatusCode)
             {
-                _isRefreshing = true;
-                try
-                {
-                    var authService = _serviceProvider.GetRequiredService<IAuthService>();
-                    var refreshed = await authService.RefreshTokenAsync();
-                    if (refreshed?.Token?.AccessToken is not null)
-                    {
-                        token = refreshed.Token.AccessToken;
-                        claims = ParseClaimsFromJwt(token);
-                    }
-                    else
-                    {
-                        await ClearTokensAsync();
-                        return Anonymous;
-                    }
-                }
-                catch
-                {
-                    await ClearTokensAsync();
-                    return Anonymous;
-                }
-                finally
-                {
-                    _isRefreshing = false;
-                }
+                _cachedState = Anonymous;
+                return Anonymous;
             }
-        }
 
-        var identity = new ClaimsIdentity(claims, "jwt");
-        return new AuthenticationState(new ClaimsPrincipal(identity));
+            var session = await response.Content.ReadFromJsonAsync<SessionResponse>();
+            if (session?.Authenticated == true && session.Claims is { Count: >0 })
+            {
+                var claims = session.Claims
+                    .Select(c => new Claim(c.Type, c.Value))
+                    .ToList();
+
+                _cachedState = new AuthenticationState(
+                    new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
+                _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+                return _cachedState;
+            }
+
+            _cachedState = Anonymous;
+            return Anonymous;
+        }
+        catch
+        {
+            _cachedState = Anonymous;
+            return Anonymous;
+        }
     }
 
-    public async Task<string?> GetAccessTokenAsync()
-        => await _js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
-
-    public async Task<string?> GetRefreshTokenAsync()
-        => await _js.InvokeAsync<string?>("localStorage.getItem", "refreshToken");
-
-    public async Task SaveTokensAsync(string accessToken, string refreshToken)
+    public void NotifyStateChanged()
     {
-        await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
-        await _js.InvokeVoidAsync("localStorage.setItem", "refreshToken", refreshToken);
+        _cachedState = Anonymous;
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
-    public async Task ClearTokensAsync()
-    {
-        await _js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
-        await _js.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
-        NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
-    }
-
-    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-    {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
-
-        return kvs.SelectMany(kv =>
-        {
-            if (kv.Key is "roles" or "role")
-            {
-                if (kv.Value.ValueKind == JsonValueKind.Array)
-                    return kv.Value.EnumerateArray().Select(r => new Claim(ClaimTypes.Role, r.GetString()!));
-                return new[] { new Claim(ClaimTypes.Role, kv.Value.GetString()!) };
-            }
-            return new[] { new Claim(kv.Key, kv.Value.ToString()) };
-        });
-    }
-
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        base64 = base64.Replace('-', '+').Replace('_', '/');
-        return (base64.Length % 4) switch
-        {
-            2 => Convert.FromBase64String(base64 + "=="),
-            3 => Convert.FromBase64String(base64 + "="),
-            _ => Convert.FromBase64String(base64),
-        };
-    }
+    private sealed record SessionResponse(bool Authenticated, List<ClaimDto>? Claims);
+    private sealed record ClaimDto(string Type, string Value);
 }

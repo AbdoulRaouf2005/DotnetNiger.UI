@@ -97,7 +97,7 @@
 						@if (!string.IsNullOrWhiteSpace(post.Content))
 						{
 							<div class="prose prose-sm max-w-none" @onmouseover="@(() => {})" @onmouseout="@(() => {})">
-								@((MarkupString)post.Content)
+								@((MarkupString)HtmlSanitizer.Sanitize(post.Content))
 							</div>
 						}
 						else

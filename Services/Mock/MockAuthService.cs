@@ -59,8 +59,6 @@ public class MockAuthService : IAuthService
     private TokenDto? _currentToken;
     private DateTime? _tokenExpiry;
 
-    public event Action? OnAuthStateChanged;
-
     #region Authentification
 
     public async Task<ApiSuccessResponse<AuthDto>> LoginAsync(LoginRequest request)
@@ -96,8 +94,6 @@ public class MockAuthService : IAuthService
         
         // Stocker le refresh token
         _refreshTokens[user.Id.ToString()] = _currentToken.RefreshToken;
-
-        OnAuthStateChanged?.Invoke();
 
         return new ApiSuccessResponse<AuthDto>
         {
@@ -255,8 +251,6 @@ public class MockAuthService : IAuthService
         _currentToken = null;
         _tokenExpiry = null;
         
-        OnAuthStateChanged?.Invoke();
-        
         return;
     }
 
@@ -395,18 +389,6 @@ public class MockAuthService : IAuthService
     {
         await Task.Delay(50);
         return _currentUser?.Roles.Contains("Admin") ?? false;
-    }
-
-    public async Task<string?> GetAccessTokenAsync()
-    {
-        await Task.Delay(50);
-        
-        if (_currentToken == null || _tokenExpiry <= DateTime.Now)
-        {
-            return null;
-        }
-        
-        return _currentToken.AccessToken;
     }
 
     #endregion

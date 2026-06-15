@@ -30,9 +30,15 @@ public class ApiNotificationService : INotificationService
 
     public async Task SendNotificationAsync(Guid userId, string message)
     {
-        var response = await _http.PostAsJsonAsync($"{Base}/{userId}", new { message });
-        response.EnsureSuccessStatusCode();
-        NotificationsChanged?.Invoke(userId);
+        try
+        {
+            var response = await _http.PostAsJsonAsync($"{Base}/{userId}", new { message });
+            if (response.IsSuccessStatusCode)
+                NotificationsChanged?.Invoke(userId);
+        }
+        catch (HttpRequestException)
+        {
+        }
     }
 
     public async Task MarkAsReadAsync(Guid userId, Guid notificationId)

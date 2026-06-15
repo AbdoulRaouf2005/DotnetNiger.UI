@@ -22,7 +22,7 @@ public interface IEventService
     Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId);
 
      // Création d'événement (soumis ou publié selon rôle)
-    Task<EventDto> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin);
+    Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin);
 
     // Admin : récupérer les événements en attente
     Task<List<EventDto>> GetPendingEventsAsync();

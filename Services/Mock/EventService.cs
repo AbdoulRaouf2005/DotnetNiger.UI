@@ -184,11 +184,11 @@ public class EventService : IEventService
     //     return await Task.FromResult(newEvent);
     // }
 
-    public async Task<EventDto> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
+    public async Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
     {
         await Task.Delay(500); // simuler appel API
 
-        var resolvedIsAdmin = isAdmin || await IsAdminCurrentUserAsync();
+        var resolvedIsAdmin = isAdmin || await _authService.IsAdminAsync();
 
         var slug = request.Title.ToLower().Replace(" ", "-");
         var now = DateTime.Now;
@@ -236,19 +236,6 @@ public class EventService : IEventService
 
         _events.Add(newEvent);
         return newEvent;
-    }
-
-    private async Task<bool> IsAdminCurrentUserAsync()
-    {
-        var accessToken = await _authStateProvider.GetAccessTokenAsync();
-        var role = _authService.GetRoleFromAccessToken(accessToken);
-
-        if (string.IsNullOrWhiteSpace(role))
-            return false;
-
-        return role.Equals("admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("superadmin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("moderator", StringComparison.OrdinalIgnoreCase);
     }
 
       public async Task<List<EventDto>> GetPendingEventsAsync()

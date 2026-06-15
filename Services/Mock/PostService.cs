@@ -63,7 +63,7 @@ namespace DotnetNiger.UI.Services.Mock
             };
         }
 
-        public async Task<PostDto> CreatePostAsync(CreatePostRequest request, Guid CurrentId)
+        public async Task<PostDto?> CreatePostAsync(CreatePostRequest request, Guid CurrentId)
         {
             var newPost = new PostDto
             {

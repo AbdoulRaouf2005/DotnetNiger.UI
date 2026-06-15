@@ -150,7 +150,14 @@
 
         _ = InvokeAsync(async () =>
         {
-            unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+            try
+            {
+                unreadNotificationCount = await NotificationService.GetUnreadCountAsync(profile.Id);
+            }
+            catch
+            {
+                unreadNotificationCount = 0;
+            }
             StateHasChanged();
         });
     }
