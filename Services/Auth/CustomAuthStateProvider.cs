@@ -39,10 +39,16 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             if (session?.Authenticated == true && session.Claims is { Count: >0 })
             {
             var claims = session.Claims
-                .Select(c => new Claim(c.Type,
-                    c.Type == ClaimTypes.Role && c.Value.Length > 0
-                        ? char.ToUpperInvariant(c.Value[0]) + c.Value[1..]
-                        : c.Value))
+                .SelectMany<ClaimDto, Claim>(c =>
+                {
+                    if (c.Type == ClaimTypes.Role && c.Value.Length > 0)
+                    {
+                        var capped = char.ToUpperInvariant(c.Value[0]) + c.Value[1..];
+                        if (capped != c.Value)
+                            return new[] { new Claim(c.Type, c.Value), new Claim(c.Type, capped) };
+                    }
+                    return new[] { new Claim(c.Type, c.Value) };
+                })
                 .ToList();
 
                 _cachedState = new AuthenticationState(
@@ -72,8 +78,15 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             new("avatar_url", user.AvatarUrl),
         };
         foreach (var role in user.Roles)
-            claims.Add(new Claim(ClaimTypes.Role,
-                role.Length > 0 ? char.ToUpperInvariant(role[0]) + role[1..] : role));
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+            if (role.Length > 0)
+            {
+                var capped = char.ToUpperInvariant(role[0]) + role[1..];
+                if (capped != role)
+                    claims.Add(new Claim(ClaimTypes.Role, capped));
+            }
+        }
 
         _cachedState = new AuthenticationState(
             new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
