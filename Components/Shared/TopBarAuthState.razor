@@ -107,12 +107,20 @@
     private async Task NavigateToLoginAsync()
     {
         await NotifyActionCompletedAsync();
-        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
-        var apiBase = Config["ApiBaseUrl"];
-        if (string.IsNullOrWhiteSpace(apiBase)) return;
-        var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
-        var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
-        Navigation.NavigateTo(loginUrl);
+        var useMock = Config.GetValue<bool>("UseMockServices");
+        if (useMock)
+        {
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+            var apiBase = Config["ApiBaseUrl"];
+            if (string.IsNullOrWhiteSpace(apiBase)) return;
+            var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+            var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
+            Navigation.NavigateTo(loginUrl);
+        }
     }
 
     private async Task NavigateToProfileAsync(ClaimsPrincipal user)

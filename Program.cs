@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using DotnetNiger.UI;
 using DotnetNiger.UI.Services.Browser;
 using DotnetNiger.UI.Services.Auth;
@@ -22,10 +21,9 @@ var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
-    var anonymousState = new AuthenticationState(
-        new ClaimsPrincipal(new ClaimsIdentity()));
-    builder.Services.AddScoped<AuthenticationStateProvider>(_ =>
-        new MockAuthenticationStateProvider(anonymousState));
+    builder.Services.AddScoped<MockAuthenticationStateProvider>();
+    builder.Services.AddScoped<AuthenticationStateProvider>(
+        sp => sp.GetRequiredService<MockAuthenticationStateProvider>());
 
     builder.Services.AddScoped<IToastService, ToastService>();
     builder.Services.AddScoped<IContactService, MockContactService>();
