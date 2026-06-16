@@ -52,7 +52,7 @@ public class AuthService : IAuthService
             // Store tokens in httpOnly cookies via Gateway
             await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
 
-            _authProvider.NotifyStateChanged();
+            _authProvider.SetAuthenticatedFromUser(authDto.User);
 
             return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
         }
@@ -362,7 +362,7 @@ public class AuthService : IAuthService
                 return new ApiSuccessResponse<AuthDto> { Success = false, Message = error ?? "Erreur de connexion externe." };
 
             await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
-            _authProvider.NotifyStateChanged();
+            _authProvider.SetAuthenticatedFromUser(authDto.User);
 
             return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
         }

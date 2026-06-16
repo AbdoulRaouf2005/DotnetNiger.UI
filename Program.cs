@@ -47,22 +47,22 @@ if (useMock)
 }
 else
 {
+    builder.Services.AddScoped<HttpClient>(sp =>
+        CreateGatewayHttpClient(apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()));
+
     builder.Services.AddScoped(sp => new CustomAuthStateProvider(
-        CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+        sp.GetRequiredService<HttpClient>()));
     builder.Services.AddScoped<AuthenticationStateProvider>(
         sp => sp.GetRequiredService<CustomAuthStateProvider>());
 
     builder.Services.AddScoped<AuthService>(sp => new AuthService(
-        CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+        sp.GetRequiredService<HttpClient>(),
         sp.GetRequiredService<CustomAuthStateProvider>()
     ));
 
-    HttpClient GatewayHttp(IServiceProvider sp) => CreateGatewayHttpClient(
-        apiBaseUrl,
-        sp.GetRequiredService<ClientIdentifierProvider>(),
-        sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>());
+    HttpClient GatewayHttp(IServiceProvider sp) => sp.GetRequiredService<HttpClient>();
 
     builder.Services.AddScoped<IToastService, ToastService>();
     builder.Services.AddScoped<IUserStateService>(sp => new UserStateService());

@@ -119,7 +119,7 @@
             if (string.IsNullOrWhiteSpace(apiBase)) return;
             var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
             var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
-            Navigation.NavigateTo(loginUrl);
+            Navigation.NavigateTo(loginUrl, forceLoad: true);
         }
     }
 

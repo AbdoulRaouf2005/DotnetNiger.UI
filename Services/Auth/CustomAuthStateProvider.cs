@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
+using DotnetNiger.UI.Models.Responses;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace DotnetNiger.UI.Services.Auth;
@@ -58,6 +59,25 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             _cachedState = Anonymous;
             return Anonymous;
         }
+    }
+
+    public void SetAuthenticatedFromUser(UserDto user)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Name, user.FullName),
+            new("full_name", user.FullName),
+            new("avatar_url", user.AvatarUrl),
+        };
+        foreach (var role in user.Roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
+
+        _cachedState = new AuthenticationState(
+            new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
+        _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+        NotifyAuthenticationStateChanged(Task.FromResult(_cachedState));
     }
 
     public void NotifyStateChanged()
