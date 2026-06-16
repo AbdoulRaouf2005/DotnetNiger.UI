@@ -3,6 +3,7 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IConfiguration Config
 
 @if (_authorized)
 {
@@ -19,6 +20,19 @@
     </div>
     <ToastContainer />
 }
+else if (_authChecked)
+{
+    <div class="flex items-center justify-center h-screen">
+        <div class="text-center max-w-xl p-8">
+            <p class="text-red-600 text-lg font-semibold mb-4">Accès refusé</p>
+            <p class="text-gray-600 mb-2">Authentifié: @_isAuthenticated</p>
+            <p class="text-gray-600 mb-2">Rôles trouvés: @_roleInfo</p>
+            <p class="text-gray-600 mb-2">Nombre de roles: @_roleCount</p>
+            <p class="text-gray-600 mb-4">Claims: @_claimInfo</p>
+            <p class="text-sm text-gray-400">Redirection en cours...</p>
+        </div>
+    </div>
+}
 else
 {
     <div class="flex items-center justify-center h-screen">
@@ -30,30 +44,59 @@ else
   bool sidebarOpen = false;
   bool isCollapsed = false;
   bool _authorized;
+  bool _authChecked;
+  bool _isAuthenticated;
+  string _roleInfo = "";
+  string _claimInfo = "";
+  int _roleCount;
 
   protected override async Task OnInitializedAsync()
   {
-      var state = await AuthStateProvider.GetAuthenticationStateAsync();
-      if (state.User.Identity?.IsAuthenticated != true)
+      try
       {
-          Navigation.NavigateTo("/login", forceLoad: true);
-          return;
+          var state = await AuthStateProvider.GetAuthenticationStateAsync();
+          _isAuthenticated = state.User.Identity?.IsAuthenticated ?? false;
+          _roleInfo = string.Join(", ", state.User.FindAll(ClaimTypes.Role).Select(c => $"'{c.Value}'"));
+          _roleCount = state.User.FindAll(ClaimTypes.Role).Count();
+          _claimInfo = string.Join(", ", state.User.Claims.Select(c => $"{c.Type}='{c.Value}'").Take(10));
+
+          if (!_isAuthenticated)
+          {
+              _authChecked = true;
+              StateHasChanged();
+              await Task.Delay(2000);
+              var apiBase = Config["ApiBaseUrl"];
+              if (!string.IsNullOrWhiteSpace(apiBase))
+              {
+                  var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+                  var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+                  Navigation.NavigateTo($"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+              }
+              return;
+          }
+
+          var roles = state.User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+          var isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                                    || r.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase));
+
+          if (!isAdmin)
+          {
+              _authChecked = true;
+              StateHasChanged();
+              await Task.Delay(2000);
+              Navigation.NavigateTo("/");
+              return;
+          }
+
+          _authorized = true;
+          StateHasChanged();
       }
-
-      var roles = state.User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
-      var isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-                                || r.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase)
-                                || r.Equals("admin", StringComparison.OrdinalIgnoreCase)
-                                || r.Equals("superadmin", StringComparison.OrdinalIgnoreCase));
-
-      if (!isAdmin)
+      catch (Exception ex)
       {
-          Navigation.NavigateTo("/");
-          return;
+          _roleInfo = $"Erreur: {ex.Message}";
+          _authChecked = true;
+          StateHasChanged();
       }
-
-      _authorized = true;
-      StateHasChanged();
   }
 
   void ToggleCollapsed(){
