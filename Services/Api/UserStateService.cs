@@ -8,6 +8,12 @@ public class UserStateService : IUserStateService
     public event Action? OnChange;
 
     private UserDto? _currentUser;
+    private readonly IAuthService _auth;
+
+    public UserStateService(IAuthService auth)
+    {
+        _auth = auth;
+    }
 
     public UserDto? CurrentUser => _currentUser;
     public bool IsAuthenticated => _currentUser is { IsActive: true };
@@ -16,9 +22,14 @@ public class UserStateService : IUserStateService
     public bool IsAdmin => _currentUser?.Roles.Contains("Admin", StringComparer.OrdinalIgnoreCase) ?? false;
     public string? UserRole => _currentUser?.Roles.FirstOrDefault();
 
-    public Task LoadUserFromStorageAsync()
+    public async Task LoadUserFromStorageAsync()
     {
-        return Task.CompletedTask;
+        if (_currentUser is not null)
+            return;
+
+        var user = await _auth.GetCurrentUserAsync();
+        if (user is not null)
+            _currentUser = user;
     }
 
     public Task SetUserAsync(UserDto user)

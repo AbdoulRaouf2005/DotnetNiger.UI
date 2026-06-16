@@ -1,6 +1,5 @@
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
-using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 using System.Net.Http.Json;
 
@@ -9,14 +8,12 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiEventService : IEventService
 {
     private readonly HttpClient _http;
-    private readonly IAuthService _authService;
     private const string PublicBase = "api/v1/events";
     private const string AdminBase = "api/v1/admin/events";
 
-    public ApiEventService(HttpClient http, IAuthService authService)
+    public ApiEventService(HttpClient http)
     {
         _http = http;
-        _authService = authService;
     }
 
     public async Task<List<EventDto>> GetAllEventsAsync()

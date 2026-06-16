@@ -47,10 +47,19 @@ if (useMock)
 }
 else
 {
+    builder.Services.AddScoped<TokenStorageService>();
+    builder.Services.AddTransient<BearerTokenHandler>();
+
     builder.Services.AddScoped<HttpClient>(sp =>
-        CreateGatewayHttpClient(apiBaseUrl,
+    {
+        var bearer = sp.GetRequiredService<BearerTokenHandler>();
+        var clientId = new ClientIdHeaderHandler(
             sp.GetRequiredService<ClientIdentifierProvider>(),
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()));
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>());
+        clientId.InnerHandler = new HttpClientHandler();
+        bearer.InnerHandler = clientId;
+        return new HttpClient(bearer) { BaseAddress = new Uri(apiBaseUrl) };
+    });
 
     builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddScoped<AuthenticationStateProvider>(
@@ -58,18 +67,19 @@ else
 
     builder.Services.AddScoped<AuthService>(sp => new AuthService(
         sp.GetRequiredService<HttpClient>(),
-        sp.GetRequiredService<CustomAuthStateProvider>()
+        sp.GetRequiredService<CustomAuthStateProvider>(),
+        sp.GetRequiredService<TokenStorageService>()
     ));
 
     HttpClient GatewayHttp(IServiceProvider sp) => sp.GetRequiredService<HttpClient>();
 
     builder.Services.AddScoped<IToastService, ToastService>();
-    builder.Services.AddScoped<IUserStateService>(sp => new UserStateService());
+    builder.Services.AddScoped<IUserStateService>(sp => new UserStateService(sp.GetRequiredService<IAuthService>()));
     builder.Services.AddScoped<IContactService>(sp => new ApiContactService(GatewayHttp(sp)));
     builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
     builder.Services.AddScoped<IUserService>(sp => new ApiUserService(GatewayHttp(sp)));
     builder.Services.AddScoped<IPostService>(sp => new ApiPostService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IEventService>(sp => new ApiEventService(GatewayHttp(sp), sp.GetRequiredService<IAuthService>()));
+    builder.Services.AddScoped<IEventService>(sp => new ApiEventService(GatewayHttp(sp)));
     builder.Services.AddScoped<IResourceService>(sp => new ApiResourceService(GatewayHttp(sp)));
     builder.Services.AddScoped<IProfileService>(sp => new ApiProfileService(GatewayHttp(sp), sp.GetRequiredService<IUserStateService>()));
     builder.Services.AddScoped<ICommentService>(sp => new ApiCommentService(GatewayHttp(sp)));
@@ -87,19 +97,3 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
 
 await builder.Build().RunAsync();
-
-static HttpClient CreateGatewayHttpClient(
-    string baseUrl,
-    ClientIdentifierProvider clientIdentifierProvider,
-    ILogger<ClientIdHeaderHandler> logger)
-{
-    var headerHandler = new ClientIdHeaderHandler(clientIdentifierProvider, logger)
-    {
-        InnerHandler = new HttpClientHandler()
-    };
-
-    return new HttpClient(headerHandler)
-    {
-        BaseAddress = new Uri(baseUrl)
-    };
-}

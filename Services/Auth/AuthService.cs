@@ -12,11 +12,13 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
+    private readonly TokenStorageService _tokenStorage;
 
-    public AuthService(HttpClient http, CustomAuthStateProvider authProvider)
+    public AuthService(HttpClient http, CustomAuthStateProvider authProvider, TokenStorageService tokenStorage)
     {
         _http = http;
         _authProvider = authProvider;
+        _tokenStorage = tokenStorage;
     }
 
     public async Task<ApiSuccessResponse<AuthDto>> LoginAsync(LoginRequest request)
@@ -49,7 +51,8 @@ public class AuthService : IAuthService
             if (authDto is null)
                 return new ApiSuccessResponse<AuthDto> { Success = false, Message = error ?? "Erreur de connexion." };
 
-            // Store tokens in httpOnly cookies via Gateway
+            // Store tokens in localStorage pour Bearer header + httpOnly cookies via Gateway
+            await _tokenStorage.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
             await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
 
             _authProvider.SetAuthenticatedFromUser(authDto.User);
@@ -102,6 +105,7 @@ public class AuthService : IAuthService
             // Proceed with local state cleanup even if server call fails
         }
 
+        await _tokenStorage.ClearAsync();
         _authProvider.NotifyStateChanged();
     }
 
@@ -124,7 +128,10 @@ public class AuthService : IAuthService
 
             var (authDto, _) = await ParseTokenResponseAsync(response);
             if (authDto?.Token is not null)
+            {
+                await _tokenStorage.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
                 await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+            }
 
             return authDto;
         }
@@ -361,6 +368,7 @@ public class AuthService : IAuthService
             if (authDto is null)
                 return new ApiSuccessResponse<AuthDto> { Success = false, Message = error ?? "Erreur de connexion externe." };
 
+            await _tokenStorage.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
             await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
             _authProvider.SetAuthenticatedFromUser(authDto.User);
 
