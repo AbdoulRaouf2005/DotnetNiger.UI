@@ -72,7 +72,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             new("avatar_url", user.AvatarUrl),
         };
         foreach (var role in user.Roles)
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim(ClaimTypes.Role,
+                role.Length > 0 ? char.ToUpperInvariant(role[0]) + role[1..] : role));
 
         _cachedState = new AuthenticationState(
             new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
