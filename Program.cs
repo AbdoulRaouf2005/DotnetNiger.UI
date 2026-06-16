@@ -94,16 +94,10 @@ static HttpClient CreateGatewayHttpClient(
     ClientIdentifierProvider clientIdentifierProvider,
     ILogger<ClientIdHeaderHandler> logger)
 {
-#pragma warning disable CA1416
     var headerHandler = new ClientIdHeaderHandler(clientIdentifierProvider, logger)
     {
-        InnerHandler = new HttpClientHandler
-        {
-            UseDefaultCredentials = true,
-            UseCookies = false
-        }
+        InnerHandler = new HttpClientHandler()
     };
-#pragma warning restore CA1416
 
     return new HttpClient(headerHandler)
     {
