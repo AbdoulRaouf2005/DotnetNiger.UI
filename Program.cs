@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DotnetNiger.UI;
 using DotnetNiger.UI.Services.Browser;
 using DotnetNiger.UI.Services.Auth;
@@ -17,25 +18,15 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
 builder.Services.AddScoped<ClientIdentifierProvider>();
 
-builder.Services.AddScoped(sp => new CustomAuthStateProvider(
-    CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
-        sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
-builder.Services.AddScoped<AuthenticationStateProvider>(
-    sp => sp.GetRequiredService<CustomAuthStateProvider>());
-
-builder.Services.AddScoped<AuthService>(sp => new AuthService(
-    CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
-        sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
-    sp.GetRequiredService<CustomAuthStateProvider>()
-));
-
-builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
-
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
+    var anonymousState = new AuthenticationState(
+        new ClaimsPrincipal(new ClaimsIdentity()));
+    builder.Services.AddScoped<AuthenticationStateProvider>(_ =>
+        new MockAuthenticationStateProvider(anonymousState));
+
     builder.Services.AddScoped<IToastService, ToastService>();
     builder.Services.AddScoped<IContactService, MockContactService>();
     builder.Services.AddScoped<IUploadService, MockUploadService>();
@@ -58,6 +49,18 @@ if (useMock)
 }
 else
 {
+    builder.Services.AddScoped(sp => new CustomAuthStateProvider(
+        CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+    builder.Services.AddScoped<AuthenticationStateProvider>(
+        sp => sp.GetRequiredService<CustomAuthStateProvider>());
+
+    builder.Services.AddScoped<AuthService>(sp => new AuthService(
+        CreateGatewayHttpClient(apiBaseUrl, sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+        sp.GetRequiredService<CustomAuthStateProvider>()
+    ));
+
     HttpClient GatewayHttp(IServiceProvider sp) => CreateGatewayHttpClient(
         apiBaseUrl,
         sp.GetRequiredService<ClientIdentifierProvider>(),
@@ -82,6 +85,9 @@ else
     builder.Services.AddScoped<ISearchService>(sp => new ApiSearchService(GatewayHttp(sp)));
     builder.Services.AddScoped<IUploadService>(sp => new ApiUploadService(GatewayHttp(sp)));
 }
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
 
 await builder.Build().RunAsync();
 

@@ -8,16 +8,14 @@ namespace DotnetNiger.UI.Services.Mock;
 public class EventService : IEventService
 {
     private readonly IAuthService _authService;
-    private readonly CustomAuthStateProvider _authStateProvider;
     private List<EventDto> _events;
     private List<EventRegistrationDto> _registrations;
 
     private readonly INotificationService _notificationService;
 
-    public EventService(IAuthService authService, CustomAuthStateProvider authStateProvider, INotificationService notificationService)
+    public EventService(IAuthService authService, INotificationService notificationService)
     {
         _authService = authService;
-        _authStateProvider = authStateProvider;
         _notificationService = notificationService;
 
         _events = new List<EventDto>
