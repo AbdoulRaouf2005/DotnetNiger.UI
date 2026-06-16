@@ -1,6 +1,4 @@
-using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text.Json;
 using DotnetNiger.UI.Models.Responses;
 using Microsoft.AspNetCore.Components.Authorization;
 
@@ -8,63 +6,19 @@ namespace DotnetNiger.UI.Services.Auth;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
-    private readonly HttpClient _http;
     private static readonly AuthenticationState Anonymous =
         new(new ClaimsPrincipal(new ClaimsIdentity()));
 
     private AuthenticationState _cachedState = Anonymous;
     private DateTime _cacheExpiry = DateTime.MinValue;
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
-    public CustomAuthStateProvider(HttpClient http)
-    {
-        _http = http;
-    }
-
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         if (_cachedState != Anonymous && DateTime.UtcNow < _cacheExpiry)
-            return _cachedState;
+            return Task.FromResult(_cachedState);
 
-        try
-        {
-            var response = await _http.GetAsync("api/auth/session");
-            if (!response.IsSuccessStatusCode)
-            {
-                _cachedState = Anonymous;
-                return Anonymous;
-            }
-
-            var session = await response.Content.ReadFromJsonAsync<SessionResponse>();
-            if (session?.Authenticated == true && session.Claims is { Count: >0 })
-            {
-            var claims = session.Claims
-                .SelectMany<ClaimDto, Claim>(c =>
-                {
-                    if (c.Type == ClaimTypes.Role && c.Value.Length > 0)
-                    {
-                        var capped = char.ToUpperInvariant(c.Value[0]) + c.Value[1..];
-                        if (capped != c.Value)
-                            return new[] { new Claim(c.Type, c.Value), new Claim(c.Type, capped) };
-                    }
-                    return new[] { new Claim(c.Type, c.Value) };
-                })
-                .ToList();
-
-                _cachedState = new AuthenticationState(
-                    new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
-                _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
-                return _cachedState;
-            }
-
-            _cachedState = Anonymous;
-            return Anonymous;
-        }
-        catch
-        {
-            _cachedState = Anonymous;
-            return Anonymous;
-        }
+        return Task.FromResult(Anonymous);
     }
 
     public void SetAuthenticatedFromUser(UserDto user)
@@ -100,6 +54,4 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
-    private sealed record SessionResponse(bool Authenticated, List<ClaimDto>? Claims);
-    private sealed record ClaimDto(string Type, string Value);
 }

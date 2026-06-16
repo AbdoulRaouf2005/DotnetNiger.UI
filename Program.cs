@@ -52,8 +52,7 @@ else
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()));
 
-    builder.Services.AddScoped(sp => new CustomAuthStateProvider(
-        sp.GetRequiredService<HttpClient>()));
+    builder.Services.AddScoped<CustomAuthStateProvider>();
     builder.Services.AddScoped<AuthenticationStateProvider>(
         sp => sp.GetRequiredService<CustomAuthStateProvider>());
 
