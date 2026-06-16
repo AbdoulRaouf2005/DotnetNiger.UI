@@ -109,7 +109,7 @@
 			allPosts = await PostService.GetPublishedPostsAsync();
 			currentPage = 1;
 		}
-		catch (Exception ex)
+		catch
 		{
 			LoadError = "Impossible de charger les articles du blog.";
 		}

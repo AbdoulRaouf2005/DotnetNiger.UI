@@ -118,7 +118,7 @@
 		{
 			AllEvents = await EventService.GetPublishedEventsAsync();
 		}
-		catch (Exception ex)
+		catch
 		{
 			LoadError = "Impossible de charger les événements.";
 		}
