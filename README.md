@@ -155,6 +155,12 @@ See `git_github_frontend_guidelines.md` for the full workflow.
 
 The backend (Identity, Community API, Ocelot Gateway) lives in a separate repository. Refer to its `README.md` for setup instructions.
 
+## Deployment
+
+See [DEPLOY.md](DEPLOY.md) for all deployment options:
+- **Blazor WASM**: GitHub Pages, Netlify, Vercel, Cloudflare Pages, Firebase, S3, Docker
+- **Identity.Web**: Docker, MonsterASP, Somee, Oracle Cloud, Azure, VPS
+
 ## Links
 
 - **Backend repo**: [DotnetNiger (backend)](https://github.com/DelaliAbel/DotnetNiger)
