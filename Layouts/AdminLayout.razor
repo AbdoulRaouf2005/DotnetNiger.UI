@@ -1,19 +1,29 @@
 ﻿@using DotnetNiger.UI.Components.Admin.Shared
+@using System.Security.Claims
 @inherits LayoutComponentBase
+@inject NavigationManager Navigation
 
-<div class="flex flex-col h-screen">
-  <Topbar ToggleSidebar="ToggleSidebar"/>
-  <div class="flex flex-1 overflow-hidden">
-      <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
-    <main class="flex-1 overflow-y-auto bg-primary transition-all duration-300">
-      <div class="container mx-auto ">
-        @Body
-      </div>
-    </main>
-  </div>
-</div>
-
-<ToastContainer />
+<AuthorizeView Roles="Admin,SuperAdmin">
+    <Authorized>
+        <div class="flex flex-col h-screen">
+          <Topbar ToggleSidebar="ToggleSidebar"/>
+          <div class="flex flex-1 overflow-hidden">
+              <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
+            <main class="flex-1 overflow-y-auto bg-primary transition-all duration-300">
+              <div class="container mx-auto ">
+                @Body
+              </div>
+            </main>
+          </div>
+        </div>
+        <ToastContainer />
+    </Authorized>
+    <NotAuthorized>
+        @{
+            Navigation.NavigateTo("/");
+        }
+    </NotAuthorized>
+</AuthorizeView>
 
 @code{
   bool sidebarOpen = false;
