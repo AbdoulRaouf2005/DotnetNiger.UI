@@ -71,19 +71,19 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         => await _js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
 
     public async Task<string?> GetRefreshTokenAsync()
-        => await _js.InvokeAsync<string?>("localStorage.getItem", "refreshToken");
+        => await _js.InvokeAsync<string?>("sessionStorage.getItem", "refreshToken");
 
     public async Task SaveTokensAsync(string accessToken, string refreshToken)
     {
         await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
-        await _js.InvokeVoidAsync("localStorage.setItem", "refreshToken", refreshToken);
+        await _js.InvokeVoidAsync("sessionStorage.setItem", "refreshToken", refreshToken);
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     public async Task ClearTokensAsync()
     {
         await _js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
-        await _js.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
+        await _js.InvokeVoidAsync("sessionStorage.removeItem", "refreshToken");
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
     }
 

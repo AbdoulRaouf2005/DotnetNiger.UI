@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -17,6 +18,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 // Client HTTP dédié pour AuthService — configurez ApiBaseUrl dans wwwroot/appsettings.json
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
+var clientId = builder.Configuration["ClientId"] ?? "web-ui";
 builder.Services.AddScoped<ClientIdentifierProvider>();
 
 builder.Services.AddScoped<AuthService>(sp => new AuthService(
@@ -26,7 +28,8 @@ builder.Services.AddScoped<AuthService>(sp => new AuthService(
         sp.GetRequiredService<CustomAuthStateProvider>(),
         sp,
         sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
-    sp.GetRequiredService<CustomAuthStateProvider>()
+    sp.GetRequiredService<CustomAuthStateProvider>(),
+    clientId
 ));
 
 // Auth

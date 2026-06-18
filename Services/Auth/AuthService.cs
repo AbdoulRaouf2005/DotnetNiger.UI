@@ -12,13 +12,15 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
+    private readonly string _clientId;
 
     public event Action? OnAuthStateChanged;
 
-    public AuthService(HttpClient http, CustomAuthStateProvider authProvider)
+    public AuthService(HttpClient http, CustomAuthStateProvider authProvider, string clientId = "web-ui")
     {
         _http = http;
         _authProvider = authProvider;
+        _clientId = clientId;
     }
 
     public async Task<ApiSuccessResponse<AuthDto>> LoginAsync(LoginRequest request)
@@ -30,7 +32,8 @@ public class AuthService : IAuthService
                 ["grant_type"] = "password",
                 ["username"] = request.Email,
                 ["password"] = request.Password,
-                ["scope"] = "openid profile email roles offline_access"
+                ["scope"] = "openid profile email roles offline_access",
+                ["client_id"] = _clientId
             };
 
             var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
@@ -159,7 +162,7 @@ public class AuthService : IAuthService
             {
                 ["grant_type"] = "external_login",
                 ["ticket"] = ticket,
-                ["client_id"] = "web-ui",
+                ["client_id"] = _clientId,
                 ["scope"] = "openid profile email roles offline_access"
             };
 
@@ -296,7 +299,7 @@ public class AuthService : IAuthService
         if (!string.IsNullOrWhiteSpace(refreshToken))
         {
             _ = await _http.PostAsJsonAsync("api/auth/logout",
-                new RefreshTokenRequest { RefreshToken = refreshToken });
+                new RefreshTokenRequest { RefreshToken = refreshToken, ClientId = _clientId });
         }
 
         await _authProvider.ClearTokensAsync();
@@ -323,7 +326,8 @@ public class AuthService : IAuthService
             {
                 ["grant_type"] = "refresh_token",
                 ["refresh_token"] = refreshToken,
-                ["scope"] = "openid profile email roles offline_access"
+                ["scope"] = "openid profile email roles offline_access",
+                ["client_id"] = _clientId
             };
 
             var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
