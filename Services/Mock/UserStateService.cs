@@ -3,7 +3,7 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Mock;
 
-public class MockUserStateService : IUserStateService
+public class UserStateService : IUserStateService
 {
     public event Action? OnChange;
     
@@ -11,7 +11,7 @@ public class MockUserStateService : IUserStateService
     private readonly ILocalStorageService _localStorage;
     private readonly IUserService _userService;
     
-    public MockUserStateService(ILocalStorageService localStorage, IUserService userService)
+    public UserStateService(ILocalStorageService localStorage, IUserService userService)
     {
         _localStorage = localStorage;
         _userService = userService;
