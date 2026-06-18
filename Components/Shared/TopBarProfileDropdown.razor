@@ -75,7 +75,20 @@
                 </span>
             </button>
 
-            <div class="h-px bg-white"></div>
+            @if (UserStateService.IsAdmin)
+            {
+                <button type="button"
+                        class="flex w-full items-start gap-3 px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-white"
+                        @onclick="NavigateToAdminAsync">
+                    <i class="fas fa-shield-alt mt-0.5 text-base text-gray-700"></i>
+                    <span class="flex flex-col leading-tight">
+                        <span class="text-sm font-medium">Administration</span>
+                        <span class="max-w-[160px] truncate text-xs text-gray-500">Gérer le site</span>
+                    </span>
+                </button>
+
+                <div class="h-px bg-white"></div>
+            }
 
             <button type="button"
                     class="flex w-full items-center justify-between px-4 py-3 text-left text-sm text-gray-800 transition hover:bg-white">
@@ -152,6 +165,18 @@
                                     }
                                 </span>
                                 <span class="flex-1">@item.Label</span>
+                            </NavLink>
+                        }
+                        @if (UserStateService.IsAdmin)
+                        {
+                            <NavLink href="/admin"
+                                     ActiveClass="bg-[#DBEAFE] text-[#1E40AF]"
+                                     class="group flex items-center gap-4 rounded-lg px-4 py-3 text-base font-semibold text-[#4B5563] shadow-sm ring-1 ring-white/70 transition duration-200 hover:bg-white hover:text-[#1E40AF]"
+                                     @onclick="CloseMenu">
+                                <span class="relative flex h-11 w-11 items-center justify-center rounded-lg bg-white/90 text-inherit shadow-sm ring-1 ring-white/80 transition group-hover:bg-[#EFF6FF]">
+                                    <iconify-icon icon="material-symbols:admin-panel-settings-rounded" class="text-2xl"></iconify-icon>
+                                </span>
+                                <span class="flex-1">Administration</span>
                             </NavLink>
                         }
                     </div>
@@ -287,6 +312,13 @@
         isMenuOpen = false;
         await Task.Yield();
         Navigation.NavigateTo("/profile");
+    }
+
+    private async Task NavigateToAdminAsync()
+    {
+        isMenuOpen = false;
+        await Task.Yield();
+        Navigation.NavigateTo("/admin");
     }
 
     private async Task LogoutAsync()
