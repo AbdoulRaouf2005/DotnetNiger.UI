@@ -84,7 +84,7 @@ The frontend reads the Gateway URL from the `ApiBaseUrl` config key.
 | `IRegistrationService`   | `MockRegistrationService`    | `ApiRegistrationService`    |
 | `IUserStateService`      | `MockUserStateService`       | `UserStateService`          |
 | `IToastService`          | `ToastService`               | `ToastService`              |
-| `ILocalStorageService`   | (always real via JS interop) | `JsLocalStorageService`     |
+| `ISessionStorageService`   | (always real via JS interop) | `JsSessionStorageService`     |
 
 ## Tailwind CSS
 

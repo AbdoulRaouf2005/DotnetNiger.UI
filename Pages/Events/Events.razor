@@ -12,41 +12,45 @@
 			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700">Découvrez tous nos événements en ligne et en personne</p>
 		</div>
 
-		<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
-			<button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary" aria-label="Filtrer les événements">
-				<i class="fa-solid fa-sliders text-base"></i>
-			</button>
-			<label class="relative w-full min-w-[220px] flex-1">
-				<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-					<i class="fa-solid fa-magnifying-glass text-sm"></i>
-				</span>
-				<input type="search" @bind="searchQuery" @bind:event="oninput" placeholder="Rechercher un événement..." class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-			</label>
-
-			<select @bind="selectedLocation" class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
+		<div class="flex flex-col sm:flex-row gap-3 mb-8">
+			<div class="relative flex-1">
+				<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+				<input type="text"
+					   placeholder="Rechercher un événement..."
+					   @bind="searchQuery"
+					   @bind:event="oninput"
+					   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+				@if (!string.IsNullOrEmpty(searchQuery))
+				{
+					<button @onclick="() => { searchQuery = string.Empty; }"
+							class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+						<i class="fas fa-times"></i>
+					</button>
+				}
+			</div>
+			<select @bind="selectedLocation"
+					class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
 				<option value="">Lieu d'événement</option>
 				<option value="Online">En ligne</option>
 				<option value="Niamey">Niamey</option>
 				<option value="other">Autres villes</option>
 			</select>
-
-			<select @bind="selectedDateFilter" class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
+			<select @bind="selectedDateFilter"
+					class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
 				<option value="">Date d'événement</option>
 				<option value="week">Cette semaine</option>
 				<option value="month">Ce mois</option>
 				<option value="quarter">Ce trimestre</option>
 			</select>
-
-			
 		</div>
 
 		@if (IsLoading)
 		{
-			<div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm md:text-base text-gray-600 shadow-sm">Chargement des événements...</div>
+			<div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm md:text-base text-gray-600 shadow-sm">Chargement des événements...</div>
 		}
 		else if (!string.IsNullOrWhiteSpace(LoadError))
 		{
-			<div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm md:text-base text-red-600 shadow-sm">@LoadError</div>
+			<div class="rounded-lg bg-red-50 p-4 sm:p-6 text-xs sm:text-sm md:text-base text-red-600 shadow-sm">@LoadError</div>
 		}
 		else
 		{

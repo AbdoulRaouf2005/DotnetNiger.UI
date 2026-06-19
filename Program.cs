@@ -94,6 +94,6 @@ else
 }
 
 builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
+builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ISessionStorageService, JsSessionStorageService>();
 
 await builder.Build().RunAsync();

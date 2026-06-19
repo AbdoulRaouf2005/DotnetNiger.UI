@@ -1,4 +1,4 @@
-@page "/admin/projects/nouveau"
+﻿@page "/admin/projects/nouveau"
 @* Page admin : création d'un nouveau projet. *@
 @using DotnetNiger.UI.Models.Requests
 @inject NavigationManager Navigation
@@ -50,20 +50,11 @@
                     <ValidationMessage For="@(() => projectRequest.Description)" class="mt-1 text-xs text-red-500" />
                 </div>
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                        <label class="block text-sm font-semibold text-[#111827]">URL du projet</label>
-                        <InputText @bind-Value="projectRequest.Url"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
-                                   placeholder="https://..." />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-[#111827]">URL GitHub</label>
-                        <InputText @bind-Value="projectRequest.GithubUrl"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
-                                   placeholder="https://github.com/..." />
-                    </div>
+                <div>
+                    <label class="block text-sm font-semibold text-[#111827]">URL GitHub</label>
+                    <InputText @bind-Value="projectRequest.GithubUrl"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               placeholder="https://github.com/..." />
                 </div>
 
                 <div>

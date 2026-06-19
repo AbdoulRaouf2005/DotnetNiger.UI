@@ -82,7 +82,7 @@ else
 | Auth           | `IAuthService`        | --                             | --                 |
 | User State     | `IUserStateService`   | --                             | --                 |
 | Browser/UI     | `IToastService`       | --                             | --                 |
-|                | `ILocalStorageService`|                                |                    |
+|                | `ISessionStorageService`|                                |                    |
 | Business Logic | --                    | --                             | All entity services|
 | Limited API    | --                    | `INotificationService`*        | --                 |
 |                |                       | `IRegistrationService`**       |                    |

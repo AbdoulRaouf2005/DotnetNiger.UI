@@ -1,0 +1,133 @@
+@page "/projets/{Slug}"
+@inject IProjectService ProjectService
+@inject NavigationManager Navigation
+@using System.Globalization
+
+<PageTitle>@(Project is null ? "Projet - .NET Niger" : $"{Project.Title} - .NET Niger")</PageTitle>
+
+<section class="min-h-screen bg-gray-50 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div class="mx-auto w-full max-w-6xl">
+        @if (isLoading)
+        {
+            <div class="rounded-lg bg-white p-6 text-sm text-gray-600 shadow-sm">
+                Chargement du projet...
+            </div>
+        }
+        else if (Project is null)
+        {
+            <div class="rounded-lg bg-red-50 p-6 text-sm text-red-600 shadow-sm">
+                Projet introuvable.
+            </div>
+            <a href="/community" class="mt-4 inline-flex text-sm font-semibold text-secondary hover:underline">
+                Retour aux projets
+            </a>
+        }
+        else
+        {
+            <nav class="mb-6 text-sm text-gray-500">
+                <a href="/community" class="hover:text-secondary transition-colors">Communauté</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-800 font-medium">@Project.Title</span>
+            </nav>
+
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+
+                @* Block 1 : Image, Description, Technologies *@
+                <div class="lg:col-span-2 space-y-6">
+                    @if (!string.IsNullOrWhiteSpace(Project.ImageUrl))
+                    {
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm">
+                            <img src="@Project.ImageUrl"
+                                 alt="@Project.Title"
+                                 class="h-64 w-full object-cover sm:h-80" />
+                        </div>
+                    }
+
+                    <div class="rounded-lg bg-white p-6 shadow-sm">
+                        <h1 class="text-xl font-bold text-gray-900 sm:text-2xl">@Project.Title</h1>
+                        <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base">@Project.Description</p>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Project.Technologies))
+                    {
+                        <div class="rounded-lg bg-white p-6 shadow-sm">
+                            <h2 class="mb-3 text-sm font-semibold text-gray-800">Technologies utilisées</h2>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach (var tech in Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                {
+                                    <span class="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700">@tech</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* Block 2 : Auteur, Statut *@
+                <div class="lg:col-span-1">
+                    <div class="sticky top-8 space-y-6">
+                        <div class="rounded-lg bg-white p-6 shadow-sm">
+                            <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Auteur</h3>
+                            <a href="/membres/@Project.CreatedBy"
+                               class="flex items-center gap-3 rounded-lg transition hover:bg-gray-50 -mx-2 -my-2 p-2">
+                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary/10">
+                                    <i class="fas fa-user text-sm text-secondary"></i>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900 hover:text-secondary transition-colors">@Project.AuthorName</span>
+                            </a>
+                        </div>
+
+                        <div class="rounded-lg bg-white p-6 shadow-sm">
+                            <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Statut</h3>
+                            <span class="inline-flex items-center gap-1.5 rounded-lg @StatusCss px-3 py-1.5 text-xs font-semibold">
+                                <span class="inline-block h-2 w-2 rounded-full @StatusDotCss"></span>
+                                @StatusLabel
+                            </span>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Project.GithubUrl))
+                        {
+                            <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer"
+                               class="flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800">
+                                <i class="fab fa-github"></i>
+                                Voir sur GitHub
+                            </a>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter] public string Slug { get; set; } = string.Empty;
+
+    private ProjectResponse? Project;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Project = await ProjectService.GetBySlugAsync(Slug);
+        }
+        catch
+        {
+            Project = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private bool IsActive => Project?.Status == "active";
+    private string StatusLabel => IsActive ? "Actif" : "Archivé";
+    private string StatusCss => IsActive
+        ? "bg-green-50 text-green-700"
+        : "bg-gray-100 text-gray-600";
+    private string StatusDotCss => IsActive
+        ? "bg-green-500"
+        : "bg-gray-400";
+}

@@ -3,7 +3,7 @@
 @using System.Net
 @using System.Globalization
 
-<a href="@GetPostUrl()" class="group block overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-2">
+<a href="@GetPostUrl()" class="group block overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-2">
       <div class="block h-32 sm:h-40 md:h-44 overflow-hidden bg-secondary relative">
                  <img src="@(post?.CoverImageUrl ?? "/Images/ImageBlog.jpg")"
                    alt="@post?.Title"
@@ -19,7 +19,7 @@
       <div class="space-y-2 sm:space-y-3 p-3 sm:p-4">
             @if (post?.Categories?.Any() == true)
             {
-                  <span class="inline-flex rounded-sm bg-[#e8e3f6] px-2 py-1 text-[10px] sm:text-xs font-semibold text-secondary">
+                  <span class="inline-flex rounded-lg bg-[#e8e3f6] px-2 py-1 text-[10px] sm:text-xs font-semibold text-secondary">
                         @post.Categories.FirstOrDefault()?.Name
                   </span>
             }

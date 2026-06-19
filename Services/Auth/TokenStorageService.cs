@@ -4,11 +4,11 @@ namespace DotnetNiger.UI.Services.Auth;
 
 public class TokenStorageService
 {
-    private readonly ILocalStorageService _storage;
+    private readonly ISessionStorageService _storage;
     private const string AccessTokenKey = "access_token";
     private const string RefreshTokenKey = "refresh_token";
 
-    public TokenStorageService(ILocalStorageService storage)
+    public TokenStorageService(ISessionStorageService storage)
     {
         _storage = storage;
     }

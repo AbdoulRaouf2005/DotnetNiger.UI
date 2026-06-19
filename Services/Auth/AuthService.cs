@@ -1,6 +1,5 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
@@ -107,38 +106,6 @@ public class AuthService : IAuthService
 
         await _tokenStorage.ClearAsync();
         _authProvider.NotifyStateChanged();
-    }
-
-    private static readonly SemaphoreSlim _refreshLock = new(1, 1);
-
-    public async Task<AuthDto?> RefreshTokenAsync()
-    {
-        if (!await _refreshLock.WaitAsync(0))
-            return null;
-
-        try
-        {
-            var response = await _http.PostAsync("api/auth/refresh", null);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _authProvider.NotifyStateChanged();
-                return null;
-            }
-
-            var (authDto, _) = await ParseTokenResponseAsync(response);
-            if (authDto?.Token is not null)
-            {
-                await _tokenStorage.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
-                await StoreTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
-            }
-
-            return authDto;
-        }
-        finally
-        {
-            _refreshLock.Release();
-        }
     }
 
     public async Task<UserDto?> GetCurrentUserAsync()
@@ -384,38 +351,6 @@ public class AuthService : IAuthService
         }
     }
 
-    public string? GetRoleFromAccessToken(string? accessToken)
-    {
-        if (string.IsNullOrWhiteSpace(accessToken))
-            return null;
-
-        var segments = accessToken.Split('.');
-        if (segments.Length < 2)
-            return null;
-
-        try
-        {
-            var payloadJson = Encoding.UTF8.GetString(ParseBase64WithoutPadding(segments[1]));
-            using var document = JsonDocument.Parse(payloadJson);
-            var root = document.RootElement;
-
-            if (TryGetRoleValue(root, "roles", out var roleFromRoles))
-                return roleFromRoles;
-
-            if (TryGetRoleValue(root, "role", out var roleFromRole))
-                return roleFromRole;
-
-            if (TryGetRoleValue(root, "http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out var roleFromClaimType))
-                return roleFromClaimType;
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
     public string GetPostLoginRedirectPath(List<string>? roles)
     {
         if (roles == null || roles.Count == 0)
@@ -424,31 +359,15 @@ public class AuthService : IAuthService
         var rolesLower = roles.Select(r => r.ToLowerInvariant()).ToList();
 
         if (rolesLower.Contains("superadmin"))
-            return "/admin/dashboard";
+            return "/admin";
 
         if (rolesLower.Contains("admin"))
-            return "/admin/dashboard";
+            return "/admin";
 
         if (rolesLower.Contains("moderator"))
-            return "/admin/dashboard";
+            return "/admin";
 
         return "/";
-    }
-
-    [Obsolete("Utilisez GetPostLoginRedirectPath(List<string> roles) avec les rôles du UserDto")]
-    public string GetPostLoginRedirectPathFromToken(string? accessToken)
-    {
-        var role = GetRoleFromAccessToken(accessToken);
-        if (string.IsNullOrWhiteSpace(role))
-            return "/";
-
-        return role.ToLowerInvariant() switch
-        {
-            "admin" => "/admin/dashboard",
-            "superadmin" => "/admin/dashboard",
-            "moderator" => "/admin/dashboard",
-            _ => "/"
-        };
     }
 
     private static async Task<(AuthDto?, string?)> ParseTokenResponseAsync(HttpResponseMessage response)
@@ -515,32 +434,7 @@ public class AuthService : IAuthService
         return null;
     }
 
-    private static bool TryGetRoleValue(JsonElement root, string key, out string? role)
-    {
-        role = null;
-
-        if (!root.TryGetProperty(key, out var roleElement))
-            return false;
-
-        if (roleElement.ValueKind == JsonValueKind.Array)
-        {
-            role = roleElement
-                .EnumerateArray()
-                .Select(x => x.GetString())
-                .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-            return !string.IsNullOrWhiteSpace(role);
-        }
-
-        if (roleElement.ValueKind == JsonValueKind.String)
-        {
-            role = roleElement.GetString();
-            return !string.IsNullOrWhiteSpace(role);
-        }
-
-        return false;
-    }
-
-    private static byte[] ParseBase64WithoutPadding(string base64)
+    internal static byte[] ParseBase64WithoutPadding(string base64)
     {
         base64 = base64.Replace('-', '+').Replace('_', '/');
         return (base64.Length % 4) switch
@@ -579,7 +473,7 @@ public class AuthService : IAuthService
         }
     }
 
-    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    internal static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
         var segments = jwt.Split('.');
         if (segments.Length < 2)

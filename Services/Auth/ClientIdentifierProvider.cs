@@ -1,4 +1,4 @@
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using Microsoft.Extensions.Logging;
 
 namespace DotnetNiger.UI.Services.Auth;

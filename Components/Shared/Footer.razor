@@ -1,4 +1,4 @@
-@inject INewsletterService NewsletterService
+﻿@inject INewsletterService NewsletterService
 
 <footer class="bg-secondary text-white py-12 px-4">
     <div class="max-w-6xl mx-auto">
@@ -46,9 +46,9 @@
                     <input type="email" placeholder="Saisissez votre email"
                            @bind="newsletterEmail"
                            @bind:event="oninput"
-                           class="flex-1 px-4 py-2 mr-1 rounded-l-lg text-white bg-secondary border border-white focus:outline-none placeholder-purple-200" />
+                           class="flex-1 px-4 py-2 mr-1 rounded-lg text-white bg-secondary border border-white focus:outline-none placeholder-purple-200" />
                     <button @onclick="SubscribeNewsletterAsync" disabled="@isSubscribing"
-                            class="bg-white px-3 py-2 flex items-center rounded-r-lg transition hover:brightness-110">
+                            class="bg-white px-3 py-2 flex items-center rounded-lg transition hover:brightness-110">
                         @if (isSubscribing)
                         {
                             <i class="fa-solid fa-spinner fa-spin text-2xl text-secondary"></i>

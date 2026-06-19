@@ -1,4 +1,4 @@
-@page "/evenements/{Slug}"
+﻿@page "/evenements/{Slug}"
 @page "/evenements/{Id:guid}"
 @inject IEventService EventService
 @inject ICommentService CommentService
@@ -33,13 +33,13 @@
     <div class="mx-auto w-full max-w-6xl space-y-4">
         @if (IsLoading)
         {
-            <div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">
+            <div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">
                 Chargement de l'événement...
             </div>
         }
         else if (!string.IsNullOrWhiteSpace(LoadError))
         {
-            <div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">
+            <div class="rounded-lg bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">
                 @LoadError
             </div>
             <a href="/evenements" class="inline-flex text-xs sm:text-sm font-semibold text-secondary hover:underline">
@@ -48,12 +48,12 @@
         }
         else if (CurrentEvent is not null)
         {
-            @* ── Hero card ── *@
-            <article class="overflow-hidden rounded-xl bg-white shadow-sm">
+            @* --- Hero card --- *@
+            <article class="overflow-hidden rounded-lg bg-white shadow-sm">
                 <div class="h-64 bg-cover bg-center sm:h-80" style="@BuildCoverStyle(CurrentEvent.CoverImageUrl)"></div>
                 <div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
                     <div class="flex justify-between items-center">
-                        <span class="inline-flex items-center gap-1 rounded-md bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
+                        <span class="inline-flex items-center gap-1 rounded-lg bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
                             <i class="fa-solid fa-satellite-dish text-[9px] sm:text-[10px]"></i>
                             @GetEventTypeLabel(CurrentEvent.EventType)
                         </span>
@@ -96,7 +96,7 @@
                         <div class="flex flex-wrap items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
                             <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-gray-500">
                                 <i class="fa-regular fa-clock"></i>
-                                Événement passé
+                                é‰vénement passé
                             </span>
                             @if (IsRegistered)
                             {
@@ -207,9 +207,9 @@
                 </div>
             </article>
 
-            @* ── À propos + Partage desktop ── *@
+            @* --- À propos + Partage desktop --- *@
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 relative">
-                <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
                     <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
                         À propos de l'événement
                     </h2>
@@ -218,7 +218,7 @@
                     </p>
                 </article>
 
-                <aside class="hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:sticky lg:top-0 lg:block">
+                <aside class="hidden rounded-lg border border-gray-100 bg-white p-5 shadow-sm lg:sticky lg:top-0 lg:block">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
@@ -231,7 +231,7 @@
                                 Diffusez l'événement sur vos réseaux ou copiez le lien direct.
                             </p>
                         </div>
-                        <div class="flex h-11 w-11 items-center justify-center rounded-md bg-indigo-50 text-secondary">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-50 text-secondary">
                             <i class="fa-solid fa-share-nodes"></i>
                         </div>
                     </div>
@@ -240,11 +240,11 @@
                 </aside>
             </div>
 
-            @* ── Mobile share overlay ── *@
+            @* --- Mobile share overlay --- *@
             <div class="fixed inset-0 z-10 bg-black/50 sm:hidden @(IsShared ? "" : "hidden")"
                  @onclick="ToggleSharePanel"></div>
             <aside id="mobile-share-panel"
-                   class="overflow-hidden z-20 w-[91%] fixed top-20 rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 lg:hidden @(IsShared ? "max-h-80 p-4 opacity-100 pointer-events-auto translate-x-0" : "max-h-0 p-0 opacity-0 pointer-events-none translate-x-full")">
+                   class="overflow-hidden z-20 w-[91%] fixed top-20 rounded-lg border border-gray-100 bg-white shadow-sm transition-all duration-300 lg:hidden @(IsShared ? "max-h-80 p-4 opacity-100 pointer-events-auto translate-x-0" : "max-h-0 p-0 opacity-0 pointer-events-none translate-x-full")">
                 <div class="flex items-center justify-between gap-3">
                     <div>
                         <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
@@ -264,11 +264,11 @@
                               Description="@CurrentEvent.Description" />
             </aside>
 
-            @* ── Intervenants ── *@
+            @* --- Intervenants --- *@
             @if (CurrentEvent.Speakers.Count > 0)
             {
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                    <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
                         <div class="text-center">
                             <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Intervenants</h2>
                             <p class="mt-2 text-xs sm:text-sm text-gray-500 sm:text-base">
@@ -300,18 +300,18 @@
                 </div>
             }
 
-            @* ── Galerie photos ── *@
+            @* --- Galerie photos --- *@
             @if (_galleryImages.Count > 0)
             {
                 <div class="grid grid-cols-1 gap-4">
-                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                    <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm">
                         <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">Galerie photos</h2>
                         <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             @foreach (var img in _galleryImages)
                             {
                                 <a href="@img" target="_blank" class="block">
                                     <img src="@img"
-                                         class="h-28 sm:h-32 w-full rounded-xl object-cover border border-gray-200 hover:opacity-90 transition" />
+                                         class="h-28 sm:h-32 w-full rounded-lg object-cover border border-gray-200 hover:opacity-90 transition" />
                                 </a>
                             }
                         </div>
@@ -321,7 +321,7 @@
             else if (_isPastEvent)
             {
                 <div class="grid grid-cols-1 gap-4">
-                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                    <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm">
                         <div class="flex flex-col items-center justify-center py-10 text-center">
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                                 <i class="fas fa-images text-2xl text-gray-400"></i>
@@ -339,7 +339,7 @@
             else
             {
                 <div class="grid grid-cols-1 gap-4">
-                    <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm">
+                    <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm">
                         <div class="flex flex-col items-center justify-center py-10 text-center">
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                                 <i class="fas fa-images text-2xl text-gray-400"></i>
@@ -355,9 +355,9 @@
                 </div>
             }
 
-            @* ── Commentaires ── *@
+            @* --- Commentaires --- *@
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <article class="rounded-xl bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
+                <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
                     <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
                         Commentaires & Feedback
                     </h2>
@@ -519,7 +519,7 @@
 
             if (CurrentEvent is null)
             {
-                LoadError = "Événement introuvable.";
+                LoadError = "é‰vénement introuvable.";
                 return;
             }
 
@@ -557,7 +557,7 @@
             "online" => "En ligne",
             "physical" => "Présentiel",
             "hybrid" => "Hybride",
-            _ => string.IsNullOrWhiteSpace(eventType) ? "Événement" : eventType
+            _ => string.IsNullOrWhiteSpace(eventType) ? "é‰vénement" : eventType
         };
     }
 

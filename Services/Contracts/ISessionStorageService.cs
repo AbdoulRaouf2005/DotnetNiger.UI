@@ -1,6 +1,6 @@
 namespace DotnetNiger.UI.Services.Contracts;
 
-public interface ILocalStorageService
+public interface ISessionStorageService
 {
     Task<T?> GetItemAsync<T>(string key);
     Task SetItemAsync<T>(string key, T value);

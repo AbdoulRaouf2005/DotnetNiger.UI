@@ -1,4 +1,4 @@
-@page "/admin"
+﻿@page "/admin"
 @* Page admin : tableau de bord (KPI + listes récentes) alimenté par services. *@
 @inject IPostService PostService
 @inject IEventService EventService
@@ -25,7 +25,7 @@
 
 				<div class="w-full max-w-md rounded-[18px] bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
 					<div class="flex items-center gap-3">
-						<div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+						<div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-[#EEEAFE] text-[#5b4df5]">
 							@if (CurrentUserHasAvatar)
 							{
 								<img src="@CurrentUserAvatarUrl" alt="@CurrentUserDisplayName" class="h-full w-full object-cover" />
@@ -41,11 +41,11 @@
 						</div>
 					</div>
 					<div class="mt-4 grid gap-3 sm:grid-cols-2">
-						<div class="rounded-2xl bg-[#F9FAFB] px-3 py-3">
+						<div class="rounded-lg bg-[#F9FAFB] px-3 py-3">
 							<p class="text-[11px] font-semibold uppercase tracking-wide text-[#6b7280]">Statut</p>
 							<p class="mt-1 text-sm font-semibold text-[#111827]">@(IsCurrentUserLoaded ? (IsCurrentUserActive ? "Actif" : "Inactif") : "En cours")</p>
 						</div>
-						<div class="rounded-2xl bg-[#F9FAFB] px-3 py-3">
+						<div class="rounded-lg bg-[#F9FAFB] px-3 py-3">
 							<p class="text-[11px] font-semibold uppercase tracking-wide text-[#6b7280]">Accès</p>
 							<p class="mt-1 text-sm font-semibold text-[#111827]">@(IsCurrentUserAdmin ? "Administration" : "Membre")</p>
 						</div>
@@ -59,7 +59,7 @@
 			{
 				<article class="overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
 					<div class="flex min-h-[150px] flex-col items-center justify-center gap-3 px-6 py-7 text-center">
-						<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+						<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-[#EEEAFE] text-[#5b4df5]">
 							<i class="@metric.IconClass text-2xl"></i>
 						</div>
 						<p class="text-4xl font-semibold leading-none text-[#111827]">@metric.Value</p>
@@ -76,12 +76,12 @@
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEEAFE] text-[#5b4df5]">
 							<i class="fas fa-user-plus text-lg"></i>
 						</div>
 						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Demandes d’intégration</h2>
-							<p class="text-sm text-[#6b7280]">Membres de la communauté en attente d’approbation</p>
+							<h2 class="text-lg font-semibold text-[#111827]">Demandes d'intégration</h2>
+							<p class="text-sm text-[#6b7280]">Membres de la communauté en attente d'approbation</p>
 						</div>
 					</div>
 					<span class="rounded-full bg-[#EEEAFE] px-3 py-1 text-xs font-semibold text-[#5b4df5]">@PendingUsers.Count</span>
@@ -90,15 +90,15 @@
 				<div class="mt-5 space-y-3">
 					@if (PendingUsers.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune demande d’intégration en attente.</p>
+						<p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune demande d'intégration en attente.</p>
 					}
 					else
 					{
 						@foreach (var item in PendingUsers)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+							<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
 								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 text-[#5b4df5]">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-[#5b4df5]">
 										@if (!string.IsNullOrWhiteSpace(item.AvatarUrl))
 										{
 											<img src="@item.AvatarUrl" alt="@item.DisplayName" class="h-full w-full object-cover" />
@@ -135,12 +135,12 @@
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF6FF] text-[#2563eb]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEF6FF] text-[#2563eb]">
 							<i class="fas fa-calendar-check text-lg"></i>
 						</div>
 						<div>
 							<h2 class="text-lg font-semibold text-[#111827]">File de validation</h2>
-							<p class="text-sm text-[#6b7280]">Événements en attente</p>
+							<p class="text-sm text-[#6b7280]">é‰vénements en attente</p>
 						</div>
 					</div>
 					<span class="rounded-full bg-[#EEF6FF] px-3 py-1 text-xs font-semibold text-[#2563eb]">@PendingEvents.Count</span>
@@ -149,15 +149,15 @@
 				<div class="mt-5 space-y-3">
 					@if (PendingEvents.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun événement en attente de validation.</p>
+						<p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun événement en attente de validation.</p>
 					}
 					else
 					{
 						@foreach (var item in PendingEvents)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+							<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
 								<div class="flex min-w-0 items-center gap-3">
-									<div class="h-11 w-11 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+									<div class="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
 										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
 										{
 											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
@@ -193,7 +193,7 @@
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F0FDF4] text-[#16a34a]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#F0FDF4] text-[#16a34a]">
 							<i class="fas fa-folder-open text-lg"></i>
 						</div>
 						<div>
@@ -207,15 +207,15 @@
 				<div class="mt-5 space-y-3">
 					@if (RecentResources.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune ressource disponible.</p>
+						<p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune ressource disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentResources)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+							<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
 								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F3F4F6] text-[#111827]">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#F3F4F6] text-[#111827]">
 										<i class="fas fa-folder-open text-base"></i>
 									</div>
 									<div class="min-w-0">
@@ -240,7 +240,7 @@
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEEAFE] text-[#5b4df5]">
 							<i class="fas fa-code-branch text-lg"></i>
 						</div>
 						<div>
@@ -254,15 +254,15 @@
 				<div class="mt-5 space-y-3">
 					@if (RecentProjects.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun projet récent disponible.</p>
+						<p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun projet récent disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentProjects)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+							<div class="flex items-center justify-between gap-3 rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
 								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-[#EEEAFE] text-[#5b4df5]">
 										<i class="fas fa-code-branch text-base"></i>
 									</div>
 									<div class="min-w-0">
@@ -287,11 +287,11 @@
 			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6 xl:col-span-2">
 				<div class="flex items-center justify-between gap-3">
 					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF7ED] text-[#ea580c]">
+						<div class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#FFF7ED] text-[#ea580c]">
 							<i class="fas fa-calendar-days text-lg"></i>
 						</div>
 						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Événements récents</h2>
+							<h2 class="text-lg font-semibold text-[#111827]">é‰vénements récents</h2>
 							<p class="text-sm text-[#6b7280]">Dernières publications visibles</p>
 						</div>
 					</div>
@@ -301,15 +301,15 @@
 				<div class="mt-5 space-y-3">
 					@if (RecentEvents.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun évènement récent disponible.</p>
+						<p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun évènement récent disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentEvents)
 						{
-							<div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+							<div class="flex items-center justify-between gap-4 rounded-lg border border-gray-100 bg-white px-3 py-3 shadow-sm">
 								<div class="flex min-w-0 items-center gap-3">
-									<div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+									<div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
 										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
 										{
 											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
@@ -325,7 +325,7 @@
 									</div>
 								</div>
 								<div class="flex items-center gap-3">
-									<span class="rounded-md px-3 py-1.5 text-xs font-semibold @GetEventStatusClass(item)">@GetEventStatusLabel(item)</span>
+									<span class="rounded-lg px-3 py-1.5 text-xs font-semibold @GetEventStatusClass(item)">@GetEventStatusLabel(item)</span>
 									<AdminActionDropdown ItemId="item.Id"
 												Status="@(item.IsPublished ? "Published" : "Pending")"
 												ViewLabel="Voir l'article"
@@ -353,7 +353,7 @@
 	private List<DashboardMetric> Metrics { get; set; } =
 	[
 		new() { IconClass = "fas fa-users", Value = 0, Label = "Utilisateurs", Url = "/admin/Users" },
-		new() { IconClass = "fas fa-calendar-alt", Value = 0, Label = "Événements", Url = "/admin/events" },
+		new() { IconClass = "fas fa-calendar-alt", Value = 0, Label = "é‰vénements", Url = "/admin/events" },
 		new() { IconClass = "fas fa-newspaper", Value = 0, Label = "Blogs", Url = "/admin/blog" },
 		new() { IconClass = "fas fa-folder-open", Value = 0, Label = "Ressources", Url = "/admin/ressources" },
 		new() { IconClass = "fas fa-code-branch", Value = 0, Label = "Projets", Url = "/admin/projects" }
@@ -410,7 +410,7 @@
 			Metrics =
 			[
 				new() { IconClass = "fas fa-users", Value = users.Count, Label = "Utilisateurs", Url = "/admin/Users" },
-				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "Événements", Url = "/admin/events" },
+				new() { IconClass = "fas fa-calendar-alt", Value = events.Count, Label = "é‰vénements", Url = "/admin/events" },
 				new() { IconClass = "fas fa-newspaper", Value = posts.Count, Label = "Blogs", Url = "/admin/blog" },
 				new() { IconClass = "fas fa-folder-open", Value = resources.Count, Label = "Ressources", Url = "/admin/ressources" },
 				new() { IconClass = "fas fa-code-branch", Value = projects.Items.Count, Label = "Projets", Url = "/admin/projects" }
@@ -547,14 +547,14 @@
 	private async Task HandleViewAsync(Guid id)
 	{
 		var item = FindItem(id);
-		Navigation.NavigateTo(item?.ViewRoute ?? item?.EditRoute ?? "/admin/dashboard");
+		Navigation.NavigateTo(item?.ViewRoute ?? item?.EditRoute ?? "/admin");
 		await Task.CompletedTask;
 	}
 
 	private async Task HandleEditAsync(Guid id)
 	{
 		var item = FindItem(id);
-		Navigation.NavigateTo(item?.EditRoute ?? item?.ManageRoute ?? "/admin/dashboard");
+		Navigation.NavigateTo(item?.EditRoute ?? item?.ManageRoute ?? "/admin");
 		await Task.CompletedTask;
 	}
 
@@ -698,7 +698,7 @@
 		<div class="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
 			<h3 class="text-lg font-semibold">Raison du rejet</h3>
 			<p class="text-sm text-gray-600 mt-2">Veuillez saisir une raison pour le rejet de cet élément (optionnel).</p>
-			<textarea @bind="rejectReason" rows="4" class="w-full mt-4 rounded-md border-gray-200 p-3"></textarea>
+			<textarea @bind="rejectReason" rows="4" class="w-full mt-4 rounded-lg border-gray-200 p-3"></textarea>
 			<div class="mt-4 flex justify-end gap-2">
 				<button class="px-4 py-2 rounded bg-gray-200" @onclick="CancelRejectAsync">Annuler</button>
 				<button class="px-4 py-2 rounded bg-red-600 text-white" @onclick="ConfirmRejectAsync">Confirmer le rejet</button>

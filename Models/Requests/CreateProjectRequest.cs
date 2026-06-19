@@ -10,7 +10,6 @@ public class CreateProjectRequest
     [Required]
     public string Description { get; set; } = string.Empty;
 
-    public string Url { get; set; } = string.Empty;
     public string GithubUrl { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public string Technologies { get; set; } = string.Empty;

@@ -21,17 +21,17 @@
 
                 <!-- Grande image -->
                 <img src="/Images/Hero/Fond1.jpeg" loading="lazy"
-                     class="absolute w-64 md:w-96 rounded-3xl shadow-2xl z-10"
+                     class="absolute w-64 md:w-96 rounded-lg shadow-2xl z-10"
                      alt="">
 
                 <!-- Image qui monte sur la première -->
                 <img src="/Images/Hero/Fond2.jpg" loading="lazy"
-                     class="absolute top-24 left-40 w-52 md:w-72 rounded-3xl shadow-2xl border-4 border-[#F4F2F2] z-20"
+                     class="absolute top-24 left-40 w-52 md:w-72 rounded-lg shadow-2xl border-4 border-[#F4F2F2] z-20"
                      alt="">
 
                 <!-- Troisième image -->
                 <img src="/Images/Hero/Fond3.jpg" loading="lazy"
-                     class="absolute top-72 left-20 w-52 md:w-64 rounded-3xl shadow-2xl border-4 border-[#F4F2F2] z-30"
+                     class="absolute top-72 left-20 w-52 md:w-64 rounded-lg shadow-2xl border-4 border-[#F4F2F2] z-30"
                      alt="">
 
             </div>
@@ -149,11 +149,11 @@
         <!-- Events Grid -->
         @if (IsLoading)
         {
-            <div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des événements...</div>
+            <div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des événements...</div>
         }
         else if (!string.IsNullOrWhiteSpace(LoadError))
         {
-            <div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@LoadError</div>
+            <div class="rounded-lg bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@LoadError</div>
         }
         else if (AllEvents.Any())
         {
@@ -191,11 +191,11 @@
         <!-- Resources Grid -->
         @if (IsLoadingResources)
         {
-            <div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des ressources...</div>
+            <div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des ressources...</div>
         }
         else if (!string.IsNullOrWhiteSpace(ResourcesError))
         {
-            <div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@ResourcesError</div>
+            <div class="rounded-lg bg-red-50 p-4 sm:p-6 text-xs sm:text-sm text-red-600 shadow-sm">@ResourcesError</div>
         }
         else if (PopularResources.Any())
         {

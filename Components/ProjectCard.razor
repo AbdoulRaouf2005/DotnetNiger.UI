@@ -1,24 +1,70 @@
-<div class="bg-white rounded-xl shadow-md p-3 sm:p-4 md:p-6">
-      <div class="flex items-start justify-between gap-2">
-            <h3 class="text-sm sm:text-base md:text-lg font-semibold">Nom du projet</h3>
-            <span class="text-[10px] sm:text-xs bg-green-50 text-green-600 px-2 py-1 rounded whitespace-nowrap flex-shrink-0">En développement</span>
-      </div>
-      <p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-600">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deserunt ipsum
-            eveniet optio in assumenda quis recusandae praesentium.</p>
+@using DotnetNiger.UI.Models.Responses
 
-            <div class="mt-3 sm:mt-4 flex flex-wrap gap-1 sm:gap-2">
-                  <span class="text-[10px] sm:text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">C#</span>
-                  <span class="text-[10px] sm:text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">ASP.NET Core</span>
-                  <span class="text-[10px] sm:text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Entity Framework</span>
-                  <span class="text-[10px] sm:text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Azure</span>
+@if (Project is null)
+{
+    <div class="bg-white rounded-lg shadow-md p-3 sm:p-4 md:p-6">
+        <div class="flex items-start justify-between gap-2">
+            <div class="h-5 sm:h-6 bg-gray-200 rounded w-3/4"></div>
+            <div class="h-5 sm:h-6 bg-gray-200 rounded w-20"></div>
+        </div>
+        <div class="mt-2 sm:mt-3 space-y-2">
+            <div class="h-3 bg-gray-200 rounded w-full"></div>
+            <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+        </div>
+        <div class="mt-3 sm:mt-4 flex flex-wrap gap-1 sm:gap-2">
+            <div class="h-5 sm:h-6 bg-gray-200 rounded w-12"></div>
+            <div class="h-5 sm:h-6 bg-gray-200 rounded w-20"></div>
+            <div class="h-5 sm:h-6 bg-gray-200 rounded w-16"></div>
+        </div>
+        <div class="mt-4 sm:mt-6 h-8 bg-gray-200 rounded w-32"></div>
+    </div>
+}
+else
+{
+    <a href="/projets/@Project.Slug" class="group block rounded-lg bg-white shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+        <div class="p-3 sm:p-4 md:p-6">
+            <div class="flex items-start justify-between gap-2">
+                <h3 class="text-sm sm:text-base md:text-lg font-semibold group-hover:text-secondary transition-colors">@Project.Title</h3>
+                <span class="text-[10px] sm:text-xs @StatusCss px-2 py-1 rounded whitespace-nowrap flex-shrink-0">@StatusLabel</span>
+            </div>
+            <p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-600">@Project.Description</p>
+
+            @if (!string.IsNullOrWhiteSpace(Project.Technologies))
+            {
+                <div class="mt-3 sm:mt-4 flex flex-wrap gap-1 sm:gap-2">
+                    @foreach (var tech in Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                    {
+                        <span class="text-[10px] sm:text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">@tech</span>
+                    }
+                </div>
+            }
+
+            <div class="mt-3 sm:mt-4 flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
+                <span>Par @Project.AuthorName</span>
+                <span>@Project.CreatedAt.ToString("dd MMM. yyyy", System.Globalization.CultureInfo.GetCultureInfo("fr-FR"))</span>
             </div>
 
             <div class="mt-4 sm:mt-6 flex items-center space-x-2 sm:space-x-3">
-                  <button class="bg-white border border-gray-200 text-secondary px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded">Voir sur GitHub</button>
-                  <button class="bg-secondary text-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded">Contribuer</button>
+                <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 bg-white border border-gray-200 text-secondary px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded hover:bg-gray-50 transition"
+                   @onclick:stopPropagation>
+                    <i class="fab fa-github"></i>
+                    Voir sur GitHub
+                </a>
             </div>
-      </div>
+        </div>
+    </a>
+}
 
-@code{
+@code {
+    [Parameter, EditorRequired]
+    public ProjectResponse? Project { get; set; }
 
+    private bool IsActive => Project?.Status == "active";
+
+    private string StatusLabel => IsActive ? "Actif" : "Archivé";
+
+    private string StatusCss => IsActive
+        ? "bg-green-50 text-green-600"
+        : "bg-gray-100 text-gray-500";
 }

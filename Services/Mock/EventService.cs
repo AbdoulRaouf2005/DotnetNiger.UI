@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
@@ -90,7 +90,7 @@ public class EventService : IEventService
         _registrations = new List<EventRegistrationDto>();
     }
 
-    // ── Lecture ────────────────────────────────────────────────
+    // ---- Lecture --------------------------------------------------------------------------------
 
     public async Task<List<EventDto>> GetAllEventsAsync()
     {
@@ -154,7 +154,7 @@ public class EventService : IEventService
                    .ToList());
     }
 
-    // ── Création / Mise à jour / Suppression ───────────────────
+    // ---- Création / Mise à jour / Suppression -------------------------------------------------
 
 
     public async Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
@@ -321,7 +321,7 @@ public class EventService : IEventService
         return await Task.FromResult(true);
     }
 
-    // ── Inscriptions ───────────────────────────────────────────
+    // -- Inscriptions -------------------------------------------
 
     public async Task<EventRegistrationDto?> RegisterToEventAsync(RegisterEventRequest request, Guid userId, string userName)
     {

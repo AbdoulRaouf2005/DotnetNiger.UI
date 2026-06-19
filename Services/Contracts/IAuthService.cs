@@ -5,9 +5,7 @@ namespace DotnetNiger.UI.Services.Contracts;
 
 public interface IAuthService
 {
-    string? GetRoleFromAccessToken(string? accessToken);
     string GetPostLoginRedirectPath(List<string>? roles);
-    string GetPostLoginRedirectPathFromToken(string? accessToken);
 
     Task<ApiSuccessResponse<AuthDto>> LoginAsync(LoginRequest request);
     Task<ApiSuccessResponse<AuthDto>> RegisterAsync(RegisterRequest request);
@@ -20,8 +18,6 @@ public interface IAuthService
     Task<bool> VerifyEmailAsync(VerifyEmailRequest request);
 
     Task<ApiSuccessResponse<AuthDto>> CompleteExternalLoginAsync(string ticket);
-
-    Task<AuthDto?> RefreshTokenAsync();
 
     Task<UserDto?> GetCurrentUserAsync();
     Task<bool> IsAuthenticatedAsync();

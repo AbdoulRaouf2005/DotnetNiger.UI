@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
@@ -15,7 +15,7 @@ namespace DotnetNiger.UI.Services.Mock
                 new PostDto
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Les nouveaut�s de .NET 9",
+                    Title = "Les nouveautï¿½s de .NET 9",
                     Slug = "les-nouveautes-de-dotnet-9",
                     Excerpt = "Découvrez les dernières fonctionnalités et améliorations de .NET 9, avec C# 13 comme langage phare.",
                     Content = "<h1>Introduction</h1><p>...</p>",
@@ -39,7 +39,7 @@ namespace DotnetNiger.UI.Services.Mock
                 new PostDto
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
+                    Title = "Introduction ï¿½ Blazor WebAssembly",
                     Slug = "introduction-a-blazor-webassembly",
                     Excerpt = "Apprenez les bases de Blazor WASM...",
                     Content = "<h1>Blazor WASM</h1><p>...</p>",
@@ -73,7 +73,7 @@ namespace DotnetNiger.UI.Services.Mock
                 Excerpt = request.Excerpt,
                 Content = request.Content,
                 CoverImageUrl = request.CoverImageUrl ?? "/images/default.jpg",
-                AuthorId = CurrentId, // � remplacer par l'utilisateur connect�
+                AuthorId = CurrentId, // ï¿½ remplacer par l'utilisateur connectï¿½
                 AuthorName = "Admin",
                 AuthorAvatar = "/images/avatars/default.jpg",
                 PostType = request.PostType,
@@ -222,17 +222,17 @@ namespace DotnetNiger.UI.Services.Mock
             return title
                 .ToLowerInvariant()
                 .Replace(" ", "-")
-                .Replace("�", "a")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "i")
-                .Replace("�", "i")
-                .Replace("�", "o")
-                .Replace("�", "u")
-                .Replace("�", "u")
-                .Replace("�", "c")
+                .Replace("ï¿½", "a")
+                .Replace("ï¿½", "e")
+                .Replace("ï¿½", "e")
+                .Replace("ï¿½", "e")
+                .Replace("ï¿½", "e")
+                .Replace("ï¿½", "i")
+                .Replace("ï¿½", "i")
+                .Replace("ï¿½", "o")
+                .Replace("ï¿½", "u")
+                .Replace("ï¿½", "u")
+                .Replace("ï¿½", "c")
                 .Replace("'", "-")
                 .Replace("\"", "")
                 .Replace(",", "")

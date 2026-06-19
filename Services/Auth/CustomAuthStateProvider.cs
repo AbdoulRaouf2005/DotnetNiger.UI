@@ -13,12 +13,40 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     private DateTime _cacheExpiry = DateTime.MinValue;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
 
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    private readonly TokenStorageService _tokenStorage;
+
+    public CustomAuthStateProvider(TokenStorageService tokenStorage)
+    {
+        _tokenStorage = tokenStorage;
+    }
+
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         if (_cachedState != Anonymous && DateTime.UtcNow < _cacheExpiry)
-            return Task.FromResult(_cachedState);
+            return _cachedState;
 
-        return Task.FromResult(Anonymous);
+        var state = await RestoreFromTokenAsync();
+        if (state != Anonymous)
+        {
+            _cachedState = state;
+            _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+        }
+
+        return state;
+    }
+
+    private async Task<AuthenticationState> RestoreFromTokenAsync()
+    {
+        var accessToken = await _tokenStorage.GetAccessTokenAsync();
+        if (string.IsNullOrWhiteSpace(accessToken))
+            return Anonymous;
+
+        var claims = AuthService.ParseClaimsFromJwt(accessToken).ToList();
+        if (claims.Count == 0)
+            return Anonymous;
+
+        return new AuthenticationState(
+            new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
     }
 
     public void SetAuthenticatedFromUser(UserDto user)

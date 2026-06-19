@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
@@ -12,7 +12,7 @@ public class MockProjectService : IProjectService
         {
             Id = Guid.NewGuid(), Title = "DotnetNiger Web Platform", Slug = "dotnetniger-web-platform",
             Description = "Plateforme communautaire .NET Niger — blog, événements, ressources.",
-            Url = "https://github.com/dotnetniger/platform", GithubUrl = "https://github.com/dotnetniger/platform",
+            GithubUrl = "https://github.com/dotnetniger/platform",
             Technologies = "ASP.NET Core, Blazor, PostgreSQL", Status = "active",
             AuthorName = "Équipe DotnetNiger", IsFeatured = true, IsPublished = true,
             CreatedAt = DateTime.UtcNow.AddMonths(-3)
@@ -21,7 +21,7 @@ public class MockProjectService : IProjectService
         {
             Id = Guid.NewGuid(), Title = "Niger Open Data API", Slug = "niger-open-data-api",
             Description = "API ouverte pour les données publiques du Niger.",
-            Url = "https://github.com/dotnetniger/opendata", GithubUrl = "https://github.com/dotnetniger/opendata",
+            GithubUrl = "https://github.com/dotnetniger/opendata",
             Technologies = "ASP.NET Core, Entity Framework, Swagger", Status = "active",
             AuthorName = "Amadou Diallo", IsFeatured = true, IsPublished = true,
             CreatedAt = DateTime.UtcNow.AddMonths(-6)
@@ -51,6 +51,10 @@ public class MockProjectService : IProjectService
     public Task<ProjectResponse?> GetByIdAsync(Guid id) =>
         Task.FromResult(_projects.FirstOrDefault(p => p.Id == id));
 
+    public Task<ProjectResponse?> GetBySlugAsync(string slug) =>
+        Task.FromResult(_projects.FirstOrDefault(p =>
+            p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase)));
+
     public Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {
         var project = new ProjectResponse
@@ -59,7 +63,6 @@ public class MockProjectService : IProjectService
             Title = request.Title,
             Slug = request.Title.ToLowerInvariant().Replace(" ", "-"),
             Description = request.Description,
-            Url = request.Url,
             GithubUrl = request.GithubUrl,
             ImageUrl = request.ImageUrl,
             Technologies = request.Technologies,
@@ -80,7 +83,6 @@ public class MockProjectService : IProjectService
 
         existing.Title = request.Title;
         existing.Description = request.Description;
-        existing.Url = request.Url;
         existing.GithubUrl = request.GithubUrl;
         existing.ImageUrl = request.ImageUrl;
         existing.Technologies = request.Technologies;

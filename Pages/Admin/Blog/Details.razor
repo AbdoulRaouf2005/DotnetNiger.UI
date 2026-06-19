@@ -1,4 +1,4 @@
-@page "/admin/blog/{Id:guid}"
+﻿@page "/admin/blog/{Id:guid}"
 @layout AdminLayout
 @* Page admin : détail d'article avec actions de modération. *@
 @using DotnetNiger.UI.Models.Responses
@@ -18,7 +18,7 @@
 		<div class="mb-4 flex items-center justify-between gap-4">
 			<nav aria-label="Fil d'ariane" class="text-xs sm:text-sm text-slate-500">
 				<ol class="flex flex-wrap items-center gap-2">
-					<li><a href="/admin/dashboard" class="transition-colors hover:text-slate-700">Admin</a></li>
+					<li><a href="/admin" class="transition-colors hover:text-slate-700">Admin</a></li>
 					<li><i class="fas fa-angle-right text-[10px] text-slate-400" aria-hidden="true"></i></li>
 					<li><a href="/admin/blog" class="transition-colors hover:text-slate-700">Blog</a></li>
 					<li><i class="fas fa-angle-right text-[10px] text-slate-400" aria-hidden="true"></i></li>
@@ -120,7 +120,7 @@
 
 				<hr class="border-gray-200" />
 
-				<div class="overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
+				<div class="overflow-hidden rounded-lg bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
 					<img src="@GetCoverImage()" alt="@post.Title" class="h-56 w-full object-cover sm:h-[330px]" />
 				</div>
 
@@ -147,7 +147,7 @@
 					<div class="space-y-3 pt-2">
 						@if (post.Tags?.Any() == true)
 						{
-							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">ÉTIQUETTES</p>
+							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">é‰TIQUETTES</p>
 							<div class="flex flex-wrap gap-2">
 								@foreach (var tag in post.Tags)
 								{
@@ -159,7 +159,7 @@
 						}
 					</div>
 
-					<div class="rounded-xl bg-white border-t p-4 sm:p-6 border-gray-200">
+					<div class="rounded-lg bg-white border-t p-4 sm:p-6 border-gray-200">
 						<div class="flex items-center justify-between">
 							<h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Métadonnées</h2>
 						</div>
@@ -235,7 +235,7 @@
 
     private async Task DeletePost(Guid postId)
     {
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir supprimer cet article ?");
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "éÅ tes-vous sé»r de vouloir supprimer cet article ?");
         if (confirmed)
         {
             try

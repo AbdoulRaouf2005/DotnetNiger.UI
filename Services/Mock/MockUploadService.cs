@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models;
+﻿using DotnetNiger.UI.Models;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 using Microsoft.AspNetCore.Components.Forms;
@@ -7,7 +7,7 @@ namespace DotnetNiger.UI.Services.Mock;
 
 public class MockUploadService : IUploadService
 {
-    private readonly ILocalStorageService _localStorage;
+    private readonly ISessionStorageService _localStorage;
     private const long MaxFileSize = 5 * 1024 * 1024;
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -20,7 +20,7 @@ public class MockUploadService : IUploadService
 
     private const string StorageKeyPrefix = "uploaded_images";
 
-    public MockUploadService(ILocalStorageService localStorage)
+    public MockUploadService(ISessionStorageService localStorage)
     {
         _localStorage = localStorage;
     }

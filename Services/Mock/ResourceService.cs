@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
@@ -102,7 +102,7 @@ public class ResourceService : IResourceService
                 Id = Guid.NewGuid(),
                 Title = "Projet .NET Niger — API Gateway Ocelot",
                 Slug = "projet-dotnet-niger-api-gateway-ocelot",
-                Description = "Architecture et mise en œuvre de la passerelle API du projet DotNet Niger avec Ocelot et Consul.",
+                Description = "Architecture et mise en Å“uvre de la passerelle API du projet DotNet Niger avec Ocelot et Consul.",
                 Url = "https://github.com/dotnetniger/platform",
                 ResourceType = "GitHub",
                 Level = "Avancé",

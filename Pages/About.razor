@@ -1,4 +1,4 @@
-@page "/propos"
+﻿@page "/propos"
 
 @using DotnetNiger.UI.Components
 @inject IUserService UserService
@@ -22,10 +22,10 @@
 
 			<p
 				class="mt-4 sm:mt-6 max-w-3xl text-xs leading-6 text-slate-600 sm:text-sm sm:leading-7 md:text-base lg:text-lg">
-				.NET Niger est plus qu’une simple communauté de développeurs : c’est un catalyseur de la
-				transformation numérique au Sahel. Fondée par des passionnés de l’écosystème Microsoft, notre
-				organisation s’est donnée pour mission de démocratiser l’accès aux technologies de pointe et de
-				former une nouvelle génération d’ingénieurs capables de relever les défis les plus complexes de
+				.NET Niger est plus qu'une simple communauté de développeurs : c'est un catalyseur de la
+				transformation numérique au Sahel. Fondée par des passionnés de l'écosystème Microsoft, notre
+				organisation s'est donnée pour mission de démocratiser l'accès aux technologies de pointe et de
+				former une nouvelle génération d'ingénieurs capables de relever les défis les plus complexes de
 				notre époque.
 			</p>
 
@@ -36,7 +36,7 @@
 				</a>
 				<a href="#equipe"
 				   class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-[#512BD4]/30 hover:bg-[#fbfaff]">
-					Rencontrer l’équipe
+					Rencontrer l'équipe
 				</a>
 			</div>
 		</div>
@@ -80,9 +80,9 @@
 				@foreach (var value in values)
 				{
 					<article
-						class="rounded-2xl border border-white bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
+						class="rounded-lg border border-white bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
 						<div
-							class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-gradient-to-br @value.IconBackground text-base sm:text-lg @value.IconColor shadow-sm">
+							class="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg bg-gradient-to-br @value.IconBackground text-base sm:text-lg @value.IconColor shadow-sm">
 							<i class="@value.Icon"></i>
 						</div>
 						<h3 class="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-bold text-slate-900">
@@ -113,7 +113,7 @@
 						@foreach (var milestone in milestones)
 						{
 							<article
-								class="rounded-2xl border border-white bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
+								class="rounded-lg border border-white bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
 								<div class="flex items-start justify-between gap-3 sm:gap-4">
 									<div
 										class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#ECE7FF] text-base sm:text-xl text-[#512BD4]">
@@ -139,7 +139,7 @@
 						<div class="mx-auto max-w-6xl">
 							<div class="text-center">
 								<h2 class="text-2xl font-extrabold text-slate-900 sm:text-3xl md:text-4xl">
-									L’équipe de direction
+									L'équipe de direction
 								</h2>
 								<p class="mt-3 text-xs sm:text-sm text-slate-500">
 									Les visages derrière la communauté.
@@ -150,7 +150,7 @@
 								@foreach (var leader in leaders)
 								{
 									<article
-										class="overflow-hidden rounded-2xl border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+										class="overflow-hidden rounded-lg border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
 										<div
 											class="relative h-56 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-br @leader.HeaderBackground">
 											<div
@@ -216,21 +216,22 @@
 										}
 										else
 										{
-											<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
-												<button type="button"
-													  class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary"
-													  aria-label="Filtrer">
-													<i class="fa-solid fa-sliders text-base"></i>
-												</button>
-												<label class="relative w-full min-w-[220px] flex-1">
-													<span
-														class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-														<i class="fa-solid fa-magnifying-glass text-sm"></i>
-													</span>
-													<input type="search" placeholder="Rechercher un membre..."
-														   @bind="memberSearch" @bind:event="oninput"
-														   class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-												</label>
+											<div class="flex flex-col sm:flex-row gap-3 mb-8">
+												<div class="relative flex-1">
+													<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+													<input type="text"
+														   placeholder="Rechercher un membre..."
+														   @bind="memberSearch"
+														   @bind:event="oninput"
+														   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+													@if (!string.IsNullOrEmpty(memberSearch))
+													{
+														<button @onclick="() => { memberSearch = string.Empty; }"
+																class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+															<i class="fas fa-times"></i>
+														</button>
+													}
+												</div>
 											</div>
 
 											<div class="mt-8 sm:mt-10 flex items-center gap-3">
@@ -254,24 +255,24 @@
 @code {
 	private readonly IReadOnlyList<ValueItem> values = new[]
 	{
-		new ValueItem("Collaboration", "fa-solid fa-people-group", "bg-[#ECE7FF]", "text-[#512BD4]", "L’esprit de partage est au cœur de notre ADN. Ensemble, nous apprenons et grandissons à la fois."),
+		new ValueItem("Collaboration", "fa-solid fa-people-group", "bg-[#ECE7FF]", "text-[#512BD4]", "L'esprit de partage est au coeur de notre ADN. Ensemble, nous apprenons et grandissons à la fois."),
 		new ValueItem("Innovation", "fa-solid fa-lightbulb", "bg-[#FFF0F5]", "text-[#C13C76]", "Repousser les limites du possible avec .NET pour résoudre les défis locaux par le code."),
-		new ValueItem("Excellence", "fa-solid fa-graduation-cap", "bg-[#EAF2FF]", "text-[#2E5EA8]", "Nous visons la qualité technique et l’éthique professionnelle dans tous nos projets communautaires.")
+		new ValueItem("Excellence", "fa-solid fa-graduation-cap", "bg-[#EAF2FF]", "text-[#2E5EA8]", "Nous visons la qualité technique et l'éthique professionnelle dans tous nos projets communautaires.")
 	};
 
 	private readonly IReadOnlyList<MilestoneItem> milestones = new[]
 	{
-		new MilestoneItem("2024", "La Fondation", "fa-solid fa-rocket", "bg-secondary", "text-[#5D48FF]", Description: "Un petit groupe de passionnés se réunit à Niamey pour poser les jalons de l’écosystème .NET au Niger, avec l’ambition de créer un pont vers l’innovation mondiale."),
-		new MilestoneItem("2025", "L’Expansion", "fa-solid fa-users", "bg-secondary", "text-[#4A78C2]", "Lancement du premier grand meetup communautaire réunissant plus de 100 développeurs et étudiants, marquant le début d’une dynamique de partage sans précédent."),
+		new MilestoneItem("2024", "La Fondation", "fa-solid fa-rocket", "bg-secondary", "text-[#5D48FF]", Description: "Un petit groupe de passionnés se réunit à Niamey pour poser les jalons de l'écosystème .NET au Niger, avec l'ambition de créer un pont vers l'innovation mondiale."),
+		new MilestoneItem("2025", "L'Expansion", "fa-solid fa-users", "bg-secondary", "text-[#4A78C2]", "Lancement du premier grand meetup communautaire réunissant plus de 100 développeurs et étudiants, marquant le début d'une dynamique de partage sans précédent."),
 		new MilestoneItem("2026", "La Reconnaissance", "fa-solid fa-award", "bg-secondary", "text-[#B94A8A]", "Signature de partenariats stratégiques avec des institutions locales et intégration officielle dans le réseau global des communautés .NET.")
 	};
 
 	private readonly IReadOnlyList<LeaderItem> leaders = new[]
 	{
 		new LeaderItem("Ahmed Moussa", "Community Lead", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-[#F97316]", "Porte la vision de la communauté et structure les initiatives pour faire grandir l’écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
+"text-[#F97316]", "Porte la vision de la communauté et structure les initiatives pour faire grandir l'écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
 		new LeaderItem("Abdallah Ibrahim", "Technical Outreach", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-[#EC4899]", "Facilite les ateliers, les rencontres techniques et l’accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
+"text-[#EC4899]", "Facilite les ateliers, les rencontres techniques et l'accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
 		new LeaderItem("Ibrahim Sani", "Content Strategy", "bg-gradient-to-br from-[#8A1E16] via-[#4B1711] to-[#1E0B0A]",
 "text-[#F59E0B]", "Expert en communication technique, il simplifie les concepts complexes et les rend utiles à tous.",
 new[] { "Editorial", "UX", "Culture" })

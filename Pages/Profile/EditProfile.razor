@@ -1,4 +1,4 @@
-@page "/profile/informations"
+﻿@page "/profile/informations"
 @using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Components.Shared
 @implements IDisposable
@@ -13,7 +13,7 @@
     </header>
 
     <div class="space-y-6">
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+        <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
                 <div>
                     <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Informations personnelles</h2>
@@ -23,29 +23,29 @@
                 <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div class="md:col-span-1">
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Nom complet</label>
-                        <InputText @bind-Value="model.FullName" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="model.FullName" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
                     <div class="md:col-span-1">
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Ville</label>
-                        <InputText @bind-Value="model.City" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="model.City" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
                     <div class="md:col-span-1">
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Adresse email</label>
-                        <InputText Value="@displayEmail" ValueExpression="() => displayEmail" disabled class="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-500" />
+                        <InputText Value="@displayEmail" ValueExpression="() => displayEmail" disabled class="h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-base text-slate-500" />
                     </div>
                     <div class="md:col-span-1">
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Telephone</label>
-                        <InputText @bind-Value="model.PhoneNumber" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="model.PhoneNumber" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
                     <div class="md:col-span-2">
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Pays</label>
-                        <InputText @bind-Value="model.Country" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="model.Country" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+        <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
             <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
                 <div>
                     <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Biographie</h2>
@@ -55,9 +55,9 @@
                 <div class="space-y-5">
                     <div>
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Bio</label>
-                        <InputTextArea @bind-Value="model.Bio" rows="5" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-relaxed text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputTextArea @bind-Value="model.Bio" rows="5" class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-base leading-relaxed text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                         <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
                             <div class="relative mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-indigo-100 bg-slate-100 sm:mx-0 sm:h-28 sm:w-28">
                                 <img src="@AvatarPreviewUrl" alt="Apercu avatar" class="h-full w-full object-cover" />
@@ -71,21 +71,21 @@
 
                                 <div>
                                     <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar</label>
-                                    <p class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Le fichier selectionne met automatiquement a jour l'apercu et la valeur du profil.</p>
+                                    <p class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Le fichier selectionne met automatiquement a jour l'apercu et la valeur du profil.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-5">
                             <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar URL</label>
-                            <InputText @bind-Value="model.AvatarUrl" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                            <InputText @bind-Value="model.AvatarUrl" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+        <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
             <div class="mb-5 flex items-center justify-between gap-3">
                 <h2 class="text-3xl font-semibold tracking-tight text-slate-800">Liens sociaux</h2>
                 <span class="text-sm text-slate-500">Gestion rapide des plateformes</span>
@@ -105,7 +105,7 @@
                 <ul class="mb-5 space-y-2">
                     @foreach (var link in socialLinks)
                     {
-                        <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                        <li class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
                             <div class="text-sm text-slate-700">
                                 <span class="font-semibold">@link.Platform</span>
                                 <span class="mx-2 text-slate-300">|</span>
@@ -125,13 +125,13 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
                     <div>
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Plateforme</label>
-                        <InputText @bind-Value="socialModel.Platform" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="socialModel.Platform" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
                     <div>
                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">URL</label>
-                        <InputText @bind-Value="socialModel.Url" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <InputText @bind-Value="socialModel.Url" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                     </div>
-                    <button type="submit" class="h-12 rounded-xl bg-indigo-600 px-6 font-semibold text-white hover:bg-indigo-500">
+                    <button type="submit" class="h-12 rounded-lg bg-indigo-600 px-6 font-semibold text-white hover:bg-indigo-500">
                         Ajouter
                     </button>
                 </div>
@@ -139,10 +139,10 @@
         </section>
 
         <div class="flex flex-wrap items-center gap-3 pt-1">
-            <button type="button" @onclick="HandleSubmit" class="inline-flex h-12 items-center rounded-xl bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-500">
+            <button type="button" @onclick="HandleSubmit" class="inline-flex h-12 items-center rounded-lg bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-500">
                 Enregistrer
             </button>
-            <button type="button" @onclick="Annuler" class="inline-flex h-12 items-center rounded-xl border border-slate-300 bg-white px-8 font-semibold text-slate-700 transition hover:bg-slate-100">
+            <button type="button" @onclick="Annuler" class="inline-flex h-12 items-center rounded-lg border border-slate-300 bg-white px-8 font-semibold text-slate-700 transition hover:bg-slate-100">
                 Annuler
             </button>
         </div>
@@ -207,7 +207,7 @@
     private async Task HandleSubmit()
     {
         await ProfileService.UpdateProfileAsync(model);
-        // La synchronisation est assurée par ProfileService → UserStateService.UpdateUserAsync.
+        // La synchronisation est assurée par ProfileService â" ' UserStateService.UpdateUserAsync.
         Navigation.NavigateTo("/profile");
     }
 

@@ -9,7 +9,7 @@
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
         <div class="space-y-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
                 <div class="mb-5 flex justify-center">
                     <div class="relative">
                         <img src="@GetAvatarUrl(CurrentUser?.AvatarUrl)"
@@ -52,7 +52,7 @@
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-700">Réseaux sociaux</h3>
                     <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
@@ -85,7 +85,7 @@
         </div>
 
         <div class="space-y-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
                 <div class="mb-4 flex items-center justify-between gap-4">
                     <h2 class="text-lg font-semibold tracking-tight text-slate-800">A propos</h2>
                     <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
@@ -97,7 +97,7 @@
                 <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(CurrentUser?.Bio, "Aucune biographie renseignée.")</p>
             </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
                 <div class="mb-4 flex items-start justify-between gap-4">
                     <h2 class="text-lg font-semibold tracking-tight text-slate-800">Skills and Technologies</h2>
                     <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
@@ -110,13 +110,13 @@
                 <div class="flex flex-wrap gap-3">
                     @foreach (var skill in ResolveSkills(CurrentUser?.Skills))
                     {
-                        <span class="rounded-md bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
+                        <span class="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
                     }
                 </div>
             </section>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
                     <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
                         <i class="far fa-calendar-check text-indigo-600"></i>
                         Events
@@ -125,7 +125,7 @@
                     <p class="mt-2 text-lg text-slate-500">Evenement organise</p>
                 </article>
 
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
                     <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
                         <i class="far fa-comment-alt text-indigo-600"></i>
                         Contributions
@@ -134,7 +134,7 @@
                     <p class="mt-2 text-lg text-slate-500">Community posts</p>
                 </article>
 
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
                     <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
                         <i class="far fa-newspaper text-indigo-600"></i>
                         Blog posts

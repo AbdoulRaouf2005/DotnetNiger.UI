@@ -1,4 +1,4 @@
-// Services/Mocks/MockAuthService.cs
+﻿// Services/Mocks/MockAuthService.cs
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
@@ -154,41 +154,6 @@ public class MockAuthService : IAuthService
         };
     }
 
-    public string? GetRoleFromAccessToken(string? accessToken)
-    {
-        if (string.IsNullOrWhiteSpace(accessToken))
-            return null;
-
-        var segments = accessToken.Split('.');
-        if (segments.Length < 2)
-            return null;
-
-        try
-        {
-            var payloadJson = System.Text.Encoding.UTF8.GetString(ParseBase64WithoutPadding(segments[1]));
-            using var document = System.Text.Json.JsonDocument.Parse(payloadJson);
-            var root = document.RootElement;
-
-            if (root.TryGetProperty("role", out var roleElement) && roleElement.ValueKind == System.Text.Json.JsonValueKind.String)
-                return roleElement.GetString();
-
-            if (root.TryGetProperty("roles", out var rolesElement))
-            {
-                if (rolesElement.ValueKind == System.Text.Json.JsonValueKind.Array)
-                    return rolesElement.EnumerateArray().Select(x => x.GetString()).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
-
-                if (rolesElement.ValueKind == System.Text.Json.JsonValueKind.String)
-                    return rolesElement.GetString();
-            }
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
     public string GetPostLoginRedirectPath(List<string>? roles)
     {
         if (roles == null || roles.Count == 0)
@@ -196,24 +161,9 @@ public class MockAuthService : IAuthService
 
         var rolesLower = roles.Select(r => r.ToLowerInvariant()).ToList();
         if (rolesLower.Contains("superadmin") || rolesLower.Contains("admin") || rolesLower.Contains("moderator"))
-            return "/admin/dashboard";
+            return "/admin";
 
         return "/";
-    }
-
-    public string GetPostLoginRedirectPathFromToken(string? accessToken)
-    {
-        var role = GetRoleFromAccessToken(accessToken);
-        if (string.IsNullOrWhiteSpace(role))
-            return "/";
-
-        return role.ToLowerInvariant() switch
-        {
-            "superadmin" => "/admin/dashboard",
-            "admin" => "/admin/dashboard",
-            "moderator" => "/admin/dashboard",
-            _ => "/"
-        };
     }
 
     public async Task<ApiSuccessResponse<Guid>> RegisterStep1Async(RegisterRequest request)
@@ -351,26 +301,6 @@ public class MockAuthService : IAuthService
 
     #endregion
 
-    #region Refresh Token
-
-    public async Task<AuthDto?> RefreshTokenAsync()
-    {
-        await Task.Delay(500);
-
-        var user = _currentUser;
-        if (user is null || _currentToken is null || _tokenExpiry <= DateTime.Now)
-            return null;
-
-        var newToken = GenerateTokenDto(user);
-        _currentToken = newToken;
-        _tokenExpiry = DateTime.Now.AddSeconds(newToken.ExpiresIn);
-        _refreshTokens[user.Id.ToString()] = newToken.RefreshToken;
-
-        return new AuthDto { User = user, Token = newToken };
-    }
-
-    #endregion
-
     #region État utilisateur
 
     public async Task<UserDto?> GetCurrentUserAsync()
@@ -388,7 +318,7 @@ public class MockAuthService : IAuthService
     public async Task<bool> IsAdminAsync()
     {
         await Task.Delay(50);
-        return _currentUser?.Roles.Contains("Admin") ?? false;
+        return _currentUser?.Roles.Contains("Admin", StringComparer.OrdinalIgnoreCase) ?? false;
     }
 
     #endregion

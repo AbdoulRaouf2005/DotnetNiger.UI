@@ -5,6 +5,13 @@
 @code {
     protected override void OnInitialized()
     {
+        var useMock = Config.GetValue<bool>("UseMockServices");
+        if (useMock)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
         var apiBase = Config["ApiBaseUrl"];
         if (string.IsNullOrWhiteSpace(apiBase))
         {

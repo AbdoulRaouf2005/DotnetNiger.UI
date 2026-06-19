@@ -1,10 +1,10 @@
-@page "/blog/{Id}"
+﻿@page "/blog/{Id}"
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Services.Contracts
 @using DotnetNiger.UI.Components
 @inject IPostService PostService
 @inject ICommentService CommentService
-@inject ILocalStorageService LocalStorage
+@inject ISessionStorageService LocalStorage
 
 @inject NavigationManager NavManager
 
@@ -41,6 +41,11 @@
 		else
 		{
 			<div class="space-y-6 sm:space-y-7">
+				<div>
+					<a href="/blog" class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-semibold text-gray-500 hover:text-[#3b82f6] transition">
+						<i class="fa-solid fa-arrow-left text-[10px]"></i> Retour au blog
+					</a>
+				</div>
 				<div class="flex flex-wrap items-center gap-2 text-[11px] sm:text-[13px] text-gray-500">
 					@if (post.Categories?.Any() == true)
 					{
@@ -82,7 +87,7 @@
 
 				<hr class="border-gray-200" />
 
-				<div class="overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
+				<div class="overflow-hidden rounded-lg bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
 					<img src="@GetCoverImage()" alt="@post.Title" class="h-56 w-full object-cover sm:h-[330px]" />
 				</div>
 
@@ -109,13 +114,13 @@
 					<div class="space-y-3 pt-2">
 						@if (post.Tags?.Any() == true)
 						{
-							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">ÉTIQUETTES</p>
+							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">é‰TIQUETTES</p>
 							<div class="flex flex-wrap gap-2">
 								@foreach (var tag in post.Tags)
 								{
-									<span class="rounded-full bg-[#edf1f6] px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold text-gray-700 shadow-sm cursor-pointer hover:bg-[#d6e7ff] transition">
+									<a href="/blog?tag=@tag.Slug" class="rounded-full bg-[#edf1f6] px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold text-gray-700 shadow-sm cursor-pointer hover:bg-[#d6e7ff] transition no-underline inline-block">
 										#@tag.Name
-									</span>
+									</a>
 								}
 							</div>
 						}
@@ -125,7 +130,7 @@
 							  Url="@GetAbsoluteUrl(NavManager.Uri)"
 							  Description="@post.Excerpt" />
 
-				<div class="rounded-xl bg-white border-t p-4 sm:p-6 border-gray-200">
+				<div class="rounded-lg bg-white border-t p-4 sm:p-6 border-gray-200">
 						<div class="flex items-center justify-between ">
 							<h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Commentaires & Feedback</h2>
 							@if (comments.Any())

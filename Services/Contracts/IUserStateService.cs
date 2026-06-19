@@ -1,4 +1,4 @@
-// Services/IUserStateService.cs
+﻿// Services/IUserStateService.cs
 using DotnetNiger.UI.Models.Responses;
 
 namespace DotnetNiger.UI.Services.Contracts;

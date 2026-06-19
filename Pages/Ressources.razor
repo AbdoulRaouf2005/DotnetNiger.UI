@@ -50,7 +50,7 @@ else
                            placeholder="Rechercher une ressource..."
                            @bind="searchQuery"
                            @bind:event="oninput"
-                           class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+                           class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
                     @if (!string.IsNullOrEmpty(searchQuery))
                     {
                         <button @onclick="() => { searchQuery = string.Empty; currentPage = 1; }"
@@ -60,7 +60,7 @@ else
                     }
                 </div>
                 <select @bind="selectedType" @bind:after="() => currentPage = 1"
-                        class="bg-white px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+                        class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
                     <option value="">Tous les types</option>
                     @foreach (var t in resourceTypes)
                     {
@@ -68,7 +68,7 @@ else
                     }
                 </select>
                 <select @bind="selectedLevel" @bind:after="() => currentPage = 1"
-                        class="bg-white px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+                        class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
                     <option value="">Tous les niveaux</option>
                     @foreach (var l in levels)
                     {

@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Responses;
+﻿using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Mock;

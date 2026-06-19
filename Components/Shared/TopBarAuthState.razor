@@ -1,5 +1,4 @@
-@implements IDisposable
-@using System.Security.Claims
+﻿@implements IDisposable
 @inject NavigationManager Navigation
 @inject IAuthService Auth
 @inject IUserStateService UserStateService
@@ -11,27 +10,59 @@
     <Authorized Context="authState">
         @if (Mobile)
         {
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button"
-                        class="flex w-full items-center justify-center gap-2 rounded-lg border border-secondary px-3 py-2 text-sm font-semibold text-secondary transition duration-150 ease-in-out hover:bg-secondary hover:text-white"
-                        @onclick="NavigateToNotificationsAsync">
-                    <span>Notifications</span>
-                    @if (UnreadNotificationCount > 0)
-                    {
-                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">@UnreadNotificationCount</span>
-                    }
-                </button>
-                <button type="button"
-                        class="flex w-full items-center justify-center rounded-lg border border-secondary px-3 py-2 text-sm font-semibold text-secondary transition duration-150 ease-in-out hover:bg-secondary hover:text-white"
-                        @onclick="() => NavigateToProfileAsync(authState.User)">
-                    Mon Profile
-                </button>
-            </div>
-            <button type="button"
-                    class="mt-2 flex w-full items-center justify-center rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out hover:bg-red-600"
-                    @onclick="LogoutAsync">
-                Déconnexion
+            <button @onclick="ToggleOverlay" class="text-secondary hover:text-hover focus:outline-none">
+                <i class="fa-solid fa-bars text-2xl"></i>
             </button>
+
+            @if (isOverlayOpen)
+            {
+                <div class="fixed inset-0 z-30 bg-black/50" @onclick="CloseOverlay"></div>
+                <div class="fixed top-0 right-0 z-40 flex h-screen w-[75%] flex-col bg-white shadow-xl">
+                    <div class="flex items-center justify-between border-b p-4">
+                        <div class="flex flex-col items-center gap-3">
+                            <button class="h-20 w-20 overflow-hidden rounded-full border-2 border-secondary" @onclick="NavigateToProfileAsync">
+                                @if (!string.IsNullOrWhiteSpace(ResolvedAvatarUrl))
+                                {
+                                    <img src="@ResolvedAvatarUrl" alt="@DisplayName" class="h-full w-full object-cover" />
+                                }
+                                else
+                                {
+                                    <span
+                                    class="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-secondary">@Initials</span>
+                                }
+                            </button>
+                            <div>
+                                <p class="text-lg text-center font-bold text-gray-900">@DisplayName</p>
+                            </div>
+                        </div>
+                        <button @onclick="CloseOverlay"
+                                class="absolute top-3 right-3 z-40 flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+
+                    <nav class="flex-1 space-y-1 overflow-y-auto p-4">
+                        @foreach (var item in MobileNavigationItems)
+                        {
+                            if (item.Href == "/admin" && !UserStateService.IsAdmin) { continue; }
+                            <NavLink href="@item.Href" Match="@item.Match"
+                                     class="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                                     ActiveClass="bg-secondary/10 text-secondary" @onclick="CloseOverlay">
+                                <i class="@item.Icon w-6 text-lg"></i>
+                                <span>@item.Label</span>
+                            </NavLink>
+                        }
+                    </nav>
+
+                    <div class="border-t p-4">
+                        <button @onclick="LogoutAsync"
+                                class="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-600">
+                            <i class="fa-solid fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </button>
+                    </div>
+                </div>
+            }
         }
         else
         {
@@ -66,6 +97,47 @@
 
     private UserDto? profile;
     private int unreadNotificationCount;
+    private bool isOverlayOpen;
+
+    private string DisplayName => FirstNotEmpty(
+        profile?.FullName,
+        profile?.Username,
+        "Utilisateur"
+    )!;
+
+    private string? ResolvedAvatarUrl => NormalizeImagePath(profile?.AvatarUrl);
+
+    private string Initials
+    {
+        get
+        {
+            var words = DisplayName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Take(2)
+                .ToArray();
+            if (words.Length == 0) return "U";
+            return string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
+        }
+    }
+
+    private MobileNavItem[] MobileNavigationItems { get; } =
+    [
+        new MobileNavItem("/profile", "Mon Profil", "fa-solid fa-user", NavLinkMatch.All),
+        new MobileNavItem("/", "Accueil", "fa-solid fa-house"),
+        new MobileNavItem(Href: "/about", Label : "A propos", Icon: "fa-solid fa-circle-info"),
+        new MobileNavItem("/ressources", "Ressources", "fa-solid fa-folder"),
+        new MobileNavItem("/community", "Communauté", "fa-solid fa-users"),
+        new MobileNavItem("/blog", "blog", "fa-solid fa-newspaper"),
+        new MobileNavItem("/evenements", "Événements", "fa-solid fa-calendar"),
+        new MobileNavItem("/partners", "Partenaires", "fa-solid fa-handshake"),
+        new MobileNavItem("/contact", "Contact", "fa-solid fa-envelope"),
+        new MobileNavItem("/admin", "Administration", "fa-solid fa-shield-halved")
+    ];
+
+    private void ToggleOverlay()
+    {
+        isOverlayOpen = !isOverlayOpen;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,7 +174,8 @@
         UserStateService.OnChange -= HandleUserStateChanged;
     }
 
-    private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount : NotificationCount.GetValueOrDefault();
+    private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount :
+NotificationCount.GetValueOrDefault();
 
     private async Task NavigateToLoginAsync()
     {
@@ -123,17 +196,10 @@
         }
     }
 
-    private async Task NavigateToProfileAsync(ClaimsPrincipal user)
+    private async Task NavigateToProfileAsync()
     {
         await NotifyActionCompletedAsync();
-
-        var hasAdminRole = user.Claims.Any(claim =>
-            (claim.Type == ClaimTypes.Role || claim.Type == "roles" || claim.Type == "role")
-            && (string.Equals(claim.Value, "admin", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(claim.Value, "superadmin", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(claim.Value, "moderator", StringComparison.OrdinalIgnoreCase)));
-
-        Navigation.NavigateTo(hasAdminRole ? "/admin/profile" : "/profile");
+        Navigation.NavigateTo(UserStateService.IsAdmin ? "/admin/profile" : "/profile");
     }
 
     private async Task LogoutAsync()
@@ -148,7 +214,6 @@
         await NotifyActionCompletedAsync();
         Navigation.NavigateTo("/notifications");
     }
-
     private void HandleUserStateChanged()
     {
         profile = UserStateService.CurrentUser;
@@ -174,6 +239,12 @@
         });
     }
 
+    private async Task CloseOverlay()
+    {
+        isOverlayOpen = false;
+        await NotifyActionCompletedAsync();
+    }
+
     private Task NotifyActionCompletedAsync()
     {
         if (!OnActionCompleted.HasDelegate)
@@ -181,4 +252,24 @@
 
         return OnActionCompleted.InvokeAsync();
     }
+
+    private static string? FirstNotEmpty(params string?[] values)
+        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
+
+    private static string? NormalizeImagePath(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        if (value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/"))
+        {
+            return value;
+        }
+
+        return $"/{value.TrimStart('/')}";
+    }
+
+    private sealed record MobileNavItem(string Href, string Label, string Icon, NavLinkMatch Match = NavLinkMatch.Prefix);
 }

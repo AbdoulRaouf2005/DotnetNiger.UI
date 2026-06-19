@@ -40,6 +40,13 @@ public class ApiProjectService : IProjectService
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
+    public async Task<ProjectResponse?> GetBySlugAsync(string slug)
+    {
+        var response = await _http.GetAsync($"{Base}/slug/{slug}");
+        if (!response.IsSuccessStatusCode) return null;
+        return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
+    }
+
     public async Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {
         var response = await _http.PostAsJsonAsync(Base, request);

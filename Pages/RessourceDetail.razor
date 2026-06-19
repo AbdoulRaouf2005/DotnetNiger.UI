@@ -1,7 +1,7 @@
 @page "/ressource/{Slug}"
 @inject IResourceService ResourceService
 @inject NavigationManager Navigation
-@inject ILocalStorageService LocalStorage
+@inject ISessionStorageService LocalStorage
 @using DotnetNiger.UI.Services.Contracts
 
 <PageTitle>@(resource?.Title ?? "Ressource") - .NET Niger</PageTitle>
@@ -54,7 +54,7 @@ else
                 <span class="text-gray-900 font-medium">@resource.Title</span>
             </nav>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
                 <div class="@GradientClass h-44 sm:h-56 flex items-center justify-center relative">
                     <div class="absolute inset-0 bg-white/10"></div>
                     <div class="relative flex flex-col items-center gap-3">

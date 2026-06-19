@@ -4,18 +4,18 @@ using Microsoft.JSInterop;
 
 namespace DotnetNiger.UI.Services.Browser;
 
-public class JsLocalStorageService : global::DotnetNiger.UI.Services.Contracts.ILocalStorageService
+public class JsSessionStorageService : ISessionStorageService
 {
     private readonly IJSRuntime _jsRuntime;
 
-    public JsLocalStorageService(IJSRuntime jsRuntime)
+    public JsSessionStorageService(IJSRuntime jsRuntime)
     {
         _jsRuntime = jsRuntime;
     }
 
     public async Task<T?> GetItemAsync<T>(string key)
     {
-        var json = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", key);
+        var json = await _jsRuntime.InvokeAsync<string?>("sessionStorage.getItem", key);
 
         if (string.IsNullOrWhiteSpace(json))
             return default;
@@ -26,9 +26,9 @@ public class JsLocalStorageService : global::DotnetNiger.UI.Services.Contracts.I
     public async Task SetItemAsync<T>(string key, T value)
     {
         var json = JsonSerializer.Serialize(value);
-        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, json);
+        await _jsRuntime.InvokeVoidAsync("sessionStorage.setItem", key, json);
     }
 
     public Task RemoveItemAsync(string key)
-        => _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key).AsTask();
+        => _jsRuntime.InvokeVoidAsync("sessionStorage.removeItem", key).AsTask();
 }
