@@ -1,4 +1,4 @@
-ï»¿using DotnetNiger.UI.Models;
+using DotnetNiger.UI.Models;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 using Microsoft.AspNetCore.Components.Forms;
@@ -7,7 +7,7 @@ namespace DotnetNiger.UI.Services.Mock;
 
 public class MockUploadService : IUploadService
 {
-    private readonly ISessionStorageService _localStorage;
+    private readonly ILocalStorageService _localStorage;
     private const long MaxFileSize = 5 * 1024 * 1024;
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -20,7 +20,7 @@ public class MockUploadService : IUploadService
 
     private const string StorageKeyPrefix = "uploaded_images";
 
-    public MockUploadService(ISessionStorageService localStorage)
+    public MockUploadService(ILocalStorageService localStorage)
     {
         _localStorage = localStorage;
     }
@@ -35,7 +35,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Format non autorisÃ©. Formats acceptÃ©s : {string.Join(", ", AllowedExtensions)}"
+                Message = $"Format non autorisé. Formats acceptés : {string.Join(", ", AllowedExtensions)}"
             };
         }
 
@@ -44,7 +44,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = "Type MIME non autorisÃ©."
+                Message = "Type MIME non autorisé."
             };
         }
 
@@ -53,7 +53,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Le fichier dÃ©passe la taille maximale de 5 Mo."
+                Message = $"Le fichier dépasse la taille maximale de 5 Mo."
             };
         }
 
@@ -80,7 +80,7 @@ public class MockUploadService : IUploadService
         return new UploadResponse
         {
             Success = true,
-            Message = "Image uploadÃ©e avec succÃ¨s.",
+            Message = "Image uploadée avec succès.",
             ImageUrl = relativePath,
             FileName = uniqueName,
             FileSize = file.Size,
@@ -97,7 +97,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Format non autorisÃ©. Formats acceptÃ©s : {string.Join(", ", AllowedExtensions)}"
+                Message = $"Format non autorisé. Formats acceptés : {string.Join(", ", AllowedExtensions)}"
             };
         }
 
@@ -108,7 +108,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Le fichier dÃ©passe la taille maximale de 5 Mo."
+                Message = $"Le fichier dépasse la taille maximale de 5 Mo."
             };
         }
 
@@ -130,7 +130,7 @@ public class MockUploadService : IUploadService
         return new UploadResponse
         {
             Success = true,
-            Message = "Image uploadÃ©e avec succÃ¨s.",
+            Message = "Image uploadée avec succès.",
             ImageUrl = relativePath,
             FileName = uniqueName,
             FileSize = bytes.Length,

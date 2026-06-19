@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
+using System.Net.Http.Json;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
@@ -9,42 +8,29 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiRegistrationService : IRegistrationService
 {
     private readonly HttpClient _http;
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNameCaseInsensitive = true
-    };
+    private const string CertificateBase = "api/profile/certificates";
 
-    public ApiRegistrationService(HttpClient http)
-    {
-        _http = http;
-    }
+    public ApiRegistrationService(HttpClient http) => _http = http;
 
     public Task<ApiSuccessResponse<Guid>> SubmitStep1Async(RegisterRequest request)
     {
-        throw new NotSupportedException("L'étape 1 est gérée par redirection vers le fournisseur d'identité.");
+        // L'étape 1 est gérée via la redirection externe vers Identity Server (/Account/Register).
+        throw new NotSupportedException("L'étape 1 est gérée par Identity Server via redirection externe.");
     }
 
     public async Task<ApiSuccessResponse<CertificateStatusDto>> SubmitStep2Async(CertificateSubmissionDto request)
     {
-        var response = await _http.PostAsJsonAsync("api/v1/profile/certificates", request);
-        var json = await response.Content.ReadAsStringAsync();
-
-        try
+        var response = await _http.PostAsJsonAsync(CertificateBase, request);
+        if (!response.IsSuccessStatusCode)
         {
-            var wrapped = JsonSerializer.Deserialize<ApiSuccessResponse<CertificateStatusDto>>(json, JsonOptions);
-            return wrapped ?? new ApiSuccessResponse<CertificateStatusDto>
-            {
-                Success = false,
-                Message = "Erreur inattendue."
-            };
-        }
-        catch
-        {
+            var errorBody = await response.Content.ReadAsStringAsync();
             return new ApiSuccessResponse<CertificateStatusDto>
             {
                 Success = false,
-                Message = "Erreur de communication avec le serveur."
+                Message = string.IsNullOrWhiteSpace(errorBody) ? "Erreur lors de la soumission du certificat." : errorBody
             };
         }
+        return await response.Content.ReadFromJsonAsync<ApiSuccessResponse<CertificateStatusDto>>()
+            ?? new ApiSuccessResponse<CertificateStatusDto> { Success = true };
     }
 }

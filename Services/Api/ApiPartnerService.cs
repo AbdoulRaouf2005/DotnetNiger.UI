@@ -6,7 +6,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiPartnerService : IPartnerService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/partners";
+    private const string Base = "api/partners";
 
     public ApiPartnerService(HttpClient http) => _http = http;
 

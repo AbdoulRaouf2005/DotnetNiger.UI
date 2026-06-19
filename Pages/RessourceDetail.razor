@@ -1,7 +1,7 @@
 @page "/ressource/{Slug}"
 @inject IResourceService ResourceService
 @inject NavigationManager Navigation
-@inject ISessionStorageService LocalStorage
+@inject ILocalStorageService LocalStorage
 @using DotnetNiger.UI.Services.Contracts
 
 <PageTitle>@(resource?.Title ?? "Ressource") - .NET Niger</PageTitle>

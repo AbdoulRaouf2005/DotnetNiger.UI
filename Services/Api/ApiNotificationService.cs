@@ -7,7 +7,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiNotificationService : INotificationService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/notifications";
+    private const string Base = "api/notifications";
 
     public ApiNotificationService(HttpClient http) => _http = http;
 

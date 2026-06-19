@@ -1,19 +1,19 @@
-﻿using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Mock;
 
-public class MockUserStateService : IUserStateService
+public class UserStateService : IUserStateService
 {
     public event Action? OnChange;
     
     private UserDto? _currentUser;
-    private readonly ISessionStorageService _sessionStorage;
+    private readonly ILocalStorageService _localStorage;
     private readonly IUserService _userService;
     
-    public MockUserStateService(ISessionStorageService sessionStorage, IUserService userService)
+    public UserStateService(ILocalStorageService localStorage, IUserService userService)
     {
-        _sessionStorage = sessionStorage;
+        _localStorage = localStorage;
         _userService = userService;
     }
     
@@ -22,20 +22,20 @@ public class MockUserStateService : IUserStateService
     public bool IsAuthenticated => _currentUser != null && _currentUser.IsActive;
     public Guid UserId => _currentUser?.Id ?? Guid.Empty;
     public string UserName => _currentUser?.FullName ?? string.Empty;
-    public bool IsAdmin => _currentUser?.Roles.Contains("Admin", StringComparer.OrdinalIgnoreCase) ?? false;
+    public bool IsAdmin => _currentUser?.Roles.Contains("Admin") ?? false;
     public string? UserRole => _currentUser?.Roles.FirstOrDefault();
     
     // Méthodes
     public async Task LoadUserFromStorageAsync()
     {
-        _currentUser = await _sessionStorage.GetItemAsync<UserDto>("currentUser");
+        _currentUser = await _localStorage.GetItemAsync<UserDto>("currentUser");
         OnChange?.Invoke();
     }
     
     public async Task SetUserAsync(UserDto user)
     {
         _currentUser = user;
-        await _sessionStorage.SetItemAsync("currentUser", user);
+        await _localStorage.SetItemAsync("currentUser", user);
         OnChange?.Invoke();
     }
     
@@ -44,7 +44,7 @@ public class MockUserStateService : IUserStateService
         if (_currentUser != null && _currentUser.Id == updatedUser.Id)
         {
             _currentUser = updatedUser;
-            await _sessionStorage.SetItemAsync("currentUser", updatedUser);
+            await _localStorage.SetItemAsync("currentUser", updatedUser);
             OnChange?.Invoke();
         }
     }
@@ -52,7 +52,7 @@ public class MockUserStateService : IUserStateService
     public async Task ClearUserAsync()
     {
         _currentUser = null;
-        await _sessionStorage.RemoveItemAsync("currentUser");
+        await _localStorage.RemoveItemAsync("currentUser");
         OnChange?.Invoke();
     }
     
@@ -64,7 +64,7 @@ public class MockUserStateService : IUserStateService
             if (freshUser != null)
             {
                 _currentUser = freshUser;
-                await _sessionStorage.SetItemAsync("currentUser", freshUser);
+                await _localStorage.SetItemAsync("currentUser", freshUser);
                 OnChange?.Invoke();
             }
         }

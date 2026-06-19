@@ -8,7 +8,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiUserService : IUserService
 {
     private readonly HttpClient _http;
-    private const string AdminUsersBase = "api/v1/admin/users";
+    private const string AdminUsersBase = "api/identity/admin/users";
 
     public ApiUserService(HttpClient http)
     {

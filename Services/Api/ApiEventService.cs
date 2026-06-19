@@ -1,5 +1,6 @@
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 using System.Net.Http.Json;
 
@@ -8,12 +9,16 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiEventService : IEventService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/v1/events";
-    private const string AdminBase = "api/v1/admin/events";
+    private readonly CustomAuthStateProvider _authStateProvider;
+    private readonly IAuthService _authService;
+    private const string PublicBase = "api/events";
+    private const string AdminBase = "api/community/admin/events";
 
-    public ApiEventService(HttpClient http)
+    public ApiEventService(HttpClient http, CustomAuthStateProvider authStateProvider, IAuthService authService)
     {
         _http = http;
+        _authStateProvider = authStateProvider;
+        _authService = authService;
     }
 
     public async Task<List<EventDto>> GetAllEventsAsync()
@@ -88,13 +93,13 @@ public class ApiEventService : IEventService
         return events.Where(e => e.EventType.Equals(eventType, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
-    public async Task<EventDto?> CreateEventAsync(CreateEventRequest request)
+    public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
     {
         var response = await _http.PostAsJsonAsync(PublicBase, request);
-        if (!response.IsSuccessStatusCode)
-            return null;
+        response.EnsureSuccessStatusCode();
 
-        return await ApiResponseReader.ReadAsync<EventDto>(response);
+        return await ApiResponseReader.ReadAsync<EventDto>(response)
+               ?? throw new InvalidOperationException("La réponse API est vide pour la création de l'événement.");
     }
 
     public async Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
@@ -127,8 +132,8 @@ public class ApiEventService : IEventService
             return false;
 
         var endpoint = current.IsPublished
-            ? $"{PublicBase}/{id}/unpublish"
-            : $"{PublicBase}/{id}/publish";
+            ? $"{AdminBase}/{id}/unpublish"
+            : $"{AdminBase}/{id}/publish";
 
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
@@ -160,7 +165,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetPendingEventsAsync()
     {
-        var response = await _http.GetAsync($"{PublicBase}/pending");
+        var response = await _http.GetAsync($"{AdminBase}?status=pending");
         if (!response.IsSuccessStatusCode)
             return new List<EventDto>();
 
@@ -170,8 +175,8 @@ public class ApiEventService : IEventService
     public async Task<bool> ApproveEventAsync(Guid eventId, string? adminComment = null)
     {
         var endpoint = string.IsNullOrWhiteSpace(adminComment)
-            ? $"{PublicBase}/{eventId}/approve"
-            : $"{PublicBase}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
+            ? $"{AdminBase}/{eventId}/approve"
+            : $"{AdminBase}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
 
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
@@ -179,7 +184,7 @@ public class ApiEventService : IEventService
 
     public async Task<bool> RejectEventAsync(Guid eventId, string reason)
     {
-        var endpoint = $"{PublicBase}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
+        var endpoint = $"{AdminBase}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
         var response = await _http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
     }
@@ -191,6 +196,19 @@ public class ApiEventService : IEventService
             return new List<EventDto>();
 
         return await ApiResponseReader.ReadCollectionAsync<EventDto>(response);
+    }
+
+    private async Task<bool> IsAdminCurrentUserAsync()
+    {
+        var accessToken = await _authStateProvider.GetAccessTokenAsync();
+        var role = _authService.GetRoleFromAccessToken(accessToken);
+
+        if (string.IsNullOrWhiteSpace(role))
+            return false;
+
+        return role.Equals("admin", StringComparison.OrdinalIgnoreCase)
+               || role.Equals("superadmin", StringComparison.OrdinalIgnoreCase)
+               || role.Equals("moderator", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<List<T>> GetCollectionAsync<T>(string path, Dictionary<string, string?>? query = null)

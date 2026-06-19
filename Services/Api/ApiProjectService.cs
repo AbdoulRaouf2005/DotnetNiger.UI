@@ -8,7 +8,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiProjectService : IProjectService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/projects";
+    private const string Base = "api/projects";
 
     public ApiProjectService(HttpClient http) => _http = http;
 

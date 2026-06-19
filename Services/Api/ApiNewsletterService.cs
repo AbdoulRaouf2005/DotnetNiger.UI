@@ -7,7 +7,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiNewsletterService : INewsletterService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/newsletter";
+    private const string Base = "api/newsletters";
 
     public ApiNewsletterService(HttpClient http) => _http = http;
 

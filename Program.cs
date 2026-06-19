@@ -8,25 +8,43 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
+
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+// Client HTTP pour les ressources statiques de l'application
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+// Client HTTP dédié pour AuthService — configurez ApiBaseUrl dans wwwroot/appsettings.json
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
+var clientId = builder.Configuration["ClientId"] ?? "web-ui";
 builder.Services.AddScoped<ClientIdentifierProvider>();
 
+builder.Services.AddScoped<AuthService>(sp => new AuthService(
+    CreateGatewayHttpClient(
+        apiBaseUrl,
+        sp.GetRequiredService<ClientIdentifierProvider>(),
+        sp.GetRequiredService<CustomAuthStateProvider>(),
+        sp,
+        sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+    sp.GetRequiredService<CustomAuthStateProvider>(),
+    clientId
+));
+
+// Auth
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(
+    sp => sp.GetRequiredService<CustomAuthStateProvider>());
+builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
+
+// Services applicatifs — basculer entre Mock et API via "UseMockServices" dans appsettings.json
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 
 if (useMock)
 {
-    builder.Services.AddScoped<MockAuthenticationStateProvider>();
-    builder.Services.AddScoped<AuthenticationStateProvider>(
-        sp => sp.GetRequiredService<MockAuthenticationStateProvider>());
-
     builder.Services.AddScoped<IToastService, ToastService>();
-    builder.Services.AddScoped<IContactService, MockContactService>();
     builder.Services.AddScoped<IUploadService, MockUploadService>();
     builder.Services.AddScoped<IAuthService, MockAuthService>();
     builder.Services.AddScoped<IUserService, MockUserService>();
@@ -37,7 +55,7 @@ if (useMock)
     builder.Services.AddScoped<IProfileService, ProfileService>();
     builder.Services.AddScoped<ICommentService, CommentService>();
     builder.Services.AddScoped<IRegistrationService, MockRegistrationService>();
-    builder.Services.AddScoped<IUserStateService, MockUserStateService>();
+    builder.Services.AddScoped<IUserStateService, UserStateService>();
     builder.Services.AddScoped<IProjectService, MockProjectService>();
     builder.Services.AddScoped<IPartnerService, MockPartnerService>();
     builder.Services.AddScoped<INewsletterService, MockNewsletterService>();
@@ -47,53 +65,149 @@ if (useMock)
 }
 else
 {
-    builder.Services.AddScoped<TokenStorageService>();
-    builder.Services.AddTransient<BearerTokenHandler>();
-
-    builder.Services.AddScoped<HttpClient>(sp =>
-    {
-        var bearer = sp.GetRequiredService<BearerTokenHandler>();
-        var clientId = new ClientIdHeaderHandler(
-            sp.GetRequiredService<ClientIdentifierProvider>(),
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>());
-        clientId.InnerHandler = new HttpClientHandler();
-        bearer.InnerHandler = clientId;
-        return new HttpClient(bearer) { BaseAddress = new Uri(apiBaseUrl) };
-    });
-
-    builder.Services.AddScoped<CustomAuthStateProvider>();
-    builder.Services.AddScoped<AuthenticationStateProvider>(
-        sp => sp.GetRequiredService<CustomAuthStateProvider>());
-
-    builder.Services.AddScoped<AuthService>(sp => new AuthService(
-        sp.GetRequiredService<HttpClient>(),
-        sp.GetRequiredService<CustomAuthStateProvider>(),
-        sp.GetRequiredService<TokenStorageService>()
-    ));
-
-    HttpClient GatewayHttp(IServiceProvider sp) => sp.GetRequiredService<HttpClient>();
-
     builder.Services.AddScoped<IToastService, ToastService>();
-    builder.Services.AddScoped<IUserStateService>(sp => new UserStateService(sp.GetRequiredService<IAuthService>()));
-    builder.Services.AddScoped<IContactService>(sp => new ApiContactService(GatewayHttp(sp)));
     builder.Services.AddScoped<IAuthService>(sp => sp.GetRequiredService<AuthService>());
-    builder.Services.AddScoped<IUserService>(sp => new ApiUserService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IPostService>(sp => new ApiPostService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IEventService>(sp => new ApiEventService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IResourceService>(sp => new ApiResourceService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IProfileService>(sp => new ApiProfileService(GatewayHttp(sp), sp.GetRequiredService<IUserStateService>()));
-    builder.Services.AddScoped<ICommentService>(sp => new ApiCommentService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IRegistrationService>(sp => new ApiRegistrationService(GatewayHttp(sp)));
-    builder.Services.AddScoped<INotificationService>(sp => new ApiNotificationService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IProjectService>(sp => new ApiProjectService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IPartnerService>(sp => new ApiPartnerService(GatewayHttp(sp)));
-    builder.Services.AddScoped<INewsletterService>(sp => new ApiNewsletterService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IMemberDirectoryService>(sp => new ApiMemberDirectoryService(GatewayHttp(sp)));
-    builder.Services.AddScoped<ISearchService>(sp => new ApiSearchService(GatewayHttp(sp)));
-    builder.Services.AddScoped<IUploadService>(sp => new ApiUploadService(GatewayHttp(sp)));
+    builder.Services.AddScoped<IUserService>(sp =>
+        new ApiUserService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+    builder.Services.AddScoped<IPostService>(sp =>
+        new ApiPostService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+    builder.Services.AddScoped<IEventService>(sp =>
+        new ApiEventService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp.GetRequiredService<IAuthService>()));
+    builder.Services.AddScoped<IResourceService>(sp =>
+        new ApiResourceService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IProfileService>(sp =>
+        new ApiProfileService(
+            CreateGatewayHttpClient(
+                apiBaseUrl,
+                sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>()));
+
+    builder.Services.AddScoped<ICommentService>(sp =>
+        new ApiCommentService(
+            CreateGatewayHttpClient(
+                apiBaseUrl,
+                sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
+            sp.GetRequiredService<CustomAuthStateProvider>()));
+
+    builder.Services.AddScoped<IRegistrationService>(sp =>
+        new ApiRegistrationService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+    builder.Services.AddScoped<INotificationService>(sp =>
+        new ApiNotificationService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IContactService>(sp =>
+        new ApiContactService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IProjectService>(sp =>
+        new ApiProjectService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IPartnerService>(sp =>
+        new ApiPartnerService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<INewsletterService>(sp =>
+        new ApiNewsletterService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IMemberDirectoryService>(sp =>
+        new ApiMemberDirectoryService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<ISearchService>(sp =>
+        new ApiSearchService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
+
+    builder.Services.AddScoped<IUserStateService, UserStateService>();
+
+    builder.Services.AddScoped<IUploadService>(sp =>
+        new ApiUploadService(CreateGatewayHttpClient(
+            apiBaseUrl,
+            sp.GetRequiredService<ClientIdentifierProvider>(),
+            sp.GetRequiredService<CustomAuthStateProvider>(),
+            sp,
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 }
 
-builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ISessionStorageService, JsSessionStorageService>();
-
 await builder.Build().RunAsync();
+
+static HttpClient CreateGatewayHttpClient(
+    string baseUrl,
+    ClientIdentifierProvider clientIdentifierProvider,
+    CustomAuthStateProvider authStateProvider,
+    IServiceProvider serviceProvider,
+    ILogger<ClientIdHeaderHandler> logger)
+{
+    var headerHandler = new ClientIdHeaderHandler(clientIdentifierProvider, authStateProvider, serviceProvider, logger)
+    {
+        InnerHandler = new HttpClientHandler()
+    };
+
+    return new HttpClient(headerHandler)
+    {
+        BaseAddress = new Uri(baseUrl)
+    };
+}

@@ -8,7 +8,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiResourceService : IResourceService
 {
     private readonly HttpClient _http;
-    private const string PublicBase = "api/v1/resources";
+    private const string PublicBase = "api/resources";
 
     public ApiResourceService(HttpClient http)
     {

@@ -7,7 +7,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiSearchService : ISearchService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/search";
+    private const string Base = "api/search";
 
     public ApiSearchService(HttpClient http) => _http = http;
 

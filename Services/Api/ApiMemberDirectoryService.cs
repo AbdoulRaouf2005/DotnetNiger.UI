@@ -6,7 +6,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiMemberDirectoryService : IMemberDirectoryService
 {
     private readonly HttpClient _http;
-    private const string Base = "api/v1/members";
+    private const string Base = "api/members";
 
     public ApiMemberDirectoryService(HttpClient http) => _http = http;
 

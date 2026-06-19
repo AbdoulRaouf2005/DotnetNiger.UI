@@ -1,6 +1,8 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
@@ -8,19 +10,22 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiProfileService : IProfileService
 {
     private readonly HttpClient _http;
-    private readonly IUserStateService _userStateService;
-    private const string ProfileBase = "api/v1/me";
-    private const string SocialLinksBase = "api/v1/social-links";
+    private readonly CustomAuthStateProvider _authProvider;
+    private const string ProfileBase = "api/me";
+    private const string SocialLinksBase = "api/social-links";
 
-    public ApiProfileService(HttpClient http, IUserStateService userStateService)
+    public ApiProfileService(HttpClient http, CustomAuthStateProvider authProvider)
     {
         _http = http;
-        _userStateService = userStateService;
+        _authProvider = authProvider;
     }
 
     public async Task<UserDto> GetProfileAsync()
     {
-        var response = await _http.GetAsync(ProfileBase);
+        using var request = new HttpRequestMessage(HttpMethod.Get, ProfileBase);
+        await AttachAuthHeaderAsync(request);
+
+        var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode)
             return new UserDto();
 
@@ -29,7 +34,13 @@ public class ApiProfileService : IProfileService
 
     public async Task<UserDto> UpdateProfileAsync(UpdateProfileRequest request)
     {
-        var response = await _http.PutAsJsonAsync(ProfileBase, request);
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Put, ProfileBase)
+        {
+            Content = JsonContent.Create(request)
+        };
+        await AttachAuthHeaderAsync(httpRequest);
+
+        var response = await _http.SendAsync(httpRequest);
         if (!response.IsSuccessStatusCode)
             return await GetProfileAsync();
 
@@ -37,15 +48,15 @@ public class ApiProfileService : IProfileService
             return await GetProfileAsync();
 
         var updated = await ApiResponseReader.ReadAsync<UserDto>(response);
-        var result = updated ?? await GetProfileAsync();
-
-        await _userStateService.UpdateUserAsync(result);
-        return result;
+        return updated ?? await GetProfileAsync();
     }
 
     public async Task<List<SocialLinkDto>> GetSocialLinksAsync()
     {
-        var response = await _http.GetAsync(SocialLinksBase);
+        using var request = new HttpRequestMessage(HttpMethod.Get, SocialLinksBase);
+        await AttachAuthHeaderAsync(request);
+
+        var response = await _http.SendAsync(request);
         if (!response.IsSuccessStatusCode)
             return new List<SocialLinkDto>();
 
@@ -54,42 +65,42 @@ public class ApiProfileService : IProfileService
 
     public async Task<SocialLinkDto?> AddSocialLinkAsync(AddSocialLinkRequest request)
     {
-        var response = await _http.PostAsJsonAsync(SocialLinksBase, request);
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, SocialLinksBase)
+        {
+            Content = JsonContent.Create(request)
+        };
+        await AttachAuthHeaderAsync(httpRequest);
+
+        var response = await _http.SendAsync(httpRequest);
         if (!response.IsSuccessStatusCode)
             return null;
 
-        SocialLinkDto? result;
         if (response.Content.Headers.ContentLength is null or 0)
         {
             var links = await GetSocialLinksAsync();
-            result = links.LastOrDefault(link =>
+            return links.LastOrDefault(link =>
                 link.Platform.Equals(request.Platform, StringComparison.OrdinalIgnoreCase) &&
                 link.Url.Equals(request.Url, StringComparison.OrdinalIgnoreCase));
         }
-        else
-        {
-            result = await ApiResponseReader.ReadAsync<SocialLinkDto>(response);
-        }
 
-        if (result is not null)
-        {
-            var profile = await GetProfileAsync();
-            if (profile.Id != Guid.Empty)
-                await _userStateService.UpdateUserAsync(profile);
-        }
-
-        return result;
+        return await ApiResponseReader.ReadAsync<SocialLinkDto>(response);
     }
 
     public async Task<bool> DeleteSocialLinkAsync(Guid id)
     {
-        var response = await _http.DeleteAsync($"{SocialLinksBase}/{id}");
-        if (response.IsSuccessStatusCode)
-        {
-            var profile = await GetProfileAsync();
-            if (profile.Id != Guid.Empty)
-                await _userStateService.UpdateUserAsync(profile);
-        }
+        using var request = new HttpRequestMessage(HttpMethod.Delete, $"{SocialLinksBase}/{id}");
+        await AttachAuthHeaderAsync(request);
+
+        var response = await _http.SendAsync(request);
         return response.IsSuccessStatusCode;
+    }
+
+    private async Task AttachAuthHeaderAsync(HttpRequestMessage request)
+    {
+        var token = await _authProvider.GetAccessTokenAsync();
+        if (string.IsNullOrWhiteSpace(token))
+            return;
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 }

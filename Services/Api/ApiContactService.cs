@@ -8,14 +8,11 @@ public class ApiContactService : IContactService
 {
     private readonly HttpClient _http;
 
-    public ApiContactService(HttpClient http)
-    {
-        _http = http;
-    }
+    public ApiContactService(HttpClient http) => _http = http;
 
     public async Task<bool> SendAsync(ContactRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/v1/contact", request);
+        var response = await _http.PostAsJsonAsync("api/contact", request);
         return response.IsSuccessStatusCode;
     }
 }

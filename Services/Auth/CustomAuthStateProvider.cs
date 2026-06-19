@@ -1,85 +1,118 @@
 using System.Security.Claims;
-using DotnetNiger.UI.Models.Responses;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
+using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Auth;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
+    private readonly IJSRuntime _js;
+    private readonly IServiceProvider _serviceProvider;
     private static readonly AuthenticationState Anonymous =
         new(new ClaimsPrincipal(new ClaimsIdentity()));
 
-    private AuthenticationState _cachedState = Anonymous;
-    private DateTime _cacheExpiry = DateTime.MinValue;
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
+    private bool _isRefreshing;
 
-    private readonly TokenStorageService _tokenStorage;
-
-    public CustomAuthStateProvider(TokenStorageService tokenStorage)
+    public CustomAuthStateProvider(IJSRuntime js, IServiceProvider serviceProvider)
     {
-        _tokenStorage = tokenStorage;
+        _js = js;
+        _serviceProvider = serviceProvider;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        if (_cachedState != Anonymous && DateTime.UtcNow < _cacheExpiry)
-            return _cachedState;
-
-        var state = await RestoreFromTokenAsync();
-        if (state != Anonymous)
-        {
-            _cachedState = state;
-            _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
-        }
-
-        return state;
-    }
-
-    private async Task<AuthenticationState> RestoreFromTokenAsync()
-    {
-        var accessToken = await _tokenStorage.GetAccessTokenAsync();
-        if (string.IsNullOrWhiteSpace(accessToken))
+        var token = await GetAccessTokenAsync();
+        if (string.IsNullOrWhiteSpace(token))
             return Anonymous;
 
-        var claims = AuthService.ParseClaimsFromJwt(accessToken).ToList();
-        if (claims.Count == 0)
-            return Anonymous;
+        var claims = ParseClaimsFromJwt(token);
+        var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
 
-        return new AuthenticationState(
-            new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
-    }
-
-    public void SetAuthenticatedFromUser(UserDto user)
-    {
-        var claims = new List<Claim>
+        if (expClaim != null && long.TryParse(expClaim, out var expUnix))
         {
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Email, user.Email),
-            new(ClaimTypes.Name, user.FullName),
-            new("full_name", user.FullName),
-            new("avatar_url", user.AvatarUrl),
-        };
-        foreach (var role in user.Roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-            if (role.Length > 0)
+            var expDate = DateTimeOffset.FromUnixTimeSeconds(expUnix);
+            if (expDate <= DateTimeOffset.UtcNow && !_isRefreshing)
             {
-                var capped = char.ToUpperInvariant(role[0]) + role[1..];
-                if (capped != role)
-                    claims.Add(new Claim(ClaimTypes.Role, capped));
+                _isRefreshing = true;
+                try
+                {
+                    var authService = _serviceProvider.GetRequiredService<IAuthService>();
+                    var refreshed = await authService.RefreshTokenAsync();
+                    if (refreshed?.Token?.AccessToken is not null)
+                    {
+                        token = refreshed.Token.AccessToken;
+                        claims = ParseClaimsFromJwt(token);
+                    }
+                    else
+                    {
+                        await ClearTokensAsync();
+                        return Anonymous;
+                    }
+                }
+                catch
+                {
+                    await ClearTokensAsync();
+                    return Anonymous;
+                }
+                finally
+                {
+                    _isRefreshing = false;
+                }
             }
         }
 
-        _cachedState = new AuthenticationState(
-            new ClaimsPrincipal(new ClaimsIdentity(claims, "cookie")));
-        _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
-        NotifyAuthenticationStateChanged(Task.FromResult(_cachedState));
+        var identity = new ClaimsIdentity(claims, "jwt");
+        return new AuthenticationState(new ClaimsPrincipal(identity));
     }
 
-    public void NotifyStateChanged()
+    public async Task<string?> GetAccessTokenAsync()
+        => await _js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
+
+    public async Task<string?> GetRefreshTokenAsync()
+        => await _js.InvokeAsync<string?>("sessionStorage.getItem", "refreshToken");
+
+    public async Task SaveTokensAsync(string accessToken, string refreshToken)
     {
-        _cachedState = Anonymous;
+        await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
+        await _js.InvokeVoidAsync("sessionStorage.setItem", "refreshToken", refreshToken);
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
+    public async Task ClearTokensAsync()
+    {
+        await _js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
+        await _js.InvokeVoidAsync("sessionStorage.removeItem", "refreshToken");
+        NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
+    }
+
+    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+    {
+        var payload = jwt.Split('.')[1];
+        var jsonBytes = ParseBase64WithoutPadding(payload);
+        var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
+
+        return kvs.SelectMany(kv =>
+        {
+            if (kv.Key is "roles" or "role")
+            {
+                if (kv.Value.ValueKind == JsonValueKind.Array)
+                    return kv.Value.EnumerateArray().Select(r => new Claim(ClaimTypes.Role, r.GetString()!));
+                return new[] { new Claim(ClaimTypes.Role, kv.Value.GetString()!) };
+            }
+            return new[] { new Claim(kv.Key, kv.Value.ToString()) };
+        });
+    }
+
+    private static byte[] ParseBase64WithoutPadding(string base64)
+    {
+        base64 = base64.Replace('-', '+').Replace('_', '/');
+        return (base64.Length % 4) switch
+        {
+            2 => Convert.FromBase64String(base64 + "=="),
+            3 => Convert.FromBase64String(base64 + "="),
+            _ => Convert.FromBase64String(base64),
+        };
+    }
 }
