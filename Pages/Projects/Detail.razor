@@ -62,36 +62,42 @@
                     }
                 </div>
 
-                @* Block 2 : Auteur, Statut *@
+                @* Block 2 : Auteur, Statut, GitHub (boîte unique) *@
                 <div class="lg:col-span-1">
-                    <div class="sticky top-8 space-y-6">
-                        <div class="rounded-lg bg-white p-6 shadow-sm">
-                            <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Auteur</h3>
-                            <a href="/membres/@Project.CreatedBy"
-                               class="flex items-center gap-3 rounded-lg transition hover:bg-gray-50 -mx-2 -my-2 p-2">
-                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary/10">
-                                    <i class="fas fa-user text-sm text-secondary"></i>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-900 hover:text-secondary transition-colors">@Project.AuthorName</span>
-                            </a>
-                        </div>
+                    <div class="sticky top-8">
+                        <div class="rounded-lg bg-white p-6 shadow-sm space-y-5">
+                            <div>
+                                <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">Auteur</h3>
+                                <a href="/member/@Project.CreatedBy"
+                                   class="flex items-center gap-3 rounded-lg transition hover:bg-gray-50 -mx-2 -my-2 p-2">
+                                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary/10">
+                                        <i class="fas fa-user text-sm text-secondary"></i>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-900 hover:text-secondary transition-colors">@Project.AuthorName</span>
+                                </a>
+                            </div>
 
-                        <div class="rounded-lg bg-white p-6 shadow-sm">
-                            <h3 class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Statut</h3>
-                            <span class="inline-flex items-center gap-1.5 rounded-lg @StatusCss px-3 py-1.5 text-xs font-semibold">
-                                <span class="inline-block h-2 w-2 rounded-full @StatusDotCss"></span>
-                                @StatusLabel
-                            </span>
-                        </div>
+                            <hr class="border-gray-100" />
 
-                        @if (!string.IsNullOrWhiteSpace(Project.GithubUrl))
-                        {
-                            <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer"
-                               class="flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800">
-                                <i class="fab fa-github"></i>
-                                Voir sur GitHub
-                            </a>
-                        }
+                            <div>
+                                <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">Statut</h3>
+                                <span class="inline-flex items-center gap-1.5 rounded-lg @StatusCss px-3 py-1.5 text-xs font-semibold">
+                                    <span class="inline-block h-2 w-2 rounded-full @StatusDotCss"></span>
+                                    @StatusLabel
+                                </span>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(Project.GithubUrl))
+                            {
+                                <hr class="border-gray-100" />
+
+                                <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer"
+                                   class="flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800">
+                                    <i class="fab fa-github"></i>
+                                    Voir sur GitHub
+                                </a>
+                            }
+                        </div>
                     </div>
                 </div>
 
