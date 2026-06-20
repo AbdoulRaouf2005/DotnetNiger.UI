@@ -28,7 +28,8 @@
                 class="w-full border-0 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
                 @bind="commentContent"
                 @bind:event="oninput"
-                maxlength="1000" />
+                maxlength="1000"
+                @onkeydown="HandleKeyDown" />
         </div>
         <button
             type="button"
@@ -79,6 +80,14 @@ else
             userInitial = string.IsNullOrWhiteSpace(user.FullName)
                 ? "?"
                 : user.FullName.Trim()[0].ToString().ToUpperInvariant();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await HandleSubmit();
         }
     }
 

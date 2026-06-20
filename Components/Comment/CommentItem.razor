@@ -6,6 +6,7 @@
 
 @inject ICommentService CommentService
 @inject IToastService ToastService
+@inject IUserStateService UserStateService
 
 <div class="flex gap-4">
     <!-- Avatar -->
@@ -35,24 +36,33 @@
                 }
             </div>
 
-            <!-- Action buttons (visible only if current user is the author) -->
+            <!-- Action dropdown (visible only if current user is the author) -->
             @if (Comment.UserId == CurrentUserId && !isEditing && !showDeleteConfirm)
             {
-                <div class="flex items-center gap-2">
+                <div class="relative">
                     <button
                         type="button"
-                        class="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
-                        title="Modifier"
-                        @onclick="ToggleEdit">
-                        <i class="fa-solid fa-edit text-sm"></i>
+                        class="text-gray-400 hover:text-gray-600 px-2 py-1"
+                        @onclick="ToggleActionMenu">
+                        <i class="fa-solid fa-ellipsis-v text-sm"></i>
                     </button>
-                    <button
-                        type="button"
-                        class="text-xs text-red-400 hover:text-red-600 px-2 py-1"
-                        title="Supprimer"
-                        @onclick="ShowDeleteConfirmation">
-                        <i class="fa-solid fa-trash text-sm"></i>
-                    </button>
+                    @if (showActionMenu)
+                    {
+                        <div class="absolute right-0 top-full z-10 mt-1 w-36 rounded-lg border border-gray-200 bg-white shadow-lg" @onclick:stopPropagation>
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                @onclick="ToggleEdit">
+                                <i class="fa-solid fa-edit text-sm"></i> Modifier
+                            </button>
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                                @onclick="ShowDeleteConfirmation">
+                                <i class="fa-solid fa-trash text-sm"></i> Supprimer
+                            </button>
+                        </div>
+                    }
                 </div>
             }
 
@@ -78,7 +88,8 @@
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
                     rows="3"
                     maxlength="1000"
-                    placeholder="Modifiez votre commentaire..."></textarea>
+                    placeholder="Modifiez votre commentaire..."
+                    @onkeydown="HandleEditKeyDown"></textarea>
                 <div class="flex gap-2">
                     <button
                         type="button"
@@ -128,16 +139,25 @@
         <!-- Reply button -->
         @if (!isEditing && !showDeleteConfirm)
         {
-            <button
-                type="button"
-                class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
-                @onclick="ToggleReplyForm">
-                @(showReplyForm ? "Annuler" : "Répondre")
-            </button>
+            if (UserStateService.IsAuthenticated)
+            {
+                <button
+                    type="button"
+                    class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
+                    @onclick="ToggleReplyForm">
+                    @(showReplyForm ? "Annuler" : "Répondre")
+                </button>
+            }
+            else
+            {
+                <a href="/auth/login" class="mt-3 inline-block text-sm font-semibold text-gray-400 hover:text-[#5b4df5]">
+                    Connectez-vous pour répondre
+                </a>
+            }
         }
 
         <!-- Reply form -->
-        @if (showReplyForm && !isEditing && !showDeleteConfirm)
+        @if (showReplyForm && !isEditing && !showDeleteConfirm && UserStateService.IsAuthenticated)
         {
             <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <textarea
@@ -145,7 +165,8 @@
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
                     rows="3"
                     maxlength="1000"
-                    placeholder="Écrivez votre réponse..."></textarea>
+                    placeholder="Écrivez votre réponse..."
+                    @onkeydown="HandleReplyKeyDown"></textarea>
                 <div class="mt-3 flex gap-2">
                     <button
                         type="button"
@@ -205,6 +226,7 @@
     private bool showReplyForm;
     private bool isEditing;
     private bool showDeleteConfirm;
+    private bool showActionMenu;
     private bool deleteAllReplies = true;
     private string replyContent = string.Empty;
     private string editedContent = string.Empty;
@@ -215,6 +237,7 @@
     private void ToggleEdit()
     {
         isEditing = !isEditing;
+        showActionMenu = false;
         if (isEditing)
         {
             editedContent = Comment.Content;
@@ -227,6 +250,17 @@
     {
         showDeleteConfirm = true;
         showReplyForm = false;
+        showActionMenu = false;
+    }
+
+    private void ToggleActionMenu() => showActionMenu = !showActionMenu;
+
+    private async Task HandleReplyKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && (e.CtrlKey || e.MetaKey))
+        {
+            await HandleReplySubmit();
+        }
     }
 
     private async Task HandleReplySubmit()
@@ -272,6 +306,14 @@
         finally
         {
             isSubmittingReply = false;
+        }
+    }
+
+    private async Task HandleEditKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && (e.CtrlKey || e.MetaKey))
+        {
+            await HandleUpdate();
         }
     }
 

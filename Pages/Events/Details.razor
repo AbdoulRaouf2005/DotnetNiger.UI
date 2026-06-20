@@ -356,32 +356,41 @@
             }
 
             @* --- Commentaires --- *@
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <article class="rounded-lg bg-white p-4 sm:p-6 shadow-sm lg:col-span-2">
-                    <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
-                        Commentaires & Feedback
-                    </h2>
+            <div class="rounded-xl bg-white border-t p-4 sm:p-6 border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-gray-900">Commentaires & Feedback</h2>
+                    @if (EventComments.Any())
+                    {
+                        <span class="text-xs sm:text-sm text-gray-500">@EventComments.Count commentaire@(EventComments.Count > 1 ? "s" : "")</span>
+                    }
+                </div>
 
-                    <div class="mt-5">
-                        <CommentForm EventId="CurrentEvent.Id" OnCommentAdded="RefreshComments" />
-                    </div>
+                <div class="mt-5 sm:mt-6">
+                    <CommentForm EventId="CurrentEvent.Id" OnCommentAdded="RefreshComments" />
+                </div>
 
-                    <div class="mt-7">
-                        @if (EventComments.Count == 0)
-                        {
-                            <p class="text-xs sm:text-sm text-gray-500">
-                                Aucun commentaire pour le moment. Soyez le premier à commenter !
-                            </p>
-                        }
-                        else
-                        {
-                            <CommentThread Comments="EventComments"
-                                           OnReplySubmitted="RefreshComments"
-                                           OnCommentUpdated="RefreshComments"
-                                           OnCommentDeleted="RefreshComments" />
-                        }
+                @if (isLoadingComments)
+                {
+                    <div class="mt-6 sm:mt-8 py-10 sm:py-12 text-center text-sm sm:text-base text-gray-600">
+                        Chargement des commentaires...
                     </div>
-                </article>
+                }
+                else if (EventComments.Any())
+                {
+                    <div class="mt-6 sm:mt-8">
+                        <CommentThread Comments="EventComments"
+                                       OnReplySubmitted="RefreshComments"
+                                       OnCommentUpdated="RefreshComments"
+                                       OnCommentDeleted="RefreshComments" />
+                    </div>
+                }
+                else
+                {
+                    <div class="mt-6 sm:mt-8 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 sm:p-8 text-center">
+                        <i class="fa-solid fa-comments text-2xl sm:text-3xl text-gray-300 mb-3 sm:mb-4 block"></i>
+                        <p class="text-xs sm:text-sm text-gray-500">Aucun commentaire pour le moment. Soyez le premier à commenter !</p>
+                    </div>
+                }
             </div>
         }
     </div>
@@ -395,6 +404,7 @@
     private EventDto? CurrentEvent { get; set; }
     private List<CommentResponse> EventComments { get; set; } = new();
     private bool IsLoading { get; set; }
+    private bool isLoadingComments;
     private bool IsShared { get; set; }
     private string? LoadError { get; set; }
     private string CurrentPageUrl { get; set; } = "/evenements";
@@ -493,7 +503,9 @@
     {
         if (CurrentEvent is null) return;
 
+        isLoadingComments = true;
         EventComments = await CommentService.GetCommentsByEventIdAsync(CurrentEvent.Id);
+        isLoadingComments = false;
     }
 
     protected override async Task OnParametersSetAsync()
