@@ -7,124 +7,21 @@
 @using DotnetNiger.UI.Components.Admin.Shared
 
 <div class="p-6 bg-[#F4F2F2]">
-<div class="flex justify-between items-center mb-6">
-        <AdminBreadcrumb />
-        <button @onclick="OpenDrawer" class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-plus text-xl"></i>
-            <span class="Button">Nouveau</span>
-        </button>
-    </div>
-
-    @if (isDrawerOpen)
+    @if (isLoading)
     {
-        <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseDrawer"></div>
-        <div class="fixed top-0 right-0 h-screen w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-2xl z-50 transform transition-transform duration-300">
-            <div class="flex flex-col h-full">
-                <div class="flex justify-between items-center px-6 py-4 border-b">
-                    <h2 class="text-xl font-semibold">@(editingId.HasValue ? "Modifier la ressource" : "Nouvelle ressource")</h2>
-                    <button @onclick="CloseDrawer" class="text-gray-500 hover:text-black text-2xl">&times;</button>
-                </div>
-                <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-                    @if (!string.IsNullOrEmpty(drawerError))
-                    {
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">@drawerError</div>
-                    }
-                    <EditForm Model="resourceRequest" OnValidSubmit="SaveResource">
-                        <DataAnnotationsValidator />
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Titre *</label>
-                            <InputText @bind-Value="resourceRequest.Title"
-                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                       placeholder="Titre de la ressource" />
-                            <ValidationMessage For="@(() => resourceRequest.Title)" class="text-xs text-red-500 mt-1" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Description *</label>
-                            <InputTextArea @bind-Value="resourceRequest.Description" rows="3"
-                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                           placeholder="Description de la ressource" />
-                            <ValidationMessage For="@(() => resourceRequest.Description)" class="text-xs text-red-500 mt-1" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">URL *</label>
-                            <InputText @bind-Value="resourceRequest.Url"
-                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                       placeholder="https://..." />
-                            <ValidationMessage For="@(() => resourceRequest.Url)" class="text-xs text-red-500 mt-1" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Type *</label>
-                            <InputSelect @bind-Value="resourceRequest.ResourceType"
-                                         class="w-full border rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selectionner un type</option>
-                                <option value="Documentation">Documentation</option>
-                                <option value="Tutoriel">Tutoriel</option>
-                                <option value="Article">Article</option>
-                                <option value="GitHub">GitHub</option>
-                                <option value="Cours">Cours</option>
-                                <option value="Livre">Livre</option>
-                                <option value="Outil">Outil</option>
-                            </InputSelect>
-                            <ValidationMessage For="@(() => resourceRequest.ResourceType)" class="text-xs text-red-500 mt-1" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Niveau *</label>
-                            <InputSelect @bind-Value="resourceRequest.Level"
-                                         class="w-full border rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Selectionner un niveau</option>
-                                <option value="Débutant">Débutant</option>
-                                <option value="Intermediaire">Intermediaire</option>
-                                <option value="Avancé">Avancé</option>
-                                <option value="Tous niveaux">Tous niveaux</option>
-                            </InputSelect>
-                            <ValidationMessage For="@(() => resourceRequest.Level)" class="text-xs text-red-500 mt-1" />
-                        </div>
-                        <div class="border-t pt-4 flex justify-end gap-3 bg-white">
-                            <button type="button" @onclick="CloseDrawer"
-                                    class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
-                                Annuler
-                            </button>
-                            <button type="submit"
-                                    class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
-                                @(editingId.HasValue ? "Mettre à jour" : "Créer")
-                            </button>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
+        <div class="flex justify-between items-center mb-6">
+            <Skeleton Type="SkeletonType.Title" Class="w-48" />
+            <Skeleton Type="SkeletonType.Button" Width="140px" />
         </div>
-    }
 
-    <div class="flex gap-4 mb-6">
-        <div class="flex-1 relative">
-            <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
-            <input type="text" placeholder="Rechercher une ressource..."
-                   @bind="searchQuery" @bind:event="oninput"
-                   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none" />
+        <div class="flex gap-4 mb-6">
+            <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg flex-1" />
+            <Skeleton Type="SkeletonType.Custom" Class="h-12 w-40 rounded-lg" />
+            <Skeleton Type="SkeletonType.Custom" Class="h-12 w-40 rounded-lg" />
         </div>
-        <select @bind="selectedType" class="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none">
-            <option value="">Type</option>
-            <option value="Documentation">Documentation</option>
-            <option value="Tutoriel">Tutoriel</option>
-            <option value="Article">Article</option>
-            <option value="GitHub">GitHub</option>
-            <option value="Cours">Cours</option>
-            <option value="Livre">Livre</option>
-            <option value="Outil">Outil</option>
-        </select>
-        <select @bind="selectedLevel" class="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none">
-            <option value="">Niveau</option>
-            <option value="Débutant">Débutant</option>
-            <option value="Intermediaire">Intermediaire</option>
-            <option value="Avancé">Avancé</option>
-            <option value="Tous niveaux">Tous niveaux</option>
-        </select>
-    </div>
 
-    <ViewToggle @bind-IsListView="isListView" />
+        <Skeleton Type="SkeletonType.Custom" Class="h-10 w-32 rounded-lg mb-6" />
 
-    @if (isListView)
-    {
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <table class="w-full">
                 <thead class="bg-gray-50 border-b">
@@ -138,75 +35,229 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var resource in pagedResources)
+                    @for (int i = 0; i < 6; i++)
                     {
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm font-medium">@resource.Title</td>
-                            <td class="px-6 py-4 text-sm">
-                                <span class="rounded-full bg-blue-100 text-blue-800 px-2 py-1 text-xs">@resource.ResourceType</span>
-                            </td>
-                            <td class="px-6 py-4 text-sm">@resource.Level</td>
-                            <td class="px-6 py-4 text-sm">
-                                <a href="@resource.Url" target="_blank" class="text-blue-600 hover:underline truncate max-w-[160px] block">
-                                    @(resource.Url.Length > 40 ? resource.Url[..40] + "..." : resource.Url)
-                                </a>
-                            </td>
-                            <td class="px-6 py-4 text-sm">@resource.ViewCount</td>
-                            <td class="px-6 py-4 text-sm">
-                                <AdminActionDropdown ItemId="resource.Id"
-                                                     EditLabel="Modifier"
-                                                     DeleteLabel="Supprimer"
-                                                     OnEdit="EditResourceById"
-                                                     OnDelete="DeleteResource" />
-                            </td>
+                        <tr class="border-b">
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-36" /></td>
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Badge" Width="100px" /></td>
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" /></td>
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40" /></td>
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-12" /></td>
+                            <td class="px-6 py-4"><Skeleton Type="SkeletonType.Button" Width="32px" Class="h-8" /></td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+
+        <div class="mt-6 flex justify-center">
+            <Skeleton Type="SkeletonType.Custom" Class="h-10 w-64 rounded-lg" />
+        </div>
     }
     else
     {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach (var resource in pagedResources)
-            {
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <div class="relative h-32 bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                        <div class="absolute top-3 left-3">
-                            <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">@resource.Level</span>
-                        </div>
-                        <div class="absolute top-3 right-3">
-                            <AdminActionDropdown ItemId="resource.Id"
-                                                 EditLabel="Modifier"
-                                                 DeleteLabel="Supprimer"
-                                                 OnEdit="EditResourceById"
-                                                 OnDelete="DeleteResource" />
-                        </div>
-                        <i class="fas fa-file text-white text-5xl"></i>
+        <div class="flex justify-between items-center mb-6">
+            <AdminBreadcrumb />
+            <button @onclick="OpenDrawer" class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2">
+                <i class="fas fa-plus text-xl"></i>
+                <span class="Button">Nouveau</span>
+            </button>
+        </div>
+
+        @if (isDrawerOpen)
+        {
+            <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseDrawer"></div>
+            <div class="fixed top-0 right-0 h-screen w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-2xl z-50 transform transition-transform duration-300">
+                <div class="flex flex-col h-full">
+                    <div class="flex justify-between items-center px-6 py-4 border-b">
+                        <h2 class="text-xl font-semibold">@(editingId.HasValue ? "Modifier la ressource" : "Nouvelle ressource")</h2>
+                        <button @onclick="CloseDrawer" class="text-gray-500 hover:text-black text-2xl">&times;</button>
                     </div>
-                    <div class="p-4">
-                        <h3 class="text-base font-bold mb-1 line-clamp-1">@resource.Title</h3>
-                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">@resource.Description</p>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">@resource.ResourceType</span>
-                            <span class="text-gray-500 text-xs"><i class="fas fa-eye mr-1"></i>@resource.ViewCount</span>
-                        </div>
-                        <a href="@resource.Url" target="_blank"
-                           class="mt-3 block text-center text-sm py-1.5 rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 transition">
-                            Voir la ressource
-                        </a>
+                    <div class="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+                        @if (!string.IsNullOrEmpty(drawerError))
+                        {
+                            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">@drawerError</div>
+                        }
+                        <EditForm Model="resourceRequest" OnValidSubmit="SaveResource">
+                            <DataAnnotationsValidator />
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Titre *</label>
+                                <InputText @bind-Value="resourceRequest.Title"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                           placeholder="Titre de la ressource" />
+                                <ValidationMessage For="@(() => resourceRequest.Title)" class="text-xs text-red-500 mt-1" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Description *</label>
+                                <InputTextArea @bind-Value="resourceRequest.Description" rows="3"
+                                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                               placeholder="Description de la ressource" />
+                                <ValidationMessage For="@(() => resourceRequest.Description)" class="text-xs text-red-500 mt-1" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">URL *</label>
+                                <InputText @bind-Value="resourceRequest.Url"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                           placeholder="https://..." />
+                                <ValidationMessage For="@(() => resourceRequest.Url)" class="text-xs text-red-500 mt-1" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Type *</label>
+                                <InputSelect @bind-Value="resourceRequest.ResourceType"
+                                             class="w-full border rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Selectionner un type</option>
+                                    <option value="Documentation">Documentation</option>
+                                    <option value="Tutoriel">Tutoriel</option>
+                                    <option value="Article">Article</option>
+                                    <option value="GitHub">GitHub</option>
+                                    <option value="Cours">Cours</option>
+                                    <option value="Livre">Livre</option>
+                                    <option value="Outil">Outil</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => resourceRequest.ResourceType)" class="text-xs text-red-500 mt-1" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Niveau *</label>
+                                <InputSelect @bind-Value="resourceRequest.Level"
+                                             class="w-full border rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Selectionner un niveau</option>
+                                    <option value="Débutant">Débutant</option>
+                                    <option value="Intermediaire">Intermediaire</option>
+                                    <option value="Avancé">Avancé</option>
+                                    <option value="Tous niveaux">Tous niveaux</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => resourceRequest.Level)" class="text-xs text-red-500 mt-1" />
+                            </div>
+                            <div class="border-t pt-4 flex justify-end gap-3 bg-white">
+                                <button type="button" @onclick="CloseDrawer"
+                                        class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
+                                    Annuler
+                                </button>
+                                <button type="submit"
+                                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                                    @(editingId.HasValue ? "Mettre à jour" : "Créer")
+                                </button>
+                            </div>
+                        </EditForm>
                     </div>
                 </div>
-            }
+            </div>
+        }
+
+        <div class="flex gap-4 mb-6">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                <input type="text" placeholder="Rechercher une ressource..."
+                       @bind="searchQuery" @bind:event="oninput"
+                       class="w-full bg-white pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none" />
+            </div>
+            <select @bind="selectedType" class="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none">
+                <option value="">Type</option>
+                <option value="Documentation">Documentation</option>
+                <option value="Tutoriel">Tutoriel</option>
+                <option value="Article">Article</option>
+                <option value="GitHub">GitHub</option>
+                <option value="Cours">Cours</option>
+                <option value="Livre">Livre</option>
+                <option value="Outil">Outil</option>
+            </select>
+            <select @bind="selectedLevel" class="bg-white px-4 py-3 border border-gray-300 rounded-lg focus:outline-none">
+                <option value="">Niveau</option>
+                <option value="Débutant">Débutant</option>
+                <option value="Intermediaire">Intermediaire</option>
+                <option value="Avancé">Avancé</option>
+                <option value="Tous niveaux">Tous niveaux</option>
+            </select>
+        </div>
+
+        <ViewToggle @bind-IsListView="isListView" />
+
+        @if (isListView)
+        {
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Titre</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Niveau</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">URL</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Vues</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var resource in pagedResources)
+                        {
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm font-medium">@resource.Title</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <span class="rounded-full bg-blue-100 text-blue-800 px-2 py-1 text-xs">@resource.ResourceType</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">@resource.Level</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <a href="@resource.Url" target="_blank" class="text-blue-600 hover:underline truncate max-w-[160px] block">
+                                        @(resource.Url.Length > 40 ? resource.Url[..40] + "..." : resource.Url)
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 text-sm">@resource.ViewCount</td>
+                                <td class="px-6 py-4 text-sm">
+                                    <AdminActionDropdown ItemId="resource.Id"
+                                                         EditLabel="Modifier"
+                                                         DeleteLabel="Supprimer"
+                                                         OnEdit="EditResourceById"
+                                                         OnDelete="DeleteResource" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var resource in pagedResources)
+                {
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                        <div class="relative h-32 bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                            <div class="absolute top-3 left-3">
+                                <span class="bg-white bg-opacity-20 text-white text-xs px-2 py-1 rounded-full">@resource.Level</span>
+                            </div>
+                            <div class="absolute top-3 right-3">
+                                <AdminActionDropdown ItemId="resource.Id"
+                                                     EditLabel="Modifier"
+                                                     DeleteLabel="Supprimer"
+                                                     OnEdit="EditResourceById"
+                                                     OnDelete="DeleteResource" />
+                            </div>
+                            <i class="fas fa-file text-white text-5xl"></i>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-base font-bold mb-1 line-clamp-1">@resource.Title</h3>
+                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">@resource.Description</p>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">@resource.ResourceType</span>
+                                <span class="text-gray-500 text-xs"><i class="fas fa-eye mr-1"></i>@resource.ViewCount</span>
+                            </div>
+                            <a href="@resource.Url" target="_blank"
+                               class="mt-3 block text-center text-sm py-1.5 rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 transition">
+                                Voir la ressource
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="mt-6">
+            <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
         </div>
     }
-
-    <div class="mt-6">
-        <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
-    </div>
 </div>
 
 @code {
+    private bool isLoading = true;
     private bool isListView = true;
     private bool isDrawerOpen;
     private string searchQueryValue = string.Empty;
@@ -272,7 +323,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         allResources = await ResourceService.GetAllResourcesAsync();
+        isLoading = false;
     }
 
     private void OpenDrawer()

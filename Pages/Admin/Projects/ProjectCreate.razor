@@ -7,19 +7,68 @@
 
 <div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
     <div class="mx-auto max-w-4xl">
-        <div class="mb-6 flex items-center justify-between gap-4">
-            <AdminBreadcrumb />
-            <button @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95">
-                <i class="fas fa-arrow-left"></i>
-                <span>Retour</span>
-            </button>
-        </div>
+        @if (isLoading)
+        {
+            <div class="mb-6 flex items-center justify-between gap-4">
+                <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-48" />
+                <Skeleton Type="SkeletonType.Button" Width="100px" />
+            </div>
+            <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
+                <Skeleton Type="SkeletonType.Title" Class="w-48 mb-2" />
+                <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-72 mb-8" />
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-28 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <Skeleton Type="SkeletonType.Custom" Class="h-5 w-5 rounded" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-5 w-5 rounded" />
+                    </div>
+                    <div class="flex gap-4">
+                        <Skeleton Type="SkeletonType.Button" Width="160px" />
+                        <Skeleton Type="SkeletonType.Button" Width="120px" />
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="mb-6 flex items-center justify-between gap-4">
+                <AdminBreadcrumb />
+                <button @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Retour</span>
+                </button>
+            </div>
 
-        <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
-            <h1 class="text-2xl font-bold text-[#111827]">Nouveau projet</h1>
-            <p class="mt-1 text-sm text-[#6b7280]">Ajoutez un projet à la vitrine communautaire.</p>
+            <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
+                <h1 class="text-2xl font-bold text-[#111827]">Nouveau projet</h1>
+                <p class="mt-1 text-sm text-[#6b7280]">Ajoutez un projet à la vitrine communautaire.</p>
 
-            <EditForm Model="@projectRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
+                <EditForm Model="@projectRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
                 <DataAnnotationsValidator />
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -98,10 +147,12 @@
                 </div>
             </EditForm>
         </div>
+        }
     </div>
 </div>
 
 @code {
+    private bool isLoading = true;
     private CreateProjectRequest projectRequest = new()
     {
         Status = "active",

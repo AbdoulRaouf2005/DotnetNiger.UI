@@ -14,6 +14,8 @@
           <AdminBreadcrumb />
     </div>
 
+    @if (!isLoading)
+    {
     <div class="rounded-lg bg-white p-6 shadow">
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
@@ -63,11 +65,42 @@
             </button>
         </div>
     </div>
+    }
+    else
+    {
+        <div class="rounded-lg bg-white p-6 shadow space-y-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16 mb-2" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-12 w-full rounded-lg" />
+                </div>
+                <div>
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24 mb-2" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-12 w-full rounded-lg" />
+                </div>
+                <div class="md:col-span-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40 mb-2" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-40 w-full rounded-lg" />
+                </div>
+            </div>
+
+            <div>
+                <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16 mb-2" />
+                <Skeleton Type="SkeletonType.Custom" Class="h-64 w-full rounded-lg" />
+            </div>
+
+            <div class="flex gap-4">
+                <Skeleton Type="SkeletonType.Button" Width="120px" />
+                <Skeleton Type="SkeletonType.Button" Width="120px" />
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     [Parameter] public Guid Id { get; set; }
 
+    private bool isLoading = true;
     private UpdatePostRequest postRequest = new();
     private string errorMessage = string.Empty;
 
@@ -85,6 +118,7 @@
         }
 
         postRequest = MapToUpdateRequest(post);
+        isLoading = false;
     }
     private void HandleImageUploaded(string imageUrl)
     {

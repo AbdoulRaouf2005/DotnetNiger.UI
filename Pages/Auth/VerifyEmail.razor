@@ -15,7 +15,12 @@
 
         @if (isLoading)
         {
-            <div class="text-center text-gray-500 py-6">Traitement...</div>
+            <div class="text-center py-6 space-y-4">
+                <Skeleton Type="SkeletonType.Custom" Class="h-16 w-16 rounded-full mx-auto" />
+                <Skeleton Type="SkeletonType.Title" Class="w-3/4 mx-auto" />
+                <Skeleton Type="SkeletonType.Text" Lines="2" Class="w-1/2 mx-auto" />
+                <Skeleton Type="SkeletonType.Button" Class="mx-auto" Width="200px" />
+            </div>
         }
         else if (isVerified)
         {

@@ -14,10 +14,47 @@
 
     @if (loading)
     {
-        <div class="flex items-center justify-center py-20">
-            <div class="flex items-center gap-3 text-slate-500">
-                <i class="fa-solid fa-spinner fa-spin text-xl"></i>
-                <span class="text-sm">Chargement du profil...</span>
+        <div class="animate-pulse space-y-6">
+            <div class="mb-6">
+                <div class="mb-4 h-4 w-24 rounded bg-gray-200"></div>
+                <div class="h-8 w-48 rounded bg-gray-200"></div>
+            </div>
+            <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
+                <div class="space-y-6">
+                    <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                        <div class="h-48 rounded-t-lg bg-gray-200"></div>
+                        <div class="p-8">
+                            <div class="-mt-16 mb-5 flex justify-center">
+                                <Skeleton Type="SkeletonType.Avatar" Size="128px" Class="border-4 border-white" />
+                            </div>
+                            <div class="space-y-2 text-center">
+                                <Skeleton Type="SkeletonType.Title" Class="w-1/2 mx-auto" />
+                                <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/3 mx-auto" />
+                            </div>
+                            <div class="mt-7 space-y-3">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    <Skeleton Type="SkeletonType.Text" Lines="1" />
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                        <Skeleton Type="SkeletonType.Title" Class="w-1/4" />
+                        <Skeleton Type="SkeletonType.Text" Lines="4" Class="mt-4" />
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                        <Skeleton Type="SkeletonType.Title" Class="w-1/3" />
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            @for (int i = 0; i < 4; i++)
+                            {
+                                <Skeleton Type="SkeletonType.Badge" Width="100px" />
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     }

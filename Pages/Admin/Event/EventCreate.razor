@@ -13,19 +13,79 @@
 @inject IUserService UserService
 
 <div class="p-6 bg-[#F4F2F2]">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-         <AdminBreadcrumb />
-        <button @onclick="GoBack" class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2">
-            <i class="fas fa-arrow-left text-2xl"></i>
-            <span class="Button">Retour</span>
-            
-        </button>
-    </div>
+    @if (isLoading)
+    {
+        <div class="flex justify-between items-center mb-6">
+            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-48" />
+            <Skeleton Type="SkeletonType.Button" Width="100px" />
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <Skeleton Type="SkeletonType.Title" Class="w-64 mb-6" />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-32 rounded-lg w-full" />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <Skeleton Type="SkeletonType.Custom" Class="h-20 rounded-lg w-full" />
+                <Skeleton Type="SkeletonType.Custom" Class="h-20 rounded-lg w-full" />
+                <Skeleton Type="SkeletonType.Custom" Class="h-20 rounded-lg w-full" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-10 rounded-lg w-full" />
+                </div>
+            </div>
+            <div class="mb-6 space-y-2">
+                <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                <Skeleton Type="SkeletonType.Custom" Class="h-48 rounded-lg w-full" />
+            </div>
+            <div class="flex gap-4">
+                <Skeleton Type="SkeletonType.Button" Width="160px" />
+                <Skeleton Type="SkeletonType.Button" Width="120px" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <AdminBreadcrumb />
+            <button @onclick="GoBack" class="bg-red-500 hover:bg-red-600 text-white min-h-12 px-4 py-2 rounded-lg flex items-center gap-2">
+                <i class="fas fa-arrow-left text-2xl"></i>
+                <span class="Button">Retour</span>
+            </button>
+        </div>
 
-    <!-- Form -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <EditForm Model="@eventRequest" OnValidSubmit="HandleSubmit">
+        <!-- Form -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <EditForm Model="@eventRequest" OnValidSubmit="HandleSubmit">
             <DataAnnotationsValidator />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -298,9 +358,11 @@
             </div>
         </EditForm>
     </div>
+    }
 </div>
 
 @code {
+    private bool isLoading = true;
     private CreateEventRequest eventRequest = new()
     {
         StartDate = DateTime.Now,
@@ -391,6 +453,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        isLoading = true;
         // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
         if (UserStateService.CurrentUser is null)
             await UserStateService.LoadUserFromStorageAsync();
@@ -407,6 +470,7 @@
         IsCurrentUserAdmin = UserStateService.IsAdmin;
 
         allMembers = await UserService.GetUsersAsync();
+        isLoading = false;
     }
 
     private void GoBack()

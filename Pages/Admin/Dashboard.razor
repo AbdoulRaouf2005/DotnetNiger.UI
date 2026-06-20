@@ -12,6 +12,8 @@
 	<div class="mx-auto max-w-7xl">
 		<AdminBreadcrumb />
 
+		@if (!isLoading)
+		{
 		<section class="mt-2 flex flex-col gap-3">
 			<div class="inline-flex items-center gap-2 text-sm font-semibold text-[#5b4df5]">
 				<span class="h-2.5 w-2.5 rounded-full bg-[#5b4df5]"></span>
@@ -345,6 +347,66 @@
 				</div>
 			</article>
 		</section>
+		}
+		else
+		{
+			<section class="mt-2 flex flex-col gap-3">
+				<div class="inline-flex items-center gap-2 text-sm font-semibold text-[#5b4df5]">
+					<span class="h-2.5 w-2.5 rounded-full bg-[#5b4df5]"></span>
+					Administration
+				</div>
+				<div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+					<div>
+						<Skeleton Type="SkeletonType.Title" Class="h-8 w-64" />
+						<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-96 mt-2" />
+					</div>
+					<Skeleton Type="SkeletonType.Custom" Class="h-24 w-80 rounded-[18px]" />
+				</div>
+			</section>
+
+			<section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+				@for (int i = 0; i < 4; i++)
+				{
+					<article class="overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+						<div class="flex min-h-[150px] flex-col items-center justify-center gap-3 px-6 py-7 text-center">
+							<Skeleton Type="SkeletonType.Custom" Class="h-12 w-12 rounded-2xl" />
+							<Skeleton Type="SkeletonType.Title" Class="h-8 w-16" />
+							<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+						</div>
+						<Skeleton Type="SkeletonType.Custom" Class="h-11 w-full rounded-none" />
+					</article>
+				}
+			</section>
+
+			<section class="mt-8 grid gap-6 xl:grid-cols-2">
+				@for (int i = 0; i < 4; i++)
+				{
+					<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+						<div class="flex items-center gap-3 mb-5">
+							<Skeleton Type="SkeletonType.Custom" Class="h-11 w-11 rounded-2xl" />
+							<div class="flex-1">
+								<Skeleton Type="SkeletonType.Title" Class="h-5 w-48" />
+								<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-64 mt-1" />
+							</div>
+							<Skeleton Type="SkeletonType.Badge" Width="32px" Class="h-6" />
+						</div>
+						<div class="space-y-3">
+							@for (int j = 0; j < 5; j++)
+							{
+								<div class="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
+									<Skeleton Type="SkeletonType.Custom" Class="h-11 w-11 rounded-2xl flex-shrink-0" />
+									<div class="flex-1 min-w-0">
+										<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-3/4" />
+										<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2 mt-1" />
+									</div>
+									<Skeleton Type="SkeletonType.Custom" Class="h-8 w-20 rounded-lg" />
+								</div>
+							}
+						</div>
+					</article>
+				}
+			</section>
+		}
 	</div>
 </div>
 
@@ -367,6 +429,7 @@
 	private List<DashboardItem> RecentEvents { get; set; } = [];
 	private UserDto? CurrentProfile { get; set; }
 	private UserDto? CurrentUser => UserStateService.CurrentUser;
+	private bool isLoading = true;
 	private bool IsCurrentUserLoaded { get; set; }
 	private bool IsCurrentUserActive => CurrentUser?.IsActive ?? false;
 	private bool IsCurrentUserAdmin => UserStateService.IsAdmin;
@@ -490,6 +553,7 @@
 			RecentResources = [];
 			RecentEvents = [];
 		}
+		isLoading = false;
 	}
 
 	private static string GetPublishLabel(DateTime? publishedAt)

@@ -51,7 +51,10 @@
 			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				@if (IsLoading)
 				{
-					<p class="col-span-full text-center text-xs sm:text-sm md:text-base text-secondary/70">Chargement des articles...</p>
+					@for (int i = 0; i < 8; i++)
+					{
+						<SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" Class="rounded-lg" />
+					}
 				}
 				else if (!string.IsNullOrWhiteSpace(LoadError))
 				{

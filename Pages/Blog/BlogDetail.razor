@@ -29,7 +29,50 @@
 	<div class="mx-auto w-full max-w-6xl">
 		@if (isLoading)
 		{
-			<div class="py-20 text-center text-sm sm:text-base text-gray-600">Chargement...</div>
+			<div class="lg:grid lg:grid-cols-3 lg:gap-6">
+				<div class="lg:col-span-2 space-y-6 sm:space-y-7">
+					<div class="flex flex-wrap items-center gap-2">
+						<Skeleton Type="SkeletonType.Badge" Width="100px" />
+						<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" />
+					</div>
+					<div class="space-y-3">
+						<Skeleton Type="SkeletonType.Title" Class="w-full" />
+						<Skeleton Type="SkeletonType.Title" Class="w-3/4" />
+					</div>
+					<div class="flex items-center gap-3">
+						<Skeleton Type="SkeletonType.Avatar" Size="44px" Class="h-11 w-11" />
+						<div class="space-y-1">
+							<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40" />
+							<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" />
+						</div>
+					</div>
+					<Skeleton Type="SkeletonType.Custom" Class="h-56 sm:h-[330px] w-full rounded-3xl" />
+					<div class="space-y-3">
+						<Skeleton Type="SkeletonType.Text" Lines="8" />
+					</div>
+				</div>
+				<div class="hidden lg:block lg:col-span-1 space-y-4">
+					<div class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
+						<Skeleton Type="SkeletonType.Title" Class="w-24" />
+						<Skeleton Type="SkeletonType.Text" Lines="3" Class="mt-2" />
+					</div>
+					<div class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
+						<Skeleton Type="SkeletonType.Badge" Width="80px" />
+						<Skeleton Type="SkeletonType.Title" Class="w-full mt-2" />
+						<div class="mt-4 space-y-3">
+							@for (int i = 0; i < 3; i++)
+							{
+								<div class="flex gap-3">
+									<Skeleton Type="SkeletonType.Custom" Class="w-20 h-14 rounded-lg" />
+									<div class="flex-1 space-y-2">
+										<Skeleton Type="SkeletonType.Text" Lines="2" />
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
 		}
 		else if (post is null)
 		{
@@ -148,8 +191,21 @@
 
 							@if (isLoadingComments)
 							{
-								<div class="mt-6 sm:mt-8 py-10 sm:py-12 text-center text-sm sm:text-base text-gray-600">
-									Chargement des commentaires...
+								<div class="mt-6 sm:mt-8 space-y-4">
+									@for (int i = 0; i < 3; i++)
+									{
+										<div class="flex gap-3 rounded-lg border border-gray-100 bg-white p-4">
+											<Skeleton Type="SkeletonType.Avatar" Size="40px" Class="h-10 w-10" />
+											<div class="flex-1 space-y-2">
+												<div class="flex items-center gap-2">
+													<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" />
+													<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+												</div>
+												<Skeleton Type="SkeletonType.Text" Lines="3" />
+												<Skeleton Type="SkeletonType.Button" Width="80px" Class="h-8" />
+											</div>
+										</div>
+									}
 								</div>
 							}
 							else if (comments.Any())

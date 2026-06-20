@@ -78,7 +78,7 @@
 
             <div>
                   <div class="border-t border-slate-700 p-4">
-                        <NavLink href="/" class="flex items-center gap-2 text-gray-300 transition-colors hover:text-white @(IsCollapsed ? "justify-center" : "")">
+                        <NavLink href="/" class="@GetBackLinkClass()">
                               <i class="fas fa-arrow-left mr-3"></i>
                               @if (!IsCollapsed)
                               {
@@ -167,6 +167,8 @@
 
       [Parameter]
       public bool IsOpen { get; set; }
+
+	private string GetBackLinkClass() => $"flex items-center gap-2 text-gray-300 transition-colors hover:text-white {(IsCollapsed ? "justify-center" : "")}";
 
 	private string DesktopSidebarWidthClass => IsCollapsed ? "w-20" : "w-64"; 
 

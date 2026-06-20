@@ -5,8 +5,19 @@
 
 @if (isLoading)
 {
-    <div class="min-h-[60vh] flex items-center justify-center">
-        <div class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-secondary border-r-transparent"></div>
+    <div class="min-h-[60vh] bg-white">
+        <section class="bg-purple-50 py-8 sm:py-12 md:py-16">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <Skeleton Type="SkeletonType.Title" Class="w-1/2 mx-auto" />
+                <Skeleton Type="SkeletonType.Text" Lines="2" Class="max-w-xl mx-auto mt-4" />
+                <div class="mt-8 sm:mt-10 grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <SkeletonCard HasImage="true" Class="rounded-lg" />
+                    }
+                </div>
+            </div>
+        </section>
     </div>
 }
 else

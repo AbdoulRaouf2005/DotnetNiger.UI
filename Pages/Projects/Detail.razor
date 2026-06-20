@@ -9,8 +9,31 @@
     <div class="mx-auto w-full max-w-6xl">
         @if (isLoading)
         {
-            <div class="rounded-lg bg-white p-6 text-sm text-gray-600 shadow-sm">
-                Chargement du projet...
+            <nav class="mb-6">
+                <div class="h-4 w-48 rounded bg-gray-200 animate-pulse"></div>
+            </nav>
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div class="lg:col-span-2 space-y-6">
+                    <Skeleton Type="SkeletonType.Image" Class="h-64 w-full" />
+                    <div class="rounded-lg bg-white p-6 shadow-sm">
+                        <Skeleton Type="SkeletonType.Title" Class="w-3/4" />
+                        <div class="mt-4 space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="8" />
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1">
+                    <div class="rounded-lg bg-white p-6 shadow-sm space-y-5">
+                        <Skeleton Type="SkeletonType.Badge" Class="w-24 mb-3" />
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="2" />
+                        </div>
+                        <div class="h-px bg-gray-100"></div>
+                        <Skeleton Type="SkeletonType.Badge" Class="w-20" />
+                        <div class="h-px bg-gray-100"></div>
+                        <Skeleton Type="SkeletonType.Button" Class="w-full" />
+                    </div>
+                </div>
             </div>
         }
         else if (Project is null)

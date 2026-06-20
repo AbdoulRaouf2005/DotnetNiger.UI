@@ -18,9 +18,10 @@
 		<section class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			@if (isLoading)
 			{
-				<div class="col-span-full text-center py-8 sm:py-10">
-					<p class="text-xs sm:text-sm md:text-base text-gray-600">Chargement des événements...</p>
-				</div>
+				@for (int i = 0; i < 6; i++)
+				{
+					<SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" Class="rounded-xl" />
+				}
 			}
 			else if (upcomingEvents?.Count > 0)
 			{

@@ -149,7 +149,12 @@
         <!-- Events Grid -->
         @if (IsLoading)
         {
-            <div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des événements...</div>
+            <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" />
+                <SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" />
+                <SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" />
+                <SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" />
+            </div>
         }
         else if (!string.IsNullOrWhiteSpace(LoadError))
         {
@@ -191,7 +196,11 @@
         <!-- Resources Grid -->
         @if (IsLoadingResources)
         {
-            <div class="rounded-lg bg-white p-4 sm:p-6 text-xs sm:text-sm text-gray-600 shadow-sm">Chargement des ressources...</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <SkeletonCard HasImage="true" HasBadge="true" />
+                <SkeletonCard HasImage="true" HasBadge="true" />
+                <SkeletonCard HasImage="true" HasBadge="true" />
+            </div>
         }
         else if (!string.IsNullOrWhiteSpace(ResourcesError))
         {
