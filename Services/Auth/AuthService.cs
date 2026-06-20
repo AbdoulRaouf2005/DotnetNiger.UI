@@ -57,6 +57,8 @@ public class AuthService : IAuthService
             {
                 if (authDto.Token is not null)
                     await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+                if (authDto.User is not null)
+                    await _userStateService.SetUserAsync(authDto.User);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 
@@ -142,6 +144,8 @@ public class AuthService : IAuthService
             {
                 if (authDto.Token is not null)
                     await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+                if (authDto.User is not null)
+                    await _userStateService.SetUserAsync(authDto.User);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 

@@ -1,6 +1,7 @@
 ﻿@page "/auth/external-callback"
 @using Microsoft.AspNetCore.Components
 @inject IAuthService AuthService
+@inject IUserStateService UserStateService
 @inject NavigationManager Navigation
 
 <PageTitle>Connexion en cours - .NET Niger</PageTitle>
@@ -52,6 +53,8 @@
 
         if (response.Success && response.Data != null)
         {
+            if (response.Data.User is not null)
+                await UserStateService.SetUserAsync(response.Data.User);
             Navigation.NavigateTo("/");
         }
         else
