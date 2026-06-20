@@ -59,21 +59,26 @@
     {
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Token))
         {
-            isLoading = false;
             errorMessage = "Le lien de vérification est incomplet.";
+            isLoading = false;
             return;
         }
 
-        isVerified = await Auth.VerifyEmailAsync(new VerifyEmailRequest
+        try
         {
-            Email = Email,
-            Code = Token
-        });
+            isVerified = await Auth.VerifyEmailAsync(new VerifyEmailRequest
+            {
+                Email = Email,
+                Code = Token
+            });
 
-        if (!isVerified)
-            errorMessage = "La vérification a échoué. Vous pouvez demander un nouveau lien.";
-
-        isLoading = false;
+            if (!isVerified)
+                errorMessage = "La vérification a échoué. Vous pouvez demander un nouveau lien.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task ResendVerification()

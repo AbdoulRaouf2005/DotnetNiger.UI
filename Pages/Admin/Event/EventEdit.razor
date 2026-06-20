@@ -405,27 +405,33 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        allMembers = await UserService.GetUsersAsync();
-
-        var existingEvent = await EventService.GetEventByIdAsync(Id);
-        if (existingEvent is null)
+        try
         {
-            errorMessage = "é‰vénement introuvable.";
-            return;
+            allMembers = await UserService.GetUsersAsync();
+
+            var existingEvent = await EventService.GetEventByIdAsync(Id);
+            if (existingEvent is null)
+            {
+                errorMessage = "é‰vénement introuvable.";
+                return;
+            }
+
+            organizerName = existingEvent.OrganizerName;
+            eventRequest = MapToRequest(existingEvent);
+            galleryImageUrls = existingEvent.GalleryImageUrls?.ToList() ?? new();
+            eventRequest.GalleryImageUrls = galleryImageUrls;
+            speakers = existingEvent.Speakers?.Select(s => new SpeakerDto
+            {
+                UserId = s.UserId,
+                Name = s.Name,
+                Role = s.Role,
+                AvatarUrl = s.AvatarUrl
+            }).ToList() ?? new();
         }
-
-        organizerName = existingEvent.OrganizerName;
-        eventRequest = MapToRequest(existingEvent);
-        galleryImageUrls = existingEvent.GalleryImageUrls?.ToList() ?? new();
-        eventRequest.GalleryImageUrls = galleryImageUrls;
-        speakers = existingEvent.Speakers?.Select(s => new SpeakerDto
+        finally
         {
-            UserId = s.UserId,
-            Name = s.Name,
-            Role = s.Role,
-            AvatarUrl = s.AvatarUrl
-        }).ToList() ?? new();
-        isLoading = false;
+            isLoading = false;
+        }
     }
 
     private void GoBack()

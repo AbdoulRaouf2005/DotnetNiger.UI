@@ -324,8 +324,14 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        allResources = await ResourceService.GetAllResourcesAsync();
-        isLoading = false;
+        try
+        {
+            allResources = await ResourceService.GetAllResourcesAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private void OpenDrawer()

@@ -186,7 +186,14 @@
 
     private async Task LoadPostsAsync()
     {
-        allPosts = await PostService.GetAllPostsAsync();
-        isLoading = false;
+        isLoading = true;
+        try
+        {
+            allPosts = await PostService.GetAllPostsAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }

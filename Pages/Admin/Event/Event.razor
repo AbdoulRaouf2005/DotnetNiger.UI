@@ -223,8 +223,14 @@ else
     private async Task LoadEventsAsync()
     {
         isLoading = true;
-        allEvents = await EventService.GetAllEventsAsync();
-        isLoading = false;
+        try
+        {
+            allEvents = await EventService.GetAllEventsAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task DeleteEvent(Guid id)

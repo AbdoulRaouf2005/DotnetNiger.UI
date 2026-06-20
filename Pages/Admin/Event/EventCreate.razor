@@ -454,23 +454,29 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
-        if (UserStateService.CurrentUser is null)
-            await UserStateService.LoadUserFromStorageAsync();
-
-        if (UserStateService.CurrentUser is null)
+        try
         {
-            var profil = await ProfileService.GetProfileAsync();
-            if (profil.Id != Guid.Empty)
-                await UserStateService.SetUserAsync(profil);
+            // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
+
+            if (UserStateService.CurrentUser is null)
+            {
+                var profil = await ProfileService.GetProfileAsync();
+                if (profil.Id != Guid.Empty)
+                    await UserStateService.SetUserAsync(profil);
+            }
+
+            currentUserId    = UserStateService.UserId;
+            organizerName    = UserStateService.UserName;
+            IsCurrentUserAdmin = UserStateService.IsAdmin;
+
+            allMembers = await UserService.GetUsersAsync();
         }
-
-        currentUserId    = UserStateService.UserId;
-        organizerName    = UserStateService.UserName;
-        IsCurrentUserAdmin = UserStateService.IsAdmin;
-
-        allMembers = await UserService.GetUsersAsync();
-        isLoading = false;
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private void GoBack()

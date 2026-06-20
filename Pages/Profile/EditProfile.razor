@@ -220,18 +220,24 @@ else
     {
         UserStateService.OnChange += HandleStateChanged;
 
-        if (UserStateService.CurrentUser is null)
-            await UserStateService.LoadUserFromStorageAsync();
-
-        if (UserStateService.CurrentUser is null)
+        try
         {
-            var profil = await ProfileService.GetProfileAsync();
-            if (profil.Id != Guid.Empty)
-                await UserStateService.SetUserAsync(profil);
-        }
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
 
-        SyncFormFromState();
-        isLoading = false;
+            if (UserStateService.CurrentUser is null)
+            {
+                var profil = await ProfileService.GetProfileAsync();
+                if (profil.Id != Guid.Empty)
+                    await UserStateService.SetUserAsync(profil);
+            }
+
+            SyncFormFromState();
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     public void Dispose()

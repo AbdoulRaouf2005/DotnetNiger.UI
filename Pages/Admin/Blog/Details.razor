@@ -256,8 +256,14 @@
             return;
         }
 
-        post = await PostService.GetPostByIdAsync(Id);
-        isLoading = false;
+        try
+        {
+            post = await PostService.GetPostByIdAsync(Id);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private string GetPostTypeLabel()

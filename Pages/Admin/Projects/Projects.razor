@@ -230,8 +230,14 @@ else
     private async Task LoadProjectsAsync()
     {
         isLoading = true;
-        allProjects = (await ProjectService.GetAllAsync(null, null)).Items;
-        isLoading = false;
+        try
+        {
+            allProjects = (await ProjectService.GetAllAsync(null, null)).Items;
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private Task HandleView(Guid id)
