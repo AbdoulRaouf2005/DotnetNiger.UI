@@ -869,6 +869,11 @@ video {
   margin-bottom: 0.5rem;
 }
 
+.mx-4{
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
 .mb-1{
   margin-bottom: 0.25rem;
 }
@@ -3983,6 +3988,11 @@ video {
   .sm\:mx-0{
     margin-left: 0px;
     margin-right: 0px;
+  }
+
+  .sm\:mx-8{
+    margin-left: 2rem;
+    margin-right: 2rem;
   }
 
   .sm\:mb-10{

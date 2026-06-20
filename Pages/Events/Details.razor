@@ -53,7 +53,9 @@
                 <div class="lg:col-span-2 space-y-4">
                     @* --- Hero card --- *@
                     <article class="overflow-hidden rounded-lg bg-white shadow-sm">
-                        <div class="h-64 bg-cover bg-center sm:h-80" style="@BuildCoverStyle(CurrentEvent.CoverImageUrl)"></div>
+                        <div class="overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)] mx-4 sm:mx-8 mt-4 sm:mt-8">
+                            <img src="@GetEventCoverUrl()" alt="@CurrentEvent.Title" class="h-64 w-full object-cover sm:h-80" />
+                        </div>
                         <div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
                             <div class="flex justify-between items-center">
                                 <span class="inline-flex items-center gap-1 rounded-lg bg-blue-100 px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-blue-700">
@@ -609,10 +611,11 @@
         }
     }
 
-    private static string BuildCoverStyle(string coverImageUrl)
+    private string GetEventCoverUrl()
     {
-        var img = string.IsNullOrWhiteSpace(coverImageUrl) ? "/Images/Fond1.jpeg" : coverImageUrl;
-        return $"background-image: linear-gradient(rgba(46, 26, 122, 0.45), rgba(46, 26, 122, 0.45)), url('{img}');";
+        return string.IsNullOrWhiteSpace(CurrentEvent?.CoverImageUrl)
+            ? "/Images/Fond1.jpeg"
+            : CurrentEvent.CoverImageUrl;
     }
 
     private static string GetEventTypeLabel(string eventType)

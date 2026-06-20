@@ -321,7 +321,7 @@
 			var tagNames = post.Tags.Select(t => t.Name).ToHashSet();
 			var allPosts = await PostService.GetAllPostsAsync();
 			RelatedPosts = allPosts
-				.Where(p => p.Id != post.Id && p.IsPublished)
+				.Where(p => p.Id != post.Id && p.PublishedAt.HasValue)
 				.Select(p => new
 				{
 					Post = p,
