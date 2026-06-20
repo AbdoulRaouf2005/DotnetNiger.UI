@@ -201,16 +201,11 @@ else
         try
         {
             if (UserStateService.CurrentUser is null)
-            {
                 await UserStateService.LoadUserFromStorageAsync();
-            }
 
-            if (UserStateService.CurrentUser is null)
-            {
-                var profil = await ProfileService.GetProfileAsync();
-                if (profil.Id != Guid.Empty)
-                    await UserStateService.SetUserAsync(profil);
-            }
+            var profil = await ProfileService.GetProfileAsync();
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
         }
         finally
         {
