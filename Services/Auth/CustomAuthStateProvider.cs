@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using DotnetNiger.UI.Services.Contracts;
@@ -27,7 +26,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         if (string.IsNullOrWhiteSpace(token))
             return Anonymous;
 
-        var claims = ParseClaimsFromJwt(token);
+        var claims = JwtParser.ParseClaimsFromJwt(token);
         var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
 
         if (expClaim != null && long.TryParse(expClaim, out var expUnix))
@@ -43,7 +42,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                     if (refreshed?.Token?.AccessToken is not null)
                     {
                         token = refreshed.Token.AccessToken;
-                        claims = ParseClaimsFromJwt(token);
+                        claims = JwtParser.ParseClaimsFromJwt(token);
                     }
                     else
                     {
@@ -87,32 +86,4 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
     }
 
-    private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-    {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
-
-        return kvs.SelectMany(kv =>
-        {
-            if (kv.Key is "roles" or "role")
-            {
-                if (kv.Value.ValueKind == JsonValueKind.Array)
-                    return kv.Value.EnumerateArray().Select(r => new Claim(ClaimTypes.Role, r.GetString()!));
-                return new[] { new Claim(ClaimTypes.Role, kv.Value.GetString()!) };
-            }
-            return new[] { new Claim(kv.Key, kv.Value.ToString()) };
-        });
-    }
-
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        base64 = base64.Replace('-', '+').Replace('_', '/');
-        return (base64.Length % 4) switch
-        {
-            2 => Convert.FromBase64String(base64 + "=="),
-            3 => Convert.FromBase64String(base64 + "="),
-            _ => Convert.FromBase64String(base64),
-        };
-    }
 }

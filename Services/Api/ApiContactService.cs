@@ -4,15 +4,15 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiContactService : IContactService
+public class ApiContactService : ApiServiceBase, IContactService
 {
-    private readonly HttpClient _http;
-
-    public ApiContactService(HttpClient http) => _http = http;
+    public ApiContactService(HttpClient http) : base(http)
+    {
+    }
 
     public async Task<bool> SendAsync(ContactRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/contact", request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Contact, request);
         return response.IsSuccessStatusCode;
     }
 }

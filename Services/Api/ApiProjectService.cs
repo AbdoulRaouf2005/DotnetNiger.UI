@@ -5,12 +5,11 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiProjectService : IProjectService
+public class ApiProjectService : ApiServiceBase, IProjectService
 {
-    private readonly HttpClient _http;
-    private const string Base = "api/projects";
-
-    public ApiProjectService(HttpClient http) => _http = http;
+    public ApiProjectService(HttpClient http) : base(http)
+    {
+    }
 
     public async Task<PaginatedDto<ProjectResponse>> GetAllAsync(string? status, string? query, int page = 1, int pageSize = 10)
     {
@@ -19,7 +18,7 @@ public class ApiProjectService : IProjectService
             ["page"] = page.ToString(), ["pageSize"] = pageSize.ToString(),
             ["status"] = status, ["query"] = query
         };
-        var response = await _http.GetAsync(BuildUrl(Base, q));
+        var response = await Http.GetAsync(BuildUrl(ApiEndpoints.Projects, q));
         if (!response.IsSuccessStatusCode)
             return new PaginatedDto<ProjectResponse>();
         return await ApiResponseReader.ReadAsync<PaginatedDto<ProjectResponse>>(response)
@@ -28,28 +27,28 @@ public class ApiProjectService : IProjectService
 
     public async Task<List<ProjectResponse>> GetFeaturedAsync()
     {
-        var response = await _http.GetAsync($"{Base}/featured");
+        var response = await Http.GetAsync($"{ApiEndpoints.Projects}/featured");
         if (!response.IsSuccessStatusCode) return [];
         return await ApiResponseReader.ReadCollectionAsync<ProjectResponse>(response);
     }
 
     public async Task<ProjectResponse?> GetByIdAsync(Guid id)
     {
-        var response = await _http.GetAsync($"{Base}/{id}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Projects}/{id}");
         if (!response.IsSuccessStatusCode) return null;
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
     public async Task<ProjectResponse?> GetBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{Base}/slug/{slug}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Projects}/slug/{slug}");
         if (!response.IsSuccessStatusCode) return null;
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
     public async Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {
-        var response = await _http.PostAsJsonAsync(Base, request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Projects, request);
         if (!response.IsSuccessStatusCode)
             return null;
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
@@ -57,22 +56,14 @@ public class ApiProjectService : IProjectService
 
     public async Task<ProjectResponse?> UpdateAsync(Guid id, UpdateProjectRequest request)
     {
-        var response = await _http.PutAsJsonAsync($"{Base}/{id}", request);
+        var response = await Http.PutAsJsonAsync($"{ApiEndpoints.Projects}/{id}", request);
         if (!response.IsSuccessStatusCode) return null;
         return await ApiResponseReader.ReadAsync<ProjectResponse>(response);
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var response = await _http.DeleteAsync($"{Base}/{id}");
+        var response = await Http.DeleteAsync($"{ApiEndpoints.Projects}/{id}");
         return response.IsSuccessStatusCode;
-    }
-
-    private static string BuildUrl(string path, Dictionary<string, string?> query)
-    {
-        var qs = string.Join("&", query
-            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}"));
-        return string.IsNullOrWhiteSpace(qs) ? path : $"{path}?{qs}";
     }
 }

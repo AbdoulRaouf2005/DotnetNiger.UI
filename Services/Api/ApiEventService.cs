@@ -1,34 +1,25 @@
+using DotnetNiger.UI.Helpers;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
-using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 using System.Net.Http.Json;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiEventService : IEventService
+public class ApiEventService : ApiServiceBase, IEventService
 {
-    private readonly HttpClient _http;
-    private readonly CustomAuthStateProvider _authStateProvider;
-    private readonly IAuthService _authService;
-    private const string PublicBase = "api/events";
-    private const string AdminBase = "api/community/admin/events";
-
-    public ApiEventService(HttpClient http, CustomAuthStateProvider authStateProvider, IAuthService authService)
+    public ApiEventService(HttpClient http) : base(http)
     {
-        _http = http;
-        _authStateProvider = authStateProvider;
-        _authService = authService;
     }
 
     public async Task<List<EventDto>> GetAllEventsAsync()
     {
-        return await GetCollectionAsync<EventDto>(PublicBase);
+        return await GetCollectionAsync<EventDto>(ApiEndpoints.Events);
     }
 
     public async Task<List<EventDto>> GetPublishedEventsAsync()
     {
-        var events = await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
+        var events = await GetCollectionAsync<EventDto>(ApiEndpoints.Events, new Dictionary<string, string?>
         {
             ["published"] = "true"
         });
@@ -38,7 +29,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetUpcomingEventsAsync()
     {
-        var response = await _http.GetAsync($"{PublicBase}/upcoming?page=1&pageSize=10");
+        var response = await Http.GetAsync($"{ApiEndpoints.Events}/upcoming?page=1&pageSize=10");
         if (!response.IsSuccessStatusCode)
             return new List<EventDto>();
 
@@ -47,7 +38,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetPastEventsAsync()
     {
-        var events = await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
+        var events = await GetCollectionAsync<EventDto>(ApiEndpoints.Events, new Dictionary<string, string?>
         {
             ["past"] = "true"
         });
@@ -57,7 +48,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto?> GetEventByIdAsync(Guid id)
     {
-        var response = await _http.GetAsync($"{PublicBase}/{id}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Events}/{id}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -66,7 +57,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto?> GetEventBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{PublicBase}/{slug}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Events}/{slug}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -75,7 +66,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> SearchEventsAsync(string query)
     {
-        return await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
+        return await GetCollectionAsync<EventDto>(ApiEndpoints.Events, new Dictionary<string, string?>
         {
             ["query"] = query,
             ["page"] = "1",
@@ -85,7 +76,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetEventsByTypeAsync(string eventType)
     {
-        var events = await GetCollectionAsync<EventDto>(PublicBase, new Dictionary<string, string?>
+        var events = await GetCollectionAsync<EventDto>(ApiEndpoints.Events, new Dictionary<string, string?>
         {
             ["eventType"] = eventType
         });
@@ -95,7 +86,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
     {
-        var response = await _http.PostAsJsonAsync(PublicBase, request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Events, request);
         response.EnsureSuccessStatusCode();
 
         return await ApiResponseReader.ReadAsync<EventDto>(response)
@@ -112,7 +103,7 @@ public class ApiEventService : IEventService
 
     public async Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request)
     {
-        var response = await _http.PutAsJsonAsync($"{PublicBase}/{id}", request);
+        var response = await Http.PutAsJsonAsync($"{ApiEndpoints.Events}/{id}", request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -121,7 +112,7 @@ public class ApiEventService : IEventService
 
     public async Task<bool> DeleteEventAsync(Guid id)
     {
-        var response = await _http.DeleteAsync($"{PublicBase}/{id}");
+        var response = await Http.DeleteAsync($"{ApiEndpoints.Events}/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -132,16 +123,16 @@ public class ApiEventService : IEventService
             return false;
 
         var endpoint = current.IsPublished
-            ? $"{AdminBase}/{id}/unpublish"
-            : $"{AdminBase}/{id}/publish";
+            ? $"{ApiEndpoints.AdminEvents}/{id}/unpublish"
+            : $"{ApiEndpoints.AdminEvents}/{id}/publish";
 
-        var response = await _http.PatchAsync(endpoint, null);
+        var response = await Http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<EventRegistrationDto?> RegisterToEventAsync(RegisterEventRequest request, Guid userId, string userName)
     {
-        var response = await _http.PostAsJsonAsync($"{PublicBase}/registrations", request);
+        var response = await Http.PostAsJsonAsync($"{ApiEndpoints.Events}/registrations", request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -150,13 +141,13 @@ public class ApiEventService : IEventService
 
     public async Task<bool> CancelRegistrationAsync(Guid eventId, Guid userId)
     {
-        var response = await _http.DeleteAsync($"{PublicBase}/{eventId}/registrations");
+        var response = await Http.DeleteAsync($"{ApiEndpoints.Events}/{eventId}/registrations");
         return response.IsSuccessStatusCode;
     }
 
     public async Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId)
     {
-        var response = await _http.GetAsync($"{PublicBase}/{eventId}/registrations");
+        var response = await Http.GetAsync($"{ApiEndpoints.Events}/{eventId}/registrations");
         if (!response.IsSuccessStatusCode)
             return new List<EventRegistrationDto>();
 
@@ -165,7 +156,7 @@ public class ApiEventService : IEventService
 
     public async Task<List<EventDto>> GetPendingEventsAsync()
     {
-        var response = await _http.GetAsync($"{AdminBase}?status=pending");
+        var response = await Http.GetAsync($"{ApiEndpoints.AdminEvents}?status=pending");
         if (!response.IsSuccessStatusCode)
             return new List<EventDto>();
 
@@ -175,62 +166,27 @@ public class ApiEventService : IEventService
     public async Task<bool> ApproveEventAsync(Guid eventId, string? adminComment = null)
     {
         var endpoint = string.IsNullOrWhiteSpace(adminComment)
-            ? $"{AdminBase}/{eventId}/approve"
-            : $"{AdminBase}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
+            ? $"{ApiEndpoints.AdminEvents}/{eventId}/approve"
+            : $"{ApiEndpoints.AdminEvents}/{eventId}/approve?comment={Uri.EscapeDataString(adminComment)}";
 
-        var response = await _http.PatchAsync(endpoint, null);
+        var response = await Http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> RejectEventAsync(Guid eventId, string reason)
     {
-        var endpoint = $"{AdminBase}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
-        var response = await _http.PatchAsync(endpoint, null);
+        var endpoint = $"{ApiEndpoints.AdminEvents}/{eventId}/reject?reason={Uri.EscapeDataString(reason)}";
+        var response = await Http.PatchAsync(endpoint, null);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<List<EventDto>> GetEventsBySubmitterAsync(Guid userId)
     {
-        var response = await _http.GetAsync($"{PublicBase}?submitterId={userId}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Events}?submitterId={userId}");
         if (!response.IsSuccessStatusCode)
             return new List<EventDto>();
 
         return await ApiResponseReader.ReadCollectionAsync<EventDto>(response);
-    }
-
-    private async Task<bool> IsAdminCurrentUserAsync()
-    {
-        var accessToken = await _authStateProvider.GetAccessTokenAsync();
-        var role = _authService.GetRoleFromAccessToken(accessToken);
-
-        if (string.IsNullOrWhiteSpace(role))
-            return false;
-
-        return role.Equals("admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("superadmin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("moderator", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private async Task<List<T>> GetCollectionAsync<T>(string path, Dictionary<string, string?>? query = null)
-    {
-        var url = BuildUrl(path, query);
-        var response = await _http.GetAsync(url);
-        if (!response.IsSuccessStatusCode)
-            return new List<T>();
-
-        return await ApiResponseReader.ReadCollectionAsync<T>(response);
-    }
-
-    private static string BuildUrl(string path, Dictionary<string, string?>? query = null)
-    {
-        if (query is null || query.Count == 0)
-            return path;
-
-        var queryString = string.Join("&", query
-            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}"));
-
-        return string.IsNullOrWhiteSpace(queryString) ? path : $"{path}?{queryString}";
     }
 
 }

@@ -5,19 +5,15 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiUserService : IUserService
+public class ApiUserService : ApiServiceBase, IUserService
 {
-    private readonly HttpClient _http;
-    private const string AdminUsersBase = "api/identity/admin/users";
-
-    public ApiUserService(HttpClient http)
+    public ApiUserService(HttpClient http) : base(http)
     {
-        _http = http;
     }
 
     public async Task<List<UserDto>> GetUsersAsync()
     {
-        var response = await _http.GetAsync(AdminUsersBase);
+        var response = await Http.GetAsync(ApiEndpoints.AdminUsers);
         if (!response.IsSuccessStatusCode)
             return [];
 
@@ -26,7 +22,7 @@ public class ApiUserService : IUserService
 
     public async Task<UserDto?> GetUserByIdAsync(Guid userId)
     {
-        var response = await _http.GetAsync($"{AdminUsersBase}/{userId}");
+        var response = await Http.GetAsync($"{ApiEndpoints.AdminUsers}/{userId}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -94,7 +90,7 @@ public class ApiUserService : IUserService
     public async Task<UserDto?> UpdateUserAsync(UserDto user)
     {
         var statusContent = JsonContent.Create(new UpdateUserStatusRequest { IsActive = user.IsActive });
-        var statusResponse = await _http.PatchAsync($"{AdminUsersBase}/{user.Id}/status", statusContent);
+        var statusResponse = await Http.PatchAsync($"{ApiEndpoints.AdminUsers}/{user.Id}/status", statusContent);
         if (!statusResponse.IsSuccessStatusCode)
             return null;
 
@@ -106,7 +102,7 @@ public class ApiUserService : IUserService
             if (!existing.Roles.Contains(role, StringComparer.OrdinalIgnoreCase))
             {
                 var roleContent = JsonContent.Create(new { roleName = role });
-                await _http.PostAsync($"{AdminUsersBase}/{user.Id}/roles", roleContent);
+                await Http.PostAsync($"{ApiEndpoints.AdminUsers}/{user.Id}/roles", roleContent);
             }
         }
 
@@ -121,12 +117,12 @@ public class ApiUserService : IUserService
     public async Task<bool> ApproveUserAsync(Guid userId)
     {
         var statusContent = JsonContent.Create(new UpdateUserStatusRequest { IsActive = true });
-        var response = await _http.PatchAsync($"{AdminUsersBase}/{userId}/status", statusContent);
+        var response = await Http.PatchAsync($"{ApiEndpoints.AdminUsers}/{userId}/status", statusContent);
         if (!response.IsSuccessStatusCode)
             return false;
 
         var roleContent = JsonContent.Create(new { roleName = "Member" });
-        await _http.PostAsync($"{AdminUsersBase}/{userId}/roles", roleContent);
+        await Http.PostAsync($"{ApiEndpoints.AdminUsers}/{userId}/roles", roleContent);
 
         return true;
     }
@@ -134,7 +130,7 @@ public class ApiUserService : IUserService
     public async Task<bool> RejectUserAsync(Guid userId)
     {
         var content = JsonContent.Create(new UpdateUserStatusRequest { IsActive = false });
-        var response = await _http.PatchAsync($"{AdminUsersBase}/{userId}/status", content);
+        var response = await Http.PatchAsync($"{ApiEndpoints.AdminUsers}/{userId}/status", content);
         return response.IsSuccessStatusCode;
     }
 }

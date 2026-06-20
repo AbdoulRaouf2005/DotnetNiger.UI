@@ -1,55 +1,13 @@
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 
 namespace DotnetNiger.UI.Services.Mock;
 
 public class MockUserService : IUserService
 {
-    private static readonly List<UserDto> Users = new()
-    {
-        new UserDto
-        {
-            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            Username = "admin",
-            Email = "admin@dotnet.niger",
-            FullName = "Ali Mahamane",
-            Country = "Niger",
-            City = "Niamey",
-            IsActive = true,
-            CreatedAt = DateTime.Now.AddMonths(-6),
-            LastLoginAt = DateTime.Now.AddDays(-1),
-            Roles = new List<string> { "Admin", "Member" },
-            Skills = new List<string> { "C#", "ASP.NET Core", "Blazor", "Azure" }
-        },
-        new UserDto
-        {
-            Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-            Username = "fatima",
-            Email = "fatima@dotnet.niger",
-            FullName = "Fatima Oumar",
-            Country = "Niger",
-            City = "Niamey",
-            IsActive = true,
-            CreatedAt = DateTime.Now.AddMonths(-3),
-            LastLoginAt = DateTime.Now.AddDays(-5),
-            Roles = new List<string> { "Member" },
-            Skills = new List<string> { "C#", "ASP.NET Core", "Entity Framework" }
-        },
-        new UserDto
-        {
-            Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-            Username = "moussa",
-            Email = "moussa@dotnet.niger",
-            FullName = "Moussa Issa",
-            Country = "Niger",
-            City = "Maradi",
-            IsActive = false,
-            CreatedAt = DateTime.Now.AddMonths(-1),
-            Roles = new List<string> { "Member" },
-            Skills = new List<string> { "C#", "Blazor" }
-        }
-    };
+    private static readonly List<UserDto> Users = MockDataStore.Users;
 
     public Task<UserDto?> GetUserByIdAsync(Guid userId)
         => Task.FromResult(Users.FirstOrDefault(user => user.Id == userId));

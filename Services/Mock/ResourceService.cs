@@ -1,6 +1,7 @@
 ﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 
 namespace DotnetNiger.UI.Services.Mock;
 
@@ -271,18 +272,5 @@ public class ResourceService : IResourceService
     }
 
     private static string GenerateSlug(string title)
-    {
-        return title
-            .ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("à", "a").Replace("â", "a")
-            .Replace("é", "e").Replace("è", "e").Replace("ê", "e").Replace("ë", "e")
-            .Replace("î", "i").Replace("ï", "i")
-            .Replace("ô", "o")
-            .Replace("ù", "u").Replace("û", "u")
-            .Replace("ç", "c")
-            .Replace("'", "-").Replace("\"", "")
-            .Replace(",", "").Replace(".", "")
-            .Replace("?", "").Replace("!", "").Replace("#", "");
-    }
+        => StringHelper.GenerateSlug(title);
 }

@@ -13,7 +13,6 @@ public interface IEventService
     Task<EventDto?> GetEventBySlugAsync(string slug);
     Task<List<EventDto>> SearchEventsAsync(string query);
     Task<List<EventDto>> GetEventsByTypeAsync(string eventType);
-    // Task<EventDto> CreateEventAsync(CreateEventRequest request);
     Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request);
     Task<bool> DeleteEventAsync(Guid id);
     Task<bool> TogglePublishAsync(Guid id);

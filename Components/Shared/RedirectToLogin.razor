@@ -19,7 +19,7 @@
             return;
         }
         var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
-        var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+        var path = "/Account/Login";
         var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
         Navigation.NavigateTo(loginUrl, forceLoad: true);
     }

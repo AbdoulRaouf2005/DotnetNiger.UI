@@ -43,6 +43,8 @@
         {
             isProcessing = false;
             errorMessage = "Aucun ticket de connexion reçu.";
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/login");
             return;
         }
 
