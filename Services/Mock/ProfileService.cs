@@ -45,7 +45,10 @@ namespace DotnetNiger.UI.Services.Mock
             => _userStateService.CurrentUser ?? _fallbackUser;
 
         public async Task<UserDto> GetProfileAsync()
-            => await Task.FromResult(ResolveUser());
+        {
+            await Task.Delay(800);
+            return ResolveUser();
+        }
 
         public async Task<UserDto> UpdateProfileAsync(UpdateProfileRequest request)
         {
@@ -65,7 +68,10 @@ namespace DotnetNiger.UI.Services.Mock
         }
 
         public async Task<List<SocialLinkDto>> GetSocialLinksAsync()
-            => await Task.FromResult(ResolveUser().SocialLinks);
+        {
+            await Task.Delay(800);
+            return ResolveUser().SocialLinks;
+        }
 
         public async Task<SocialLinkDto?> AddSocialLinkAsync(AddSocialLinkRequest request)
         {

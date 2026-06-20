@@ -94,12 +94,14 @@ public class EventService : IEventService
 
     public async Task<List<EventDto>> GetAllEventsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.OrderByDescending(e => e.StartDate).ToList());
     }
 
     public async Task<List<EventDto>> GetPublishedEventsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.Where(e => e.IsPublished)
                    .OrderBy(e => e.StartDate)
@@ -108,6 +110,7 @@ public class EventService : IEventService
 
     public async Task<List<EventDto>> GetUpcomingEventsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.Where(e => e.IsPublished && e.StartDate >= DateTime.Now)
                    .OrderBy(e => e.StartDate)
@@ -116,6 +119,7 @@ public class EventService : IEventService
 
     public async Task<List<EventDto>> GetPastEventsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.Where(e => e.IsPublished && e.EndDate < DateTime.Now)
                    .OrderByDescending(e => e.StartDate)
@@ -124,18 +128,21 @@ public class EventService : IEventService
 
     public async Task<EventDto?> GetEventByIdAsync(Guid id)
     {
+        await Task.Delay(800);
         var ev = _events.FirstOrDefault(e => e.Id == id);
         return await Task.FromResult(ev);
     }
 
     public async Task<EventDto?> GetEventBySlugAsync(string slug)
     {
+        await Task.Delay(800);
         var ev = _events.FirstOrDefault(e => e.Slug == slug);
         return await Task.FromResult(ev);
     }
 
     public async Task<List<EventDto>> SearchEventsAsync(string query)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.Where(e =>
                     e.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
@@ -148,6 +155,7 @@ public class EventService : IEventService
 
     public async Task<List<EventDto>> GetEventsByTypeAsync(string eventType)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _events.Where(e => e.EventType.Equals(eventType, StringComparison.OrdinalIgnoreCase) && e.IsPublished)
                    .OrderBy(e => e.StartDate)
@@ -221,7 +229,7 @@ public class EventService : IEventService
 
       public async Task<List<EventDto>> GetPendingEventsAsync()
     {
-        await Task.Delay(300);
+        await Task.Delay(800);
         return _events.Where(e => !e.IsPublished).ToList();
     }
 
@@ -261,7 +269,7 @@ public class EventService : IEventService
 
     public async Task<List<EventDto>> GetEventsBySubmitterAsync(Guid userId)
     {
-        await Task.Delay(300);
+        await Task.Delay(800);
         return _events.Where(e => e.SubmittedBy == userId).OrderByDescending(e => e.SubmittedAt).ToList();
     }
 
@@ -366,6 +374,7 @@ public class EventService : IEventService
 
     public async Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId)
     {
+        await Task.Delay(800);
         var registrations = _registrations
             .Where(r => r.EventId == eventId)
             .ToList();

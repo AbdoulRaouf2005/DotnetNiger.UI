@@ -28,8 +28,9 @@ public class MockProjectService : IProjectService
         }
     };
 
-    public Task<PaginatedDto<ProjectResponse>> GetAllAsync(string? status, string? query, int page = 1, int pageSize = 10)
+    public async Task<PaginatedDto<ProjectResponse>> GetAllAsync(string? status, string? query, int page = 1, int pageSize = 10)
     {
+        await Task.Delay(800);
         var filtered = _projects.AsEnumerable();
         if (!string.IsNullOrWhiteSpace(status))
             filtered = filtered.Where(p => p.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
@@ -39,21 +40,30 @@ public class MockProjectService : IProjectService
                 p.Description.Contains(query, StringComparison.OrdinalIgnoreCase));
 
         var list = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        return Task.FromResult(new PaginatedDto<ProjectResponse>
+        return new PaginatedDto<ProjectResponse>
         {
             Items = list, TotalCount = filtered.Count(), Page = page, PageSize = pageSize
-        });
+        };
     }
 
-    public Task<List<ProjectResponse>> GetFeaturedAsync() =>
-        Task.FromResult(_projects.Where(p => p.IsFeatured).ToList());
+    public async Task<List<ProjectResponse>> GetFeaturedAsync()
+    {
+        await Task.Delay(800);
+        return _projects.Where(p => p.IsFeatured).ToList();
+    }
 
-    public Task<ProjectResponse?> GetByIdAsync(Guid id) =>
-        Task.FromResult(_projects.FirstOrDefault(p => p.Id == id));
+    public async Task<ProjectResponse?> GetByIdAsync(Guid id)
+    {
+        await Task.Delay(800);
+        return _projects.FirstOrDefault(p => p.Id == id);
+    }
 
-    public Task<ProjectResponse?> GetBySlugAsync(string slug) =>
-        Task.FromResult(_projects.FirstOrDefault(p =>
-            p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase)));
+    public async Task<ProjectResponse?> GetBySlugAsync(string slug)
+    {
+        await Task.Delay(800);
+        return _projects.FirstOrDefault(p =>
+            p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+    }
 
     public Task<ProjectResponse?> CreateAsync(CreateProjectRequest request)
     {

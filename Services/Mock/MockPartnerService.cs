@@ -30,14 +30,18 @@ public class MockPartnerService : IPartnerService
         }
     };
 
-    public Task<List<PartnerResponse>> GetAllActiveAsync(string? partnerType)
+    public async Task<List<PartnerResponse>> GetAllActiveAsync(string? partnerType)
     {
+        await Task.Delay(800);
         var result = _partners.Where(p => p.IsActive).AsEnumerable();
         if (!string.IsNullOrWhiteSpace(partnerType))
             result = result.Where(p => p.PartnerType.Equals(partnerType, StringComparison.OrdinalIgnoreCase));
-        return Task.FromResult(result.OrderBy(p => p.SortOrder).ToList());
+        return result.OrderBy(p => p.SortOrder).ToList();
     }
 
-    public Task<PartnerResponse?> GetByIdAsync(Guid id) =>
-        Task.FromResult(_partners.FirstOrDefault(p => p.Id == id));
+    public async Task<PartnerResponse?> GetByIdAsync(Guid id)
+    {
+        await Task.Delay(800);
+        return _partners.FirstOrDefault(p => p.Id == id);
+    }
 }

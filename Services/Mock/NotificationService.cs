@@ -23,20 +23,22 @@ public class NotificationService : INotificationService
         return Task.CompletedTask;
     }
 
-    public Task<List<NotificationDto>> GetNotificationsAsync(Guid userId)
+    public async Task<List<NotificationDto>> GetNotificationsAsync(Guid userId)
     {
+        await Task.Delay(800);
         if (!_store.TryGetValue(userId, out var list))
-            return Task.FromResult(new List<NotificationDto>());
+            return new List<NotificationDto>();
 
-        return Task.FromResult(list.OrderByDescending(n => n.CreatedAt).ToList());
+        return list.OrderByDescending(n => n.CreatedAt).ToList();
     }
 
-    public Task<int> GetUnreadCountAsync(Guid userId)
+    public async Task<int> GetUnreadCountAsync(Guid userId)
     {
+        await Task.Delay(800);
         if (!_store.TryGetValue(userId, out var list))
-            return Task.FromResult(0);
+            return 0;
 
-        return Task.FromResult(list.Count(n => !n.IsRead));
+        return list.Count(n => !n.IsRead);
     }
 
     public Task MarkAsReadAsync(Guid userId, Guid notificationId)

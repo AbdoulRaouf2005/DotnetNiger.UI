@@ -28,10 +28,11 @@ public class MockSearchService : ISearchService
         }
     };
 
-    public Task<PaginatedDto<SearchResultDto>> SearchAsync(SearchQueryRequest request)
+    public async Task<PaginatedDto<SearchResultDto>> SearchAsync(SearchQueryRequest request)
     {
+        await Task.Delay(800);
         if (string.IsNullOrWhiteSpace(request.Query))
-            return Task.FromResult(new PaginatedDto<SearchResultDto>());
+            return new PaginatedDto<SearchResultDto>();
 
         var filtered = _results.Where(r =>
             r.Title.Contains(request.Query, StringComparison.OrdinalIgnoreCase) ||
@@ -42,9 +43,9 @@ public class MockSearchService : ISearchService
             filtered = filtered.Where(r => r.Type.Equals(request.Type, StringComparison.OrdinalIgnoreCase));
 
         var items = filtered.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-        return Task.FromResult(new PaginatedDto<SearchResultDto>
+        return new PaginatedDto<SearchResultDto>
         {
             Items = items, TotalCount = filtered.Count(), Page = request.Page, PageSize = request.PageSize
-        });
+        };
     }
 }

@@ -138,23 +138,27 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetAllResourcesAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.OrderByDescending(r => r.CreatedAt).ToList());
     }
 
     public async Task<ResourceDto?> GetResourceByIdAsync(Guid id)
     {
+        await Task.Delay(800);
         return await Task.FromResult(_resources.FirstOrDefault(r => r.Id == id));
     }
 
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
+        await Task.Delay(800);
         var resource = _resources.FirstOrDefault(r => r.Slug == slug);
         return await Task.FromResult(resource);
     }
 
     public async Task<List<ResourceDto>> GetResourcesByTypeAsync(string resourceType)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r => r.ResourceType.Equals(resourceType, StringComparison.OrdinalIgnoreCase))
                       .OrderByDescending(r => r.ViewCount)
@@ -163,6 +167,7 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetResourcesByLevelAsync(string level)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r => r.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
                       .OrderByDescending(r => r.ViewCount)
@@ -171,6 +176,7 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> SearchResourcesAsync(string query)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r =>
                     r.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
@@ -183,12 +189,14 @@ public class ResourceService : IResourceService
 
     public async Task<List<string>> GetResourceTypesAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Select(r => r.ResourceType).Distinct().OrderBy(t => t).ToList());
     }
 
     public async Task<List<string>> GetLevelsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Select(r => r.Level).Distinct().OrderBy(l => l switch
             {

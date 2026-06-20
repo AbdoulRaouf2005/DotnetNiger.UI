@@ -51,22 +51,35 @@ public class MockUserService : IUserService
         }
     };
 
-    public Task<UserDto?> GetUserByIdAsync(Guid userId)
-        => Task.FromResult(Users.FirstOrDefault(user => user.Id == userId));
-
-    public Task<List<UserDto>> GetUsersAsync()
-        => Task.FromResult(Users.ToList());
-
-    public Task<List<UserDto>> GetPendingUsersAsync()
-        => Task.FromResult(Users.Where(user => !user.IsActive).ToList());
-
-    public Task<UserDto?> GetUserByEmailAsync(string email)
-        => Task.FromResult(Users.FirstOrDefault(user => user.Email.Equals(email, StringComparison.OrdinalIgnoreCase)));
-
-    public Task<List<UserDto>> SearchUsersAsync(string query)
+    public async Task<UserDto?> GetUserByIdAsync(Guid userId)
     {
+        await Task.Delay(800);
+        return Users.FirstOrDefault(user => user.Id == userId);
+    }
+
+    public async Task<List<UserDto>> GetUsersAsync()
+    {
+        await Task.Delay(800);
+        return Users.ToList();
+    }
+
+    public async Task<List<UserDto>> GetPendingUsersAsync()
+    {
+        await Task.Delay(800);
+        return Users.Where(user => !user.IsActive).ToList();
+    }
+
+    public async Task<UserDto?> GetUserByEmailAsync(string email)
+    {
+        await Task.Delay(800);
+        return Users.FirstOrDefault(user => user.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<List<UserDto>> SearchUsersAsync(string query)
+    {
+        await Task.Delay(800);
         if (string.IsNullOrWhiteSpace(query))
-            return Task.FromResult(Users.ToList());
+            return Users.ToList();
 
         var normalizedQuery = query.Trim();
 
@@ -79,26 +92,33 @@ public class MockUserService : IUserService
                 user.Roles.Any(role => role.Contains(normalizedQuery, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
-        return Task.FromResult(filteredUsers);
+        return filteredUsers;
     }
 
-    public Task<List<UserDto>> GetUsersByRoleAsync(string role)
+    public async Task<List<UserDto>> GetUsersByRoleAsync(string role)
     {
+        await Task.Delay(800);
         if (string.IsNullOrWhiteSpace(role))
-            return Task.FromResult(Users.ToList());
+            return Users.ToList();
 
         var filteredUsers = Users
             .Where(user => user.Roles.Any(userRole => userRole.Equals(role, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
-        return Task.FromResult(filteredUsers);
+        return filteredUsers;
     }
 
-    public Task<int> GetUsersCountAsync()
-        => Task.FromResult(Users.Count);
+    public async Task<int> GetUsersCountAsync()
+    {
+        await Task.Delay(800);
+        return Users.Count;
+    }
 
-    public Task<int> GetActiveUsersCountAsync()
-        => Task.FromResult(Users.Count(user => user.IsActive));
+    public async Task<int> GetActiveUsersCountAsync()
+    {
+        await Task.Delay(800);
+        return Users.Count(user => user.IsActive);
+    }
 
     public Task<UserDto> CreateUserAsync(CreateUserRequest user)
     {

@@ -27,8 +27,9 @@ public class MockMemberDirectoryService : IMemberDirectoryService
         }
     };
 
-    public Task<PaginatedDto<MemberDirectoryResponse>> GetAllAsync(string? query, string? country, int page = 1, int pageSize = 10)
+    public async Task<PaginatedDto<MemberDirectoryResponse>> GetAllAsync(string? query, string? country, int page = 1, int pageSize = 10)
     {
+        await Task.Delay(800);
         var filtered = _members.AsEnumerable();
         if (!string.IsNullOrWhiteSpace(query))
             filtered = filtered.Where(m =>
@@ -38,12 +39,15 @@ public class MockMemberDirectoryService : IMemberDirectoryService
             filtered = filtered.Where(m => m.Country.Equals(country, StringComparison.OrdinalIgnoreCase));
 
         var items = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-        return Task.FromResult(new PaginatedDto<MemberDirectoryResponse>
+        return new PaginatedDto<MemberDirectoryResponse>
         {
             Items = items, TotalCount = filtered.Count(), Page = page, PageSize = pageSize
-        });
+        };
     }
 
-    public Task<MemberDirectoryResponse?> GetByIdAsync(Guid id) =>
-        Task.FromResult(_members.FirstOrDefault(m => m.Id == id));
+    public async Task<MemberDirectoryResponse?> GetByIdAsync(Guid id)
+    {
+        await Task.Delay(800);
+        return _members.FirstOrDefault(m => m.Id == id);
+    }
 }

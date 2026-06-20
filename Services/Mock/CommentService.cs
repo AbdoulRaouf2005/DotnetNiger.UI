@@ -175,28 +175,31 @@ public class CommentService : ICommentService
         };
     }
 
-    public Task<List<CommentResponse>> GetCommentsByPostIdAsync(Guid postId)
+    public async Task<List<CommentResponse>> GetCommentsByPostIdAsync(Guid postId)
     {
+        await Task.Delay(800);
         var comments = _comments
             .Where(c => c.PostId == postId && c.ParentCommentId is null)
             .Select(CloneCommentTree)
             .ToList();
-        return Task.FromResult(comments);
+        return comments;
     }
 
-    public Task<List<CommentResponse>> GetCommentsByEventIdAsync(Guid eventId)
+    public async Task<List<CommentResponse>> GetCommentsByEventIdAsync(Guid eventId)
     {
+        await Task.Delay(800);
         var comments = _comments
             .Where(c => c.EventId == eventId && c.ParentCommentId is null)
             .Select(CloneCommentTree)
             .ToList();
-        return Task.FromResult(comments);
+        return comments;
     }
 
-    public Task<CommentResponse?> GetCommentByIdAsync(Guid id)
+    public async Task<CommentResponse?> GetCommentByIdAsync(Guid id)
     {
+        await Task.Delay(800);
         var comment = _comments.FirstOrDefault(c => c.Id == id);
-        return Task.FromResult(comment);
+        return comment;
     }
 
     public Task<CommentResponse?> CreateCommentAsync(CreateCommentRequest request)
