@@ -198,18 +198,18 @@
 									  Description="@post.Excerpt" />
 					</aside>
 
-					@* --- Articles récents --- *@
-					@if (RecentPosts.Any())
+					@* --- Articles similaires --- *@
+					@if (RelatedPosts.Any())
 					{
 						<aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
 							<p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-								Récents
+								Similaires
 							</p>
 							<h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
-								Articles récents
+								Articles similaires
 							</h2>
 							<div class="mt-4 space-y-4">
-								@foreach (var article in RecentPosts)
+								@foreach (var article in RelatedPosts)
 								{
 									<a href="/blog/@(article.Slug ?? article.Id.ToString())" class="flex gap-3 group">
 										<div class="w-20 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
@@ -277,7 +277,7 @@
 	private bool isLoading = true;
 	private bool isLoadingComments = true;
 	private bool IsShared;
-	private List<PostDto> RecentPosts { get; set; } = new();
+	private List<PostDto> RelatedPosts { get; set; } = new();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -315,14 +315,23 @@
 			await RefreshComments();
 		}
 
-		// Load recent posts
+		// Load related posts (same tags)
 		if (post is not null)
 		{
+			var tagNames = post.Tags.Select(t => t.Name).ToHashSet();
 			var allPosts = await PostService.GetAllPostsAsync();
-			RecentPosts = allPosts
+			RelatedPosts = allPosts
 				.Where(p => p.Id != post.Id && p.IsPublished)
-				.OrderByDescending(p => p.PublishedAt)
+				.Select(p => new
+				{
+					Post = p,
+					MatchCount = p.Tags.Count(t => tagNames.Contains(t.Name))
+				})
+				.Where(x => x.MatchCount > 0)
+				.OrderByDescending(x => x.MatchCount)
+				.ThenByDescending(x => x.Post.PublishedAt)
 				.Take(3)
+				.Select(x => x.Post)
 				.ToList();
 		}
 	}
