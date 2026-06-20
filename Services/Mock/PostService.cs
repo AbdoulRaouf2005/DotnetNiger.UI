@@ -100,7 +100,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> GetAllPostsAsync()
         {
-            await Task.Delay(800);
+            await Task.Delay(2000);
             var posts = _posts
                 .OrderByDescending(p => p.PublishedAt)
                 .ToList();
@@ -110,7 +110,7 @@ namespace DotnetNiger.UI.Services.Mock
   
         public async Task<List<PostDto>> GetPublishedPostsAsync()
         {
-            await Task.Delay(800);
+            await Task.Delay(2000);
             var posts = _posts
                 .Where(p => p.PublishedAt != DateTime.MinValue)
                 .OrderByDescending(p => p.PublishedAt)
@@ -132,7 +132,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> GetPostsByTagAsync(string tagSlug)
         {
-            await Task.Delay(800);
+            await Task.Delay(2000);
             var posts = _posts
                 .Where(p => p.Tags.Any(t => t.Slug == tagSlug))
                 .OrderByDescending(p => p.PublishedAt)
@@ -154,7 +154,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<PostDto?> GetPostBySlugAsync(string slug)
         {
-            await Task.Delay(800);
+            await Task.Delay(2000);
             var post = _posts.FirstOrDefault(p => p.Slug == slug);
 
             if (post == null)
