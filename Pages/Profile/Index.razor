@@ -112,12 +112,19 @@
                         </button>
                     </div>
 
-                    <div class="flex flex-wrap gap-3">
-                        @foreach (var skill in ResolveSkills(CurrentUser?.Skills))
-                        {
-                            <span class="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
-                        }
-                    </div>
+                    @if (CurrentUser?.Skills is { Count: > 0 })
+                    {
+                        <div class="flex flex-wrap gap-3">
+                            @foreach (var skill in CurrentUser.Skills)
+                            {
+                                <span class="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-sm text-slate-500">Aucune compétence renseignée.</p>
+                    }
                 </section>
             </div>
         </div>
@@ -233,10 +240,6 @@ else
             _             => "Non renseignee"
         };
     }
-
-    private static IEnumerable<string> ResolveSkills(List<string>? skills)
-        => (skills is { Count: > 0 }) ? skills
-            : ["C# / .NET 8", "ASP.NET Core", "Azure Cloud", "Entity Framework", "Microservices", "Docker", "Blazor", "TypeScript"];
 
     private static string DisplayPrimaryRole(List<string>? roles)
         => (roles is { Count: > 0 }) ? roles[0] : "Membre .NET Niger";

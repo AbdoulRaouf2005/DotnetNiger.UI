@@ -1,65 +1,26 @@
-// Services/Mocks/MockAuthService.cs
+using DotnetNiger.UI.Helpers;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 namespace DotnetNiger.UI.Services.Mock;
 
 public class MockAuthService : IAuthService
 {
-    private static readonly List<UserDto> _users = new()
-    {
-        new UserDto
-        {
-            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-            Username = "admin",
-            Email = "admin@dotnet.niger",
-            FullName = "Ali Mahamane",
-            Country = "Niger",
-            City = "Niamey",
-            IsActive = true,
-            CreatedAt = DateTime.Now.AddMonths(-6),
-            LastLoginAt = DateTime.Now.AddDays(-1),
-            Roles = new List<string> { "Admin", "Member" },
-            Skills = new List<string> { "C#", "ASP.NET Core", "Blazor", "Azure" }
-        },
-        new UserDto
-        {
-            Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-            Username = "fatima",
-            Email = "fatima@dotnet.niger",
-            FullName = "Fatima Oumar",
-            Country = "Niger",
-            City = "Niamey",
-            IsActive = true,
-            CreatedAt = DateTime.Now.AddMonths(-3),
-            LastLoginAt = DateTime.Now.AddDays(-5),
-            Roles = new List<string> { "Member" },
-            Skills = new List<string> { "C#", "ASP.NET Core", "Entity Framework" }
-        },
-        new UserDto
-        {
-            Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-            Username = "moussa",
-            Email = "moussa@dotnet.niger",
-            FullName = "Moussa Issa",
-            Country = "Niger",
-            City = "Maradi",
-            IsActive = true,
-            CreatedAt = DateTime.Now.AddMonths(-1),
-            Roles = new List<string> { "Member" },
-            Skills = new List<string> { "C#", "Blazor" }
-        }
-    };
+    private static readonly List<UserDto> _users = MockDataStore.Users;
 
     private static Dictionary<string, string> _refreshTokens = new();
-    private static List<ForgotPasswordRequest> _passwordResetRequests = new();
-    private static List<RequestEmailVerificationRequest> _emailVerificationRequests = new();
 
+    private readonly CustomAuthStateProvider _authProvider;
     private UserDto? _currentUser;
     private TokenDto? _currentToken;
     private DateTime? _tokenExpiry;
 
-    public event Action? OnAuthStateChanged;
+    public MockAuthService(CustomAuthStateProvider authProvider)
+    {
+        _authProvider = authProvider;
+    }
 
     #region Authentification
 
@@ -97,7 +58,7 @@ public class MockAuthService : IAuthService
         // Stocker le refresh token
         _refreshTokens[user.Id.ToString()] = _currentToken.RefreshToken;
 
-        OnAuthStateChanged?.Invoke();
+        await _authProvider.SaveTokensAsync(_currentToken.AccessToken, _currentToken.RefreshToken);
 
         return new ApiSuccessResponse<AuthDto>
         {
@@ -169,7 +130,7 @@ public class MockAuthService : IAuthService
 
         try
         {
-            var payloadJson = System.Text.Encoding.UTF8.GetString(ParseBase64WithoutPadding(segments[1]));
+            var payloadJson = System.Text.Encoding.UTF8.GetString(JwtParser.ParseBase64WithoutPadding(segments[1]));
             using var document = System.Text.Json.JsonDocument.Parse(payloadJson);
             var root = document.RootElement;
 
@@ -193,55 +154,6 @@ public class MockAuthService : IAuthService
         }
     }
 
-    public string GetPostLoginRedirectPath(List<string>? roles)
-    {
-        if (roles == null || roles.Count == 0)
-            return "/";
-
-        var rolesLower = roles.Select(r => r.ToLowerInvariant()).ToList();
-        if (rolesLower.Contains("superadmin") || rolesLower.Contains("admin") || rolesLower.Contains("moderator"))
-            return "/admin/dashboard";
-
-        return "/";
-    }
-
-    public string GetPostLoginRedirectPathFromToken(string? accessToken)
-    {
-        var role = GetRoleFromAccessToken(accessToken);
-        if (string.IsNullOrWhiteSpace(role))
-            return "/";
-
-        return role.ToLowerInvariant() switch
-        {
-            "superadmin" => "/admin/dashboard",
-            "admin" => "/admin/dashboard",
-            "moderator" => "/admin/dashboard",
-            _ => "/"
-        };
-    }
-
-    public async Task<ApiSuccessResponse<Guid>> RegisterStep1Async(RegisterRequest request)
-    {
-        var result = await RegisterAsync(request);
-        if (!result.Success)
-        {
-            return new ApiSuccessResponse<Guid>
-            {
-                Success = false,
-                Message = result.Message ?? "Erreur lors de l'inscription.",
-                Data = Guid.Empty
-            };
-        }
-
-        var createdUser = _users.FirstOrDefault(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
-        return new ApiSuccessResponse<Guid>
-        {
-            Success = true,
-            Message = "Étape 1 validée.",
-            Data = createdUser?.Id ?? Guid.Empty
-        };
-    }
-
     public async Task LogoutAsync()
     {
         await Task.Delay(200);
@@ -254,8 +166,6 @@ public class MockAuthService : IAuthService
         _currentUser = null;
         _currentToken = null;
         _tokenExpiry = null;
-        
-        OnAuthStateChanged?.Invoke();
         
         return;
     }
@@ -275,8 +185,6 @@ public class MockAuthService : IAuthService
         {
             return true;
         }
-
-        _passwordResetRequests.Add(request);
 
         return true;
     }
@@ -328,8 +236,6 @@ public class MockAuthService : IAuthService
         {
             return false;
         }
-
-        _emailVerificationRequests.Add(request);
 
         return true;
     }
@@ -431,17 +337,6 @@ public class MockAuthService : IAuthService
     private string GenerateRefreshToken()
     {
         return $"refresh-{Guid.NewGuid()}-{DateTime.Now.Ticks}";
-    }
-
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        base64 = base64.Replace('-', '+').Replace('_', '/');
-        return (base64.Length % 4) switch
-        {
-            2 => Convert.FromBase64String(base64 + "=="),
-            3 => Convert.FromBase64String(base64 + "="),
-            _ => Convert.FromBase64String(base64),
-        };
     }
 
     #endregion

@@ -5,7 +5,8 @@ module.exports = {
         "./Components/**/*.razor",
         "./Pages/*.razor",
         "./wwwroot/**/*.html",
-        "./Layout/*.razor"
+        "./Layout/*.razor",
+        "./Layouts/**/*.razor"
     ],
     theme: {
         extend: {

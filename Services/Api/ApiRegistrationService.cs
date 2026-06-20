@@ -5,12 +5,9 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiRegistrationService : IRegistrationService
+public class ApiRegistrationService : ApiServiceBase, IRegistrationService
 {
-    private readonly HttpClient _http;
-    private const string CertificateBase = "api/profile/certificates";
-
-    public ApiRegistrationService(HttpClient http) => _http = http;
+    public ApiRegistrationService(HttpClient http) : base(http) { }
 
     public Task<ApiSuccessResponse<Guid>> SubmitStep1Async(RegisterRequest request)
     {
@@ -20,7 +17,7 @@ public class ApiRegistrationService : IRegistrationService
 
     public async Task<ApiSuccessResponse<CertificateStatusDto>> SubmitStep2Async(CertificateSubmissionDto request)
     {
-        var response = await _http.PostAsJsonAsync(CertificateBase, request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Certificates, request);
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync();

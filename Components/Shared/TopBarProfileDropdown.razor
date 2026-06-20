@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
 @using System.Security.Claims
+@using DotnetNiger.UI.Services.Helpers
 @inject NavigationManager Navigation
 @inject IAuthService Auth
 @inject IUserStateService UserStateService
@@ -140,7 +141,7 @@
         new MobileNavItem("/contact", "Messagerie", "material-symbols:mail-rounded", HasNotification: true)
     ];
 
-	private string? ResolvedAvatarUrl => NormalizeImagePath(FirstNotEmpty(
+	private string? ResolvedAvatarUrl => StringHelper.NormalizeImagePath(StringHelper.FirstNotEmpty(
 		profile?.AvatarUrl,
 		GetClaimValue("avatar_url"),
 		GetClaimValue("avatarUrl"),
@@ -152,7 +153,7 @@
 
     private int UnreadNotificationCount => unreadNotificationCount > 0 ? unreadNotificationCount : NotificationCount ?? ParseNotificationCountFromClaims();
 
-	private string DisplayName => FirstNotEmpty(
+	private string DisplayName => StringHelper.FirstNotEmpty(
 		profile?.FullName,
 		profile?.Username,
 		User.Identity?.Name,
@@ -165,21 +166,7 @@
 		"Utilisateur"
 	)!;
 
-    private string Initials
-    {
-        get
-        {
-            var words = DisplayName
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Take(2)
-                .ToArray();
-
-            if (words.Length == 0)
-                return "U";
-
-            return string.Concat(words.Select(w => char.ToUpperInvariant(w[0])));
-        }
-    }
+    private string Initials => StringHelper.GetInitials(DisplayName);
 
     protected override async Task OnInitializedAsync()
     {
@@ -283,7 +270,7 @@
 
     private int ParseNotificationCountFromClaims()
     {
-        var raw = FirstNotEmpty(
+        var raw = StringHelper.FirstNotEmpty(
             GetClaimValue("notifications"),
             GetClaimValue("notificationCount"),
             GetClaimValue("notification_count"),
@@ -292,24 +279,6 @@
         );
 
         return int.TryParse(raw, out var count) ? Math.Max(0, count) : 0;
-    }
-
-    private static string? FirstNotEmpty(params string?[] values)
-        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));
-
-    private static string? NormalizeImagePath(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return null;
-
-        if (value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
-            || value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
-            || value.StartsWith("/"))
-        {
-            return value;
-        }
-
-        return $"/{value.TrimStart('/')}";
     }
 
     private sealed record MobileNavItem(string Href, string Label, string Icon, NavLinkMatch Match = NavLinkMatch.Prefix, bool HasNotification = false);

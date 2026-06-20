@@ -3,24 +3,21 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiPartnerService : IPartnerService
+public class ApiPartnerService : ApiServiceBase, IPartnerService
 {
-    private readonly HttpClient _http;
-    private const string Base = "api/partners";
-
-    public ApiPartnerService(HttpClient http) => _http = http;
+    public ApiPartnerService(HttpClient http) : base(http) { }
 
     public async Task<List<PartnerResponse>> GetAllActiveAsync(string? partnerType)
     {
-        var url = string.IsNullOrWhiteSpace(partnerType) ? Base : $"{Base}?partnerType={Uri.EscapeDataString(partnerType)}";
-        var response = await _http.GetAsync(url);
+        var url = string.IsNullOrWhiteSpace(partnerType) ? ApiEndpoints.Partners : $"{ApiEndpoints.Partners}?partnerType={Uri.EscapeDataString(partnerType)}";
+        var response = await Http.GetAsync(url);
         if (!response.IsSuccessStatusCode) return [];
         return await ApiResponseReader.ReadCollectionAsync<PartnerResponse>(response);
     }
 
     public async Task<PartnerResponse?> GetByIdAsync(Guid id)
     {
-        var response = await _http.GetAsync($"{Base}/{id}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Partners}/{id}");
         if (!response.IsSuccessStatusCode) return null;
         return await ApiResponseReader.ReadAsync<PartnerResponse>(response);
     }

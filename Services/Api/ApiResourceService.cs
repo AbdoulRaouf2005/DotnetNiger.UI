@@ -5,24 +5,20 @@ using System.Net.Http.Json;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiResourceService : IResourceService
+public class ApiResourceService : ApiServiceBase, IResourceService
 {
-    private readonly HttpClient _http;
-    private const string PublicBase = "api/resources";
-
-    public ApiResourceService(HttpClient http)
+    public ApiResourceService(HttpClient http) : base(http)
     {
-        _http = http;
     }
 
     public async Task<List<ResourceDto>> GetAllResourcesAsync()
     {
-        return await GetCollectionAsync<ResourceDto>(PublicBase);
+        return await GetCollectionAsync<ResourceDto>(ApiEndpoints.Resources);
     }
 
     public async Task<ResourceDto?> GetResourceByIdAsync(Guid id)
     {
-        var response = await _http.GetAsync($"{PublicBase}/{id}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Resources}/{id}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -31,7 +27,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
-        var response = await _http.GetAsync($"{PublicBase}/{slug}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Resources}/{slug}");
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -40,7 +36,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetResourcesByTypeAsync(string resourceType)
     {
-        var resources = await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
+        var resources = await GetCollectionAsync<ResourceDto>(ApiEndpoints.Resources, new Dictionary<string, string?>
         {
             ["resourceType"] = resourceType
         });
@@ -50,7 +46,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetResourcesByLevelAsync(string level)
     {
-        var resources = await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
+        var resources = await GetCollectionAsync<ResourceDto>(ApiEndpoints.Resources, new Dictionary<string, string?>
         {
             ["level"] = level
         });
@@ -60,7 +56,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<ResourceDto>> SearchResourcesAsync(string query)
     {
-        return await GetCollectionAsync<ResourceDto>(PublicBase, new Dictionary<string, string?>
+        return await GetCollectionAsync<ResourceDto>(ApiEndpoints.Resources, new Dictionary<string, string?>
         {
             ["query"] = query,
             ["page"] = "1",
@@ -70,7 +66,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<string>> GetResourceTypesAsync()
     {
-        var response = await _http.GetAsync($"{PublicBase}/types");
+        var response = await Http.GetAsync($"{ApiEndpoints.Resources}/types");
         if (!response.IsSuccessStatusCode)
             return [];
 
@@ -79,7 +75,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<List<string>> GetLevelsAsync()
     {
-        var response = await _http.GetAsync($"{PublicBase}/levels");
+        var response = await Http.GetAsync($"{ApiEndpoints.Resources}/levels");
         if (!response.IsSuccessStatusCode)
             return [];
 
@@ -88,7 +84,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> CreateResourceAsync(CreateResourceRequest request)
     {
-        var response = await _http.PostAsJsonAsync(PublicBase, request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Resources, request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -97,7 +93,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> AddResourceAsync(AddResourceRequest request)
     {
-        var response = await _http.PostAsJsonAsync(PublicBase, request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Resources, request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -106,7 +102,7 @@ public class ApiResourceService : IResourceService
 
     public async Task<ResourceDto?> UpdateResourceAsync(Guid id, CreateResourceRequest request)
     {
-        var response = await _http.PutAsJsonAsync($"{PublicBase}/{id}", request);
+        var response = await Http.PutAsJsonAsync($"{ApiEndpoints.Resources}/{id}", request);
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -115,34 +111,13 @@ public class ApiResourceService : IResourceService
 
     public async Task<bool> DeleteResourceAsync(Guid id)
     {
-        var response = await _http.DeleteAsync($"{PublicBase}/{id}");
+        var response = await Http.DeleteAsync($"{ApiEndpoints.Resources}/{id}");
         return response.IsSuccessStatusCode;
     }
 
     public async Task IncrementViewCountAsync(Guid id)
     {
-        await _http.PostAsync($"{PublicBase}/{id}/views", null);
+        await Http.PostAsync($"{ApiEndpoints.Resources}/{id}/views", null);
     }
 
-    private async Task<List<T>> GetCollectionAsync<T>(string path, Dictionary<string, string?>? query = null)
-    {
-        var url = BuildUrl(path, query);
-        var response = await _http.GetAsync(url);
-        if (!response.IsSuccessStatusCode)
-            return new List<T>();
-
-        return await ApiResponseReader.ReadCollectionAsync<T>(response);
-    }
-
-    private static string BuildUrl(string path, Dictionary<string, string?>? query = null)
-    {
-        if (query is null || query.Count == 0)
-            return path;
-
-        var queryString = string.Join("&", query
-            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}"));
-
-        return string.IsNullOrWhiteSpace(queryString) ? path : $"{path}?{queryString}";
-    }
 }

@@ -29,11 +29,18 @@ builder.Services.AddScoped<AuthService>(sp => new AuthService(
         sp,
         sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
     sp.GetRequiredService<CustomAuthStateProvider>(),
+    sp.GetRequiredService<IUserStateService>(),
     clientId
 ));
 
 // Auth
-builder.Services.AddAuthorizationCore();
+builder.Services.AddAuthorizationCore(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin", "SuperAdmin"));
+    options.AddPolicy("ModeratorOrAbove", policy =>
+        policy.RequireRole("Admin", "SuperAdmin", "Moderator"));
+});
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<CustomAuthStateProvider>());
@@ -87,9 +94,7 @@ else
             sp.GetRequiredService<ClientIdentifierProvider>(),
             sp.GetRequiredService<CustomAuthStateProvider>(),
             sp,
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
-            sp.GetRequiredService<CustomAuthStateProvider>(),
-            sp.GetRequiredService<IAuthService>()));
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
     builder.Services.AddScoped<IResourceService>(sp =>
         new ApiResourceService(CreateGatewayHttpClient(
             apiBaseUrl,

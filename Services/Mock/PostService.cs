@@ -1,6 +1,7 @@
 ﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 
 namespace DotnetNiger.UI.Services.Mock
 {
@@ -224,28 +225,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         }
 
-        private string GenerateSlug(string title)
-        {
-            return title
-                .ToLowerInvariant()
-                .Replace(" ", "-")
-                .Replace("ï¿½", "a")
-                .Replace("ï¿½", "e")
-                .Replace("ï¿½", "e")
-                .Replace("ï¿½", "e")
-                .Replace("ï¿½", "e")
-                .Replace("ï¿½", "i")
-                .Replace("ï¿½", "i")
-                .Replace("ï¿½", "o")
-                .Replace("ï¿½", "u")
-                .Replace("ï¿½", "u")
-                .Replace("ï¿½", "c")
-                .Replace("'", "-")
-                .Replace("\"", "")
-                .Replace(",", "")
-                .Replace(".", "")
-                .Replace("?", "")
-                .Replace("!", "");
-        }
+        private static string GenerateSlug(string title)
+            => StringHelper.GenerateSlug(title);
     }
 }
