@@ -53,6 +53,8 @@ public class AuthService : IAuthService
             var (authDto, error) = await ParseTokenResponseAsync(response);
             if (authDto is not null)
             {
+                if (authDto.Token is not null)
+                    await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 
@@ -182,6 +184,8 @@ public class AuthService : IAuthService
             var (authDto, error) = await ParseTokenResponseAsync(response);
             if (authDto is not null)
             {
+                if (authDto.Token is not null)
+                    await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 
