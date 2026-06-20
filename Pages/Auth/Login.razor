@@ -1,13 +1,36 @@
 @page "/login"
+@inject IAuthService Auth
+@inject IUserStateService UserStateService
 @inject NavigationManager Navigation
 @inject Microsoft.Extensions.Configuration.IConfiguration Config
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var apiBase = Config["ApiBaseUrl"] ?? "http://localhost:5000";
-        var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
-        var loginUrl = $"{apiBase}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
-        Navigation.NavigateTo(loginUrl, forceLoad: true);
+        if (Config.GetValue<bool>("UseMockServices"))
+        {
+            var result = await Auth.LoginAsync(new LoginRequest
+            {
+                Email = "admin@dotnet.niger",
+                Password = "password123"
+            });
+
+            if (result.Success && result.Data is not null)
+            {
+                await UserStateService.SetUserAsync(result.Data.User);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        else
+        {
+            var apiBase = Config["ApiBaseUrl"] ?? "http://localhost:5000";
+            var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
+            var loginUrl = $"{apiBase}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+            Navigation.NavigateTo(loginUrl, forceLoad: true);
+        }
     }
 }

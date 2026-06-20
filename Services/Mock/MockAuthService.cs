@@ -1,6 +1,7 @@
 // Services/Mocks/MockAuthService.cs
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 namespace DotnetNiger.UI.Services.Mock;
 
@@ -55,11 +56,17 @@ public class MockAuthService : IAuthService
     private static List<ForgotPasswordRequest> _passwordResetRequests = new();
     private static List<RequestEmailVerificationRequest> _emailVerificationRequests = new();
 
+    private readonly CustomAuthStateProvider _authProvider;
     private UserDto? _currentUser;
     private TokenDto? _currentToken;
     private DateTime? _tokenExpiry;
 
     public event Action? OnAuthStateChanged;
+
+    public MockAuthService(CustomAuthStateProvider authProvider)
+    {
+        _authProvider = authProvider;
+    }
 
     #region Authentification
 
@@ -97,6 +104,7 @@ public class MockAuthService : IAuthService
         // Stocker le refresh token
         _refreshTokens[user.Id.ToString()] = _currentToken.RefreshToken;
 
+        await _authProvider.SaveTokensAsync(_currentToken.AccessToken, _currentToken.RefreshToken);
         OnAuthStateChanged?.Invoke();
 
         return new ApiSuccessResponse<AuthDto>
