@@ -126,6 +126,39 @@ else
                     </div>
                 </div>
 
+                @* --- Ressources similaires (mobile) --- *@
+                @if (SimilarResources.Any())
+                {
+                    <div class="lg:hidden mt-4">
+                        <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
+                            <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
+                                Similaires
+                            </p>
+                            <h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
+                                Ressources similaires
+                            </h2>
+                            <div class="mt-4 space-y-4">
+                                @foreach (var res in SimilarResources)
+                                {
+                                    <a href="/ressource/@res.Slug" class="flex gap-3 group">
+                                        <div class="w-20 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400">
+                                            <i class="@GetSimilarIcon(res.ResourceType) text-sm"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-semibold text-gray-800 group-hover:text-secondary transition line-clamp-2">
+                                                @res.Title
+                                            </p>
+                                            <p class="mt-1 text-xs text-gray-500">
+                                                @res.ResourceType · @res.Level
+                                            </p>
+                                        </div>
+                                    </a>
+                                }
+                            </div>
+                        </aside>
+                    </div>
+                }
+
                 @* --- Bloc 2 : Sidebar (desktop seulement) --- *@
                 <div class="hidden lg:block lg:col-span-1 lg:sticky lg:top-8 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-4">
                     @* --- Partage --- *@
@@ -151,7 +184,7 @@ else
                                       Description="@resource.Description" />
                     </aside>
 
-                    @* --- Ressources similaires (même type) --- *@
+                    @* --- Ressources similaires (desktop) --- *@
                     @if (SimilarResources.Any())
                     {
                         <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
