@@ -76,14 +76,16 @@
                   </nav>
             </div>
 
-            <div class="border-t border-slate-700 p-4">
-                  <NavLink href="/" class="flex items-center gap-2 text-gray-300 transition-colors hover:text-white">
-                        <i class="fas fa-arrow-left mr-3"></i>
-                        @if (!IsCollapsed)
-                        {
-                              <span>Retour au site</span>
-                        }
-                  </NavLink>
+            <div>
+                  <div class="border-t border-slate-700 p-4">
+                        <NavLink href="/" class="flex items-center gap-2 text-gray-300 transition-colors hover:text-white @(IsCollapsed ? "justify-center" : "")">
+                              <i class="fas fa-arrow-left mr-3"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span>Retour au site</span>
+                              }
+                        </NavLink>
+                  </div>
             </div>
       </aside>
 

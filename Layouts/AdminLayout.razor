@@ -7,9 +7,9 @@
 @if (_authorized)
 {
     <div class="flex flex-col h-screen">
-      <Topbar ToggleSidebar="ToggleSidebar"/>
+       <Topbar ToggleSidebar="ToggleSidebar" ToggleCollapsed="ToggleCollapsed" IsCollapsed="isCollapsed"/>
       <div class="flex flex-1 overflow-hidden">
-          <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
+           <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
         <main class="flex-1 overflow-y-auto bg-primary transition-all duration-300">
           <div class="container mx-auto ">
             @Body
