@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -44,7 +43,7 @@ builder.Services.AddAuthorizationCore(options =>
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<CustomAuthStateProvider>());
-builder.Services.AddScoped<DotnetNiger.UI.Services.Contracts.ILocalStorageService, JsLocalStorageService>();
+builder.Services.AddScoped<ILocalStorageService, JsLocalStorageService>();
 
 // Services applicatifs — basculer entre Mock et API via "UseMockServices" dans appsettings.json
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
