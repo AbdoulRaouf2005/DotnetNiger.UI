@@ -108,10 +108,9 @@ else
             CreateGatewayHttpClient(
                 apiBaseUrl,
                 sp.GetRequiredService<ClientIdentifierProvider>(),
-            sp.GetRequiredService<CustomAuthStateProvider>(),
+                sp.GetRequiredService<CustomAuthStateProvider>(),
             sp,
-            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>()),
-            sp.GetRequiredService<CustomAuthStateProvider>()));
+            sp.GetRequiredService<ILogger<ClientIdHeaderHandler>>())));
 
     builder.Services.AddScoped<ICommentService>(sp =>
         new ApiCommentService(

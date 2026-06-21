@@ -10,6 +10,7 @@ namespace DotnetNiger.UI.Services.Api;
 public class ApiCommentService : ApiServiceBase, ICommentService
 {
     private readonly CustomAuthStateProvider _authProvider;
+    private Guid? _currentUserId;
 
     public ApiCommentService(HttpClient http, CustomAuthStateProvider authProvider) : base(http)
     {
@@ -20,13 +21,20 @@ public class ApiCommentService : ApiServiceBase, ICommentService
     {
         get
         {
-            var token = _authProvider.GetAccessTokenAsync().GetAwaiter().GetResult();
+            if (_currentUserId.HasValue)
+                return _currentUserId.Value;
+
+            var tokenTask = _authProvider.GetAccessTokenAsync();
+            tokenTask.Wait();
+            var token = tokenTask.Result;
+
             if (string.IsNullOrWhiteSpace(token))
                 return Guid.Empty;
 
             var claims = JwtParser.ParseClaimsFromJwt(token);
             var userIdClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub");
-            return userIdClaim is not null && Guid.TryParse(userIdClaim.Value, out var uid) ? uid : Guid.Empty;
+            _currentUserId = userIdClaim is not null && Guid.TryParse(userIdClaim.Value, out var uid) ? uid : Guid.Empty;
+            return _currentUserId.Value;
         }
     }
 
@@ -60,10 +68,10 @@ public class ApiCommentService : ApiServiceBase, ICommentService
     public async Task<CommentResponse?> CreateCommentAsync(CreateCommentRequest request)
     {
         var response = await Http.PostAsJsonAsync(ApiEndpoints.Comments, request);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await ApiResponseReader.ReadAsync<CommentResponse>(response)
-               ?? throw new InvalidOperationException("Empty API response for comment creation.");
+        return await ApiResponseReader.ReadAsync<CommentResponse>(response);
     }
 
     public async Task<CommentResponse?> UpdateCommentAsync(UpdateCommentRequest request)

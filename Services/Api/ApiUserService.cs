@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using DotnetNiger.UI.Helpers;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
@@ -121,7 +122,7 @@ public class ApiUserService : ApiServiceBase, IUserService
         if (!response.IsSuccessStatusCode)
             return false;
 
-        var roleContent = JsonContent.Create(new { roleName = "Member" });
+        var roleContent = JsonContent.Create(new { roleName = RoleConstants.Member });
         await Http.PostAsync($"{ApiEndpoints.AdminUsers}/{userId}/roles", roleContent);
 
         return true;

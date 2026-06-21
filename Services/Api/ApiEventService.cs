@@ -84,21 +84,13 @@ public class ApiEventService : ApiServiceBase, IEventService
         return events.Where(e => e.EventType.Equals(eventType, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
-    public async Task<EventDto> CreateEventAsync(CreateEventRequest request)
-    {
-        var response = await Http.PostAsJsonAsync(ApiEndpoints.Events, request);
-        response.EnsureSuccessStatusCode();
-
-        return await ApiResponseReader.ReadAsync<EventDto>(response)
-               ?? throw new InvalidOperationException("La réponse API est vide pour la création de l'événement.");
-    }
-
     public async Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin)
     {
-        _ = currentUserId;
-        _ = isAdmin;
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.Events, request);
+        if (!response.IsSuccessStatusCode)
+            return null;
 
-        return await CreateEventAsync(request);
+        return await ApiResponseReader.ReadAsync<EventDto>(response);
     }
 
     public async Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request)
