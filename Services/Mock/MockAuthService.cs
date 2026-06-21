@@ -4,6 +4,7 @@ using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Contracts;
 using DotnetNiger.UI.Services.Helpers;
+
 namespace DotnetNiger.UI.Services.Mock;
 
 public class MockAuthService : IAuthService
@@ -105,7 +106,7 @@ public class MockAuthService : IAuthService
             FullName = request.FullName,
             IsActive = true,
             CreatedAt = DateTime.Now,
-            Roles = new List<string> { "Member" },
+            Roles = new List<string> { RoleConstants.Member },
             Skills = new List<string>()
         };
 
@@ -166,8 +167,6 @@ public class MockAuthService : IAuthService
         _currentUser = null;
         _currentToken = null;
         _tokenExpiry = null;
-        
-        return;
     }
 
     #endregion
@@ -300,7 +299,7 @@ public class MockAuthService : IAuthService
     public async Task<bool> IsAdminAsync()
     {
         await Task.Delay(50);
-        return _currentUser?.Roles.Contains("Admin") ?? false;
+        return _currentUser?.Roles.Any(r => RoleConstants.IsAdminRole(r)) ?? false;
     }
 
     public async Task<string?> GetAccessTokenAsync()
