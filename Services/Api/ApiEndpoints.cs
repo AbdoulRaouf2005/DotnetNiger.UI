@@ -13,8 +13,8 @@ public static class ApiEndpoints
     public const string Contact = "api/contact";
     public const string Notifications = "api/notifications";
     public const string Newsletters = "api/newsletters";
-    public const string Upload = "/api/upload";
-    public const string UploadBase64 = "/api/upload/base64";
+    public const string Upload = "api/upload";
+    public const string UploadBase64 = "api/upload/base64";
     public const string Profile = "api/me";
     public const string SocialLinks = "api/social-links";
     public const string Certificates = "api/profile/certificates";

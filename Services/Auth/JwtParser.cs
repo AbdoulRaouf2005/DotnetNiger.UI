@@ -8,7 +8,11 @@ public static class JwtParser
 {
     public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
-        var payload = jwt.Split('.')[1];
+        var parts = jwt.Split('.');
+        if (parts.Length < 3)
+            return Enumerable.Empty<Claim>();
+
+        var payload = parts[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
 

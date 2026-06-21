@@ -11,7 +11,6 @@ public class ApiRegistrationService : ApiServiceBase, IRegistrationService
 
     public Task<ApiSuccessResponse<Guid>> SubmitStep1Async(RegisterRequest request)
     {
-        // L'étape 1 est gérée via la redirection externe vers Identity Server (/Account/Register).
         throw new NotSupportedException("L'étape 1 est gérée par Identity Server via redirection externe.");
     }
 
@@ -27,7 +26,10 @@ public class ApiRegistrationService : ApiServiceBase, IRegistrationService
                 Message = string.IsNullOrWhiteSpace(errorBody) ? "Erreur lors de la soumission du certificat." : errorBody
             };
         }
-        return await response.Content.ReadFromJsonAsync<ApiSuccessResponse<CertificateStatusDto>>()
-            ?? new ApiSuccessResponse<CertificateStatusDto> { Success = true };
+
+        var result = await ApiResponseReader.ReadAsync<CertificateStatusDto>(response);
+        return result is not null
+            ? new ApiSuccessResponse<CertificateStatusDto> { Success = true, Data = result }
+            : new ApiSuccessResponse<CertificateStatusDto> { Success = true };
     }
 }

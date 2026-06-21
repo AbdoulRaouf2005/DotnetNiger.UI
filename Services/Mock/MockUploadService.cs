@@ -35,7 +35,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Format non autorisé. Formats acceptés : {string.Join(", ", AllowedExtensions)}"
+                Message = $"Format non autorisÃ©. Formats acceptÃ©s : {string.Join(", ", AllowedExtensions)}"
             };
         }
 
@@ -44,7 +44,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = "Type MIME non autorisé."
+                Message = "Type MIME non autorisÃ©."
             };
         }
 
@@ -53,7 +53,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Le fichier dépasse la taille maximale de 5 Mo."
+                Message = $"Le fichier dÃ©passe la taille maximale de 5 Mo."
             };
         }
 
@@ -80,7 +80,7 @@ public class MockUploadService : IUploadService
         return new UploadResponse
         {
             Success = true,
-            Message = "Image uploadée avec succès.",
+            Message = "Image uploadÃ©e avec succÃ¨s.",
             ImageUrl = relativePath,
             FileName = uniqueName,
             FileSize = file.Size,
@@ -97,7 +97,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Format non autorisé. Formats acceptés : {string.Join(", ", AllowedExtensions)}"
+                Message = $"Format non autorisÃ©. Formats acceptÃ©s : {string.Join(", ", AllowedExtensions)}"
             };
         }
 
@@ -108,7 +108,7 @@ public class MockUploadService : IUploadService
             return new UploadResponse
             {
                 Success = false,
-                Message = $"Le fichier dépasse la taille maximale de 5 Mo."
+                Message = $"Le fichier dÃ©passe la taille maximale de 5 Mo."
             };
         }
 
@@ -130,7 +130,7 @@ public class MockUploadService : IUploadService
         return new UploadResponse
         {
             Success = true,
-            Message = "Image uploadée avec succès.",
+            Message = "Image uploadÃ©e avec succÃ¨s.",
             ImageUrl = relativePath,
             FileName = uniqueName,
             FileSize = bytes.Length,

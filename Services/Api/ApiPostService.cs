@@ -102,6 +102,18 @@ public class ApiPostService : ApiServiceBase, IPostService
         });
     }
 
+    public async Task<bool> PublishPostAsync(Guid postId)
+    {
+        var response = await Http.PatchAsync($"{ApiEndpoints.Posts}/{postId}/publish", null);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> UnPublishPostAsync(Guid postId)
+    {
+        var response = await Http.PatchAsync($"{ApiEndpoints.Posts}/{postId}/unpublish", null);
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task IncrementViewCountAsync(Guid id)
     {
         await Http.PostAsync($"{ApiEndpoints.Posts}/{id}/views", null);

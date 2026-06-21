@@ -47,7 +47,7 @@ public class ApiUploadService : ApiServiceBase, IUploadService
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
         content.Add(fileContent, "file", file.Name);
 
-        var response = await Http.PostAsync($"{ApiEndpoints.Upload}?type={type}", content);
+        var response = await Http.PostAsync(BuildUrl(ApiEndpoints.Upload, new Dictionary<string, string?> { ["type"] = type.ToString() }), content);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -115,7 +115,7 @@ public class ApiUploadService : ApiServiceBase, IUploadService
 
     public async Task<bool> DeleteImageAsync(string imageUrl)
     {
-        var response = await Http.DeleteAsync($"{ApiEndpoints.Upload}?path={Uri.EscapeDataString(imageUrl)}");
+        var response = await Http.DeleteAsync(BuildUrl(ApiEndpoints.Upload, new Dictionary<string, string?> { ["path"] = imageUrl }));
         return response.IsSuccessStatusCode;
     }
 

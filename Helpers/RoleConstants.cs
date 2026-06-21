@@ -5,7 +5,7 @@ public static class RoleConstants
     public const string Admin = "admin";
     public const string SuperAdmin = "superadmin";
     public const string Moderator = "moderator";
-    public const string Member = "Member";
+    public const string Member = "member";
 
     public static readonly string[] AdminRoles = [Admin, SuperAdmin, Moderator];
 

@@ -15,7 +15,7 @@ public interface IPostService
     Task<PostDto?> CreatePostAsync(CreatePostRequest request,Guid UserId);
     Task<PostDto?> UpdatePostAsync(Guid postId, UpdatePostRequest request);
     Task<bool> DeletePostAsync(Guid postId);
-    Task<bool> PublishPostAsync(Guid postId) => Task.FromResult(false);
-    Task<bool> UnPublishPostAsync(Guid postId) => Task.FromResult(false);
+    Task<bool> PublishPostAsync(Guid postId);
+    Task<bool> UnPublishPostAsync(Guid postId);
     Task IncrementViewCountAsync(Guid id);
 }

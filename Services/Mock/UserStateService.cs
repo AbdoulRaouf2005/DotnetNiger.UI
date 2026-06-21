@@ -58,7 +58,7 @@ public class UserStateService : IUserStateService
     
     public async Task RefreshUserAsync()
     {
-        if (_currentUser?.Id != null)
+        if (_currentUser != null)
         {
             var freshUser = await _userService.GetUserByIdAsync(_currentUser.Id);
             if (freshUser != null)

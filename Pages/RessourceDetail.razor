@@ -11,77 +11,23 @@
 	<HeadContent>
 		<meta property="og:title" content="@resource.Title" />
 		<meta property="og:description" content="@resource.Description" />
-		<meta property="og:image" content="@GetAbsoluteUrl("/Logo.svg")" />
-		<meta property="og:url" content="@GetAbsoluteUrl(Navigation.Uri)" />
+		<meta property="og:image" content="@ResolveImageUrl(null)" />
+		<meta property="og:url" content="@Navigation.Uri" />
 		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="Dotnet Niger" />
+		<meta property="og:locale" content="fr_FR" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content="@resource.Title" />
 		<meta name="twitter:description" content="@resource.Description" />
-		<meta name="twitter:image" content="@GetAbsoluteUrl("/Logo.svg")" />
+		<meta name="twitter:image" content="@ResolveImageUrl(null)" />
 	</HeadContent>
 }
 
 @if (isLoading)
 {
-    <section class="bg-gradient-to-b from-[#e8e3f6] to-white px-4 py-10 sm:py-14 lg:px-10">
-        <div class="mx-auto w-full max-w-6xl">
-            <div class="lg:grid lg:grid-cols-3 lg:gap-6">
-                <div class="lg:col-span-2">
-                    <nav class="mb-6">
-                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="h-4 w-48" />
-                    </nav>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                        <Skeleton Type="SkeletonType.Image" Class="h-44 sm:h-56 rounded-none" />
-                        <div class="p-6 sm:p-8 lg:p-10 space-y-4">
-                            <div class="flex gap-3">
-                                <Skeleton Type="SkeletonType.Badge" Width="80px" />
-                                <Skeleton Type="SkeletonType.Badge" Width="100px" />
-                            </div>
-                            <Skeleton Type="SkeletonType.Title" Class="w-full" />
-                            <Skeleton Type="SkeletonType.Title" Class="w-3/4" />
-                            <Skeleton Type="SkeletonType.Text" Lines="3" />
-                            <div class="flex gap-2">
-                                @for (int t = 0; t < 4; t++)
-                                {
-                                    <Skeleton Type="SkeletonType.Badge" Width="70px" />
-                                }
-                            </div>
-                            <div class="flex gap-3 pt-4 border-t border-gray-100">
-                                <Skeleton Type="SkeletonType.Button" Width="200px" />
-                                <Skeleton Type="SkeletonType.Button" Width="180px" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="hidden lg:block lg:col-span-1 space-y-4">
-                    <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm space-y-3">
-                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="h-4 w-24" />
-                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="h-5 w-48" />
-                        <Skeleton Type="SkeletonType.Text" Lines="2" />
-                        <div class="flex gap-2">
-                            @for (int s = 0; s < 4; s++)
-                            {
-                                <Skeleton Type="SkeletonType.Avatar" Size="36px" Class="h-9 w-9" />
-                            }
-                        </div>
-                    </aside>
-                    <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm space-y-4">
-                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="h-4 w-20" />
-                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="h-5 w-44" />
-                        @for (int s = 0; s < 3; s++)
-                        {
-                            <div class="flex gap-3">
-                                <Skeleton Type="SkeletonType.Image" Class="w-20 h-14 rounded-lg flex-shrink-0" />
-                                <div class="flex-1 space-y-2">
-                                    <Skeleton Type="SkeletonType.Text" Lines="2" />
-                                </div>
-                            </div>
-                        }
-                    </aside>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="min-h-[60vh] flex items-center justify-center">
+        <div class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-secondary border-r-transparent"></div>
+    </div>
 }
 else if (resource is null)
 {
@@ -103,200 +49,76 @@ else if (resource is null)
 else
 {
     <section class="bg-gradient-to-b from-[#e8e3f6] to-white px-4 py-10 sm:py-14 lg:px-10">
-        <div class="mx-auto w-full max-w-6xl">
-            <div class="lg:grid lg:grid-cols-3 lg:gap-6">
-                @* --- Bloc 1 : Contenu principal --- *@
-                <div class="lg:col-span-2">
-                    <nav class="mb-6 text-sm text-gray-500">
-                        <a href="/ressources" class="hover:text-secondary transition">Ressources</a>
-                        <span class="mx-2">/</span>
-                        <span class="text-gray-900 font-medium">@resource.Title</span>
-                    </nav>
+        <div class="mx-auto w-full max-w-4xl">
+            <nav class="mb-6 text-sm text-gray-500">
+                <a href="/ressources" class="hover:text-secondary transition">Ressources</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-900 font-medium">@resource.Title</span>
+            </nav>
 
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="@GradientClass h-44 sm:h-56 flex items-center justify-center relative">
-                            <div class="absolute inset-0 bg-white/10"></div>
-                            <div class="relative flex flex-col items-center gap-3">
-                                <i class="@IconClass text-white text-5xl sm:text-6xl opacity-90"></i>
-                                <span class="inline-flex rounded-full bg-white/20 backdrop-blur-sm px-4 py-1 text-sm font-semibold text-white">@resource.ResourceType</span>
-                            </div>
-                        </div>
-
-                        <div class="p-6 sm:p-8 lg:p-10">
-                            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                                <div class="flex flex-wrap items-center gap-3">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
-                                        <i class="@LevelIconClass"></i>
-                                        @resource.Level
-                                    </span>
-                                    <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                                        <i class="fas fa-eye"></i>
-                                        @resource.ViewCount vue@(resource.ViewCount > 1 ? "s" : "")
-                                    </span>
-                                    @if (resource.CreatedAt != default)
-                                    {
-                                        <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                                            <i class="fas fa-calendar"></i>
-                                            @resource.CreatedAt.ToString("dd MMM yyyy")
-                                        </span>
-                                    }
-                                </div>
-                                <button type="button"
-                                        class="lg:hidden text-gray-400 hover:text-gray-600 transition"
-                                        aria-label="Partager" aria-expanded="@IsShared"
-                                        aria-controls="mobile-share-panel" @onclick="ToggleSharePanel">
-                                    <i class="fa-solid fa-share-nodes text-sm"></i>
-                                </button>
-                            </div>
-
-                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">@resource.Title</h1>
-
-                            @if (!string.IsNullOrWhiteSpace(resource.Description))
-                            {
-                                <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">@resource.Description</p>
-                            }
-
-                            @if (resource.Tags.Count > 0)
-                            {
-                                <div class="flex flex-wrap gap-2 mb-8">
-                                    @foreach (var tag in resource.Tags)
-                                    {
-                                        <span class="inline-flex rounded-full bg-gray-100 text-gray-600 px-3 py-1 text-xs font-medium">#@tag.Name</span>
-                                    }
-                                </div>
-                            }
-
-                            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
-                                <a href="@resource.Url" target="_blank" rel="noopener noreferrer"
-                                   class="inline-flex items-center justify-center gap-2 rounded-lg bg-secondary text-white px-6 py-3 text-sm font-semibold hover:brightness-110 transition">
-                                    Accéder à la ressource
-                                    <i class="fas fa-external-link-alt text-xs"></i>
-                                </a>
-                                <a href="/ressources"
-                                   class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 text-gray-700 px-6 py-3 text-sm font-semibold hover:bg-gray-50 transition">
-                                    <i class="fas fa-arrow-left text-xs"></i>
-                                    Retour aux ressources
-                                </a>
-                            </div>
-                        </div>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="@GradientClass h-44 sm:h-56 flex items-center justify-center relative">
+                    <div class="absolute inset-0 bg-white/10"></div>
+                    <div class="relative flex flex-col items-center gap-3">
+                        <i class="@IconClass text-white text-5xl sm:text-6xl opacity-90"></i>
+                        <span class="inline-flex rounded-full bg-white/20 backdrop-blur-sm px-4 py-1 text-sm font-semibold text-white">@resource.ResourceType</span>
                     </div>
                 </div>
 
-                @* --- Ressources similaires (mobile) --- *@
-                @if (SimilarResources.Any())
-                {
-                    <div class="lg:hidden mt-4">
-                        <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
-                            <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                                Similaires
-                            </p>
-                            <h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
-                                Ressources similaires
-                            </h2>
-                            <div class="mt-4 space-y-4">
-                                @foreach (var res in SimilarResources)
-                                {
-                                    <a href="/ressource/@res.Slug" class="flex gap-3 group">
-                                        <div class="w-20 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400">
-                                            <i class="@GetSimilarIcon(res.ResourceType) text-sm"></i>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-semibold text-gray-800 group-hover:text-secondary transition line-clamp-2">
-                                                @res.Title
-                                            </p>
-                                            <p class="mt-1 text-xs text-gray-500">
-                                                @res.ResourceType · @res.Level
-                                            </p>
-                                        </div>
-                                    </a>
-                                }
-                            </div>
-                        </aside>
+                <div class="p-6 sm:p-8 lg:p-10">
+                    <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
+                            <i class="@LevelIconClass"></i>
+                            @resource.Level
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                            <i class="fas fa-eye"></i>
+                            @resource.ViewCount vue@(resource.ViewCount > 1 ? "s" : "")
+                        </span>
+                        @if (resource.CreatedAt != default)
+                        {
+                            <span class="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                                <i class="fas fa-calendar"></i>
+                                @resource.CreatedAt.ToString("dd MMM yyyy")
+                            </span>
+                        }
                     </div>
-                }
 
-                @* --- Bloc 2 : Sidebar (desktop seulement) --- *@
-                <div class="hidden lg:block lg:col-span-1 lg:sticky lg:top-8 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto space-y-4">
-                    @* --- Partage --- *@
-                    <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                                    Partage
-                                </p>
-                                <h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
-                                    Partager cette ressource
-                                </h2>
-                                <p class="mt-2 text-xs sm:text-sm leading-relaxed text-gray-500">
-                                    Diffusez cette ressource sur vos réseaux ou copiez le lien direct.
-                                </p>
-                            </div>
-                            <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-50 text-secondary">
-                                <i class="fa-solid fa-share-nodes"></i>
-                            </div>
-                        </div>
-                        <ShareButtons Title="@resource.Title"
-                                      Url="@GetAbsoluteUrl(Navigation.Uri)"
-                                      Description="@resource.Description" />
-                    </aside>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">@resource.Title</h1>
 
-                    @* --- Ressources similaires (desktop) --- *@
-                    @if (SimilarResources.Any())
+                    @if (!string.IsNullOrWhiteSpace(resource.Description))
                     {
-                        <aside class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm">
-                            <p class="text-[10px] sm:text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
-                                Similaires
-                            </p>
-                            <h2 class="mt-1 text-lg sm:text-xl font-bold text-gray-800">
-                                Ressources similaires
-                            </h2>
-                            <div class="mt-4 space-y-4">
-                                @foreach (var res in SimilarResources)
-                                {
-                                    <a href="/ressource/@res.Slug" class="flex gap-3 group">
-                                        <div class="w-20 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400">
-                                            <i class="@GetSimilarIcon(res.ResourceType) text-sm"></i>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="text-sm font-semibold text-gray-800 group-hover:text-secondary transition line-clamp-2">
-                                                @res.Title
-                                            </p>
-                                            <p class="mt-1 text-xs text-gray-500">
-                                                @res.ResourceType · @res.Level
-                                            </p>
-                                        </div>
-                                    </a>
-                                }
-                            </div>
-                        </aside>
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">@resource.Description</p>
                     }
+
+                    @if (resource.Tags.Count > 0)
+                    {
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            @foreach (var tag in resource.Tags)
+                            {
+                                <span class="inline-flex rounded-full bg-gray-100 text-gray-600 px-3 py-1 text-xs font-medium">#@tag.Name</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+                        <a href="@resource.Url" target="_blank" rel="noopener noreferrer"
+                           class="inline-flex items-center justify-center gap-2 rounded-lg bg-secondary text-white px-6 py-3 text-sm font-semibold hover:brightness-110 transition">
+                            Accéder à la ressource
+                            <i class="fas fa-external-link-alt text-xs"></i>
+                        </a>
+                        <a href="/ressources"
+                           class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 text-gray-700 px-6 py-3 text-sm font-semibold hover:bg-gray-50 transition">
+                            <i class="fas fa-arrow-left text-xs"></i>
+                            Retour aux ressources
+                        </a>
+                    </div>
+
+                    <ShareButtons Title="@resource.Title"
+                                  Url="@Navigation.Uri"
+                                  Description="@resource.Description" />
                 </div>
             </div>
-
-            @* --- Mobile share overlay --- *@
-            <div class="fixed inset-0 z-10 bg-black/50 sm:hidden @(IsShared ? "" : "hidden")"
-                 @onclick="ToggleSharePanel"></div>
-            <aside id="mobile-share-panel"
-                   class="overflow-hidden z-20 w-[91%] fixed top-20 rounded-lg border border-gray-100 bg-white shadow-sm transition-all duration-300 lg:hidden @(IsShared ? "max-h-80 p-4 opacity-100 pointer-events-auto translate-x-0" : "max-h-0 p-0 opacity-0 pointer-events-none translate-x-full")">
-                <div class="flex items-center justify-between gap-3">
-                    <div>
-                        <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                            Partage
-                        </p>
-                        <h2 class="mt-1 text-base sm:text-lg font-bold text-gray-800">
-                            Partager cette ressource
-                        </h2>
-                    </div>
-                    <button type="button"
-                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
-                            aria-label="Fermer le partage" @onclick="ToggleSharePanel">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <ShareButtons Title="@resource.Title"
-                              Url="@GetAbsoluteUrl(Navigation.Uri)"
-                              Description="@resource.Description" />
-            </aside>
         </div>
     </section>
 }
@@ -307,8 +129,6 @@ else
 
     private ResourceDto? resource;
     private bool isLoading = true;
-    private bool IsShared;
-    private List<ResourceDto> SimilarResources { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -331,15 +151,6 @@ else
                     await LocalStorage.SetItemAsync($"viewed_resource_{resource.Id}", true);
                 }
             }
-
-            if (resource is not null)
-            {
-                var sameType = await ResourceService.GetResourcesByTypeAsync(resource.ResourceType);
-                SimilarResources = sameType
-                    .Where(r => r.Id != resource.Id)
-                    .Take(3)
-                    .ToList();
-            }
         }
         catch
         {
@@ -350,23 +161,6 @@ else
             isLoading = false;
         }
     }
-
-    private void ToggleSharePanel()
-    {
-        IsShared = !IsShared;
-    }
-
-    private static string GetSimilarIcon(string resourceType) => resourceType switch
-    {
-        "Documentation" => "fas fa-book",
-        "Tutoriel" => "fas fa-graduation-cap",
-        "Article" => "fas fa-newspaper",
-        "GitHub" => "fab fa-github",
-        "Cours" => "fas fa-video",
-        "Livre" => "fas fa-book-open",
-        "Outil" => "fas fa-wrench",
-        _ => "fas fa-file"
-    };
 
     private string GradientClass => resource?.ResourceType switch
     {
@@ -401,10 +195,16 @@ else
         _ => "fas fa-tag"
     };
 
-    private string GetAbsoluteUrl(string relativeUrl)
+    private string ResolveImageUrl(string? imageUrl)
     {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return $"{Navigation.BaseUri.TrimEnd('/')}/images/og-default.jpg";
+
+        if (imageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            imageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return imageUrl;
+
         var baseUri = Navigation.BaseUri.TrimEnd('/');
-        var url = relativeUrl.TrimStart('/');
-        return $"{baseUri}/{url}";
+        return $"{baseUri}/{imageUrl.TrimStart('/')}";
     }
 }

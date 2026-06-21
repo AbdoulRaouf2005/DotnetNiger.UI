@@ -67,22 +67,54 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     }
 
     public async Task<string?> GetAccessTokenAsync()
-        => await _js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
+    {
+        try
+        {
+            return await _js.InvokeAsync<string?>("localStorage.getItem", "accessToken");
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     public async Task<string?> GetRefreshTokenAsync()
-        => await _js.InvokeAsync<string?>("sessionStorage.getItem", "refreshToken");
+    {
+        try
+        {
+            return await _js.InvokeAsync<string?>("sessionStorage.getItem", "refreshToken");
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     public async Task SaveTokensAsync(string accessToken, string refreshToken)
     {
-        await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
-        await _js.InvokeVoidAsync("sessionStorage.setItem", "refreshToken", refreshToken);
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.setItem", "accessToken", accessToken);
+            await _js.InvokeVoidAsync("sessionStorage.setItem", "refreshToken", refreshToken);
+        }
+        catch
+        {
+            // JS interop may fail during pre-rendering
+        }
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     public async Task ClearTokensAsync()
     {
-        await _js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
-        await _js.InvokeVoidAsync("sessionStorage.removeItem", "refreshToken");
+        try
+        {
+            await _js.InvokeVoidAsync("localStorage.removeItem", "accessToken");
+            await _js.InvokeVoidAsync("sessionStorage.removeItem", "refreshToken");
+        }
+        catch
+        {
+            // JS interop may fail during pre-rendering
+        }
         NotifyAuthenticationStateChanged(Task.FromResult(Anonymous));
     }
 
