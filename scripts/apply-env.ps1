@@ -16,23 +16,26 @@ if (-not $apiBaseUrl -and (Test-Path $EnvFile)) {
     }
 }
 
-# 3. Fallback: keep existing value in appsettings.json
-if (-not $apiBaseUrl) {
-    if (Test-Path $appsettingsPath) {
-        $existing = Get-Content $appsettingsPath -Raw | ConvertFrom-Json
-        $apiBaseUrl = $existing.ApiBaseUrl
-    }
+# 3. Load existing config to preserve other properties
+if (Test-Path $appsettingsPath) {
+    $existing = Get-Content $appsettingsPath -Raw | ConvertFrom-Json
+} else {
+    $existing = @{}
 }
 
-# 4. Ultimate fallback
+# 4. Fallback: keep existing value in appsettings.json
+if (-not $apiBaseUrl) {
+    $apiBaseUrl = $existing.ApiBaseUrl
+}
+
+# 5. Ultimate fallback
 if (-not $apiBaseUrl) {
     $apiBaseUrl = "http://localhost:5000"
 }
 
-# Write to appsettings.json
-$config = @{
-    ApiBaseUrl = $apiBaseUrl
-} | ConvertTo-Json
+# Merge: update ApiBaseUrl, keep all other properties
+$existing.ApiBaseUrl = $apiBaseUrl
+$json = $existing | ConvertTo-Json
 
-Set-Content -Path $appsettingsPath -Value $config -NoNewline
+Set-Content -Path $appsettingsPath -Value $json -NoNewline
 Write-Host "API_BASE_URL set to: $apiBaseUrl"
