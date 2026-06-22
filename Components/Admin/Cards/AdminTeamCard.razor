@@ -1,0 +1,60 @@
+@using DotnetNiger.UI.Models.Responses
+@using DotnetNiger.UI.Components.Admin.Shared
+
+<div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
+    <div class="flex items-start justify-between gap-4">
+        <div class="flex min-w-0 items-center gap-3">
+            <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
+                @if (!string.IsNullOrWhiteSpace(User.AvatarUrl))
+                {
+                    <img src="@User.AvatarUrl" alt="@User.FullName" class="h-full w-full object-cover" />
+                }
+                else
+                {
+                    <div class="flex h-full w-full items-center justify-center text-sm font-semibold text-gray-400">
+                        @GetInitial()
+                    </div>
+                }
+            </div>
+            <div class="min-w-0">
+                <p class="truncate text-sm font-semibold text-gray-900">@User.FullName</p>
+                <p class="truncate text-xs text-gray-500">@User.Email</p>
+                @if (!string.IsNullOrWhiteSpace(User.Position))
+                {
+                    <p class="mt-1 text-xs font-medium text-secondary">@User.Position</p>
+                }
+            </div>
+        </div>
+
+        <AdminActionDropdown ItemId="User.Id"
+                             Status="Published"
+                             ViewLabel="Voir"
+                             EditLabel="Modifier"
+                             DeleteLabel="Retirer de l'équipe"
+                             OnView="OnView"
+                             OnEdit="OnEdit"
+                             OnDelete="OnRemoveFromTeam" />
+    </div>
+
+    <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+        <span>@GetPrimaryRole()</span>
+        <span class="@(User.IsActive ? "text-emerald-600" : "text-amber-600") font-semibold">
+            @(User.IsActive ? "Actif" : "Inactif")
+        </span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public UserDto User { get; set; } = default!;
+    [Parameter] public EventCallback<Guid> OnView { get; set; }
+    [Parameter] public EventCallback<Guid> OnEdit { get; set; }
+    [Parameter] public EventCallback<Guid> OnRemoveFromTeam { get; set; }
+
+    private string GetPrimaryRole() => User.Roles.FirstOrDefault() ?? "Member";
+
+    private string GetInitial()
+    {
+        if (string.IsNullOrWhiteSpace(User.FullName)) return "?";
+        return User.FullName.Trim().Substring(0, 1).ToUpperInvariant();
+    }
+}
