@@ -8,6 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 @inject IToastService ToastService
+@inject PreviewStateService PreviewState
 
 <div class="min-h-screen p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -63,6 +64,11 @@
                 <i class="fas fa-save"></i>
                 Annuler
             </button>
+            <button type="button" @onclick="HandlePreview"
+                    class="flex items-center gap-2 rounded-lg bg-gray-700 px-6 py-3 text-white transition hover:bg-gray-800">
+                <i class="fas fa-eye"></i>
+                Aperçu
+            </button>
             <button type="submit" @onclick="Publish"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
                 <i class="fas fa-paper-plane"></i>
@@ -107,6 +113,7 @@
     [Parameter] public Guid Id { get; set; }
 
     private bool isLoading = true;
+    private PostDto? originalPost;
     private UpdatePostRequest postRequest = new();
     private string errorMessage = string.Empty;
 
@@ -123,6 +130,7 @@
             return;
         }
 
+        originalPost = post;
         postRequest = MapToUpdateRequest(post);
         isLoading = false;
     }
@@ -134,6 +142,30 @@
     private void HandleImageDeleted()
     {
         postRequest.CoverImageUrl = string.Empty;
+    }
+
+    private async Task HandlePreview()
+    {
+        postRequest.Content = await EditorRef.GetContentAsync();
+
+        var previewDto = new PostDto
+        {
+            Id = Id,
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            AuthorName = originalPost?.AuthorName ?? string.Empty,
+            AuthorAvatar = originalPost?.AuthorAvatar ?? string.Empty,
+            AuthorId = originalPost?.AuthorId ?? Guid.Empty,
+            PostType = postRequest.PostType,
+            PublishedAt = originalPost?.PublishedAt ?? DateTime.Now,
+            Categories = originalPost?.Categories ?? new(),
+            Tags = postRequest.TagNames.Select(t => new TagDto { Name = t }).ToList()
+        };
+
+        PreviewState.SetBlogPreview(previewDto, $"/admin/blog/edit/{Id}");
+        NavigationManager.NavigateTo("/preview/blog");
     }
 
     private async Task SaveDraft()

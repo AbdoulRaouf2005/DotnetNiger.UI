@@ -49,6 +49,9 @@ builder.Services.AddScoped<ILocalStorageService, JsLocalStorageService>();
 // Theme
 builder.Services.AddScoped<ThemeService>();
 
+// Preview
+builder.Services.AddSingleton<PreviewStateService>();
+
 // Services applicatifs — basculer entre Mock et API via "UseMockServices" dans appsettings.json
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 

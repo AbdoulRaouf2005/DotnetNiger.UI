@@ -9,6 +9,7 @@
 @inject IEventService EventService
 @inject IToastService ToastService
 @inject IUserService UserService
+@inject PreviewStateService PreviewState
 
 <div class="p-6 bg-primary">
     @if (isLoading)
@@ -359,6 +360,11 @@
                     <i class="fas fa-clock"></i>
                     En attente
                 </button>
+                <button type="button" @onclick="HandlePreview"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg flex items-center gap-2">
+                    <i class="fas fa-eye"></i>
+                    Aperçu
+                </button>
                 <button type="submit"
                         class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
                     <i class="fas fa-paper-plane"></i>
@@ -542,6 +548,36 @@
     {
         galleryImageUrls.RemoveAt(index);
         eventRequest.GalleryImageUrls = galleryImageUrls;
+    }
+
+    private async Task HandlePreview()
+    {
+        eventRequest.Description = await EditorRef.GetContentAsync();
+        eventRequest.Speakers = speakers.ToList();
+        eventRequest.GalleryImageUrls = galleryImageUrls;
+
+        var previewDto = new EventDto
+        {
+            Id = Id,
+            Title = eventRequest.Title,
+            Description = eventRequest.Description,
+            Location = eventRequest.Location,
+            Category = eventRequest.Category,
+            EventType = eventRequest.EventType,
+            StartDate = eventRequest.StartDate,
+            EndDate = eventRequest.EndDate,
+            CoverImageUrl = eventRequest.CoverImageUrl,
+            Capacity = eventRequest.Capacity,
+            MeetupLink = eventRequest.MeetupLink,
+            RegisteredCount = 0,
+            GalleryImageUrls = galleryImageUrls,
+            Speakers = speakers.ToList(),
+            OrganizerName = organizerName,
+            IsPublished = false
+        };
+
+        PreviewState.SetEventPreview(previewDto, $"/admin/events/edit/{Id}");
+        Navigation.NavigateTo("/preview/event");
     }
 
     private async Task SaveAsync()

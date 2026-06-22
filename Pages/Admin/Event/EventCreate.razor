@@ -11,6 +11,7 @@
 @inject IEventService EventService
 @inject IToastService ToastService
 @inject IUserService UserService
+@inject PreviewStateService PreviewState
 
 <div class="p-6 bg-primary">
     @if (isLoading)
@@ -541,10 +542,40 @@
         }
     }
 
-    private void PreviewEvent()
+    private async Task PreviewEvent()
     {
-        // TODO: implémenter l'aperçu de l'événement
-        ToastService.ShowToast("Aperçu pas encore disponible.", ToastLevel.Info);
+        eventRequest.Description = await EditorRef.GetContentAsync();
+        eventRequest.EventType = eventMode switch
+        {
+            "online" => "Online",
+            "physical" => "Physical",
+            "hybrid" => "Hybrid",
+            _ => eventRequest.EventType
+        };
+        eventRequest.Speakers = speakers.ToList();
+
+        var previewDto = new EventDto
+        {
+            Id = Guid.Empty,
+            Title = eventRequest.Title,
+            Description = eventRequest.Description,
+            Location = eventRequest.Location,
+            Category = eventRequest.Category,
+            EventType = eventRequest.EventType,
+            StartDate = eventRequest.StartDate,
+            EndDate = eventRequest.EndDate,
+            CoverImageUrl = eventRequest.CoverImageUrl,
+            Capacity = eventRequest.Capacity,
+            MeetupLink = eventRequest.MeetupLink,
+            RegisteredCount = 0,
+            GalleryImageUrls = eventRequest.GalleryImageUrls ?? new(),
+            Speakers = eventRequest.Speakers ?? new(),
+            OrganizerName = organizerName,
+            IsPublished = false
+        };
+
+        PreviewState.SetEventPreview(previewDto, "/admin/events/nouveau");
+        Navigation.NavigateTo("/preview/event");
     }
 
 }

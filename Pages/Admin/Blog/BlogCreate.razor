@@ -8,6 +8,7 @@
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject IToastService ToastService
+@inject PreviewStateService PreviewState
 
 <div class="min-h-screen bg-primary p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -65,7 +66,7 @@
                 <i class="fas fa-paper-plane"></i>
                 Publier
             </button>
-            <button
+            <button type="button" @onclick="HandlePreview"
                 class="flex items-center gap-2 rounded-lg bg-gray-700 px-6 py-3 text-white transition hover:bg-gray-800">
                 <i class="fas fa-eye"></i>
                 Aperçu
@@ -106,6 +107,29 @@
     private void HandleImageDeleted()
     {
         postRequest.CoverImageUrl = string.Empty;
+    }
+
+    private async Task HandlePreview()
+    {
+        postRequest.Content = await EditorRef.GetContentAsync();
+
+        var previewDto = new PostDto
+        {
+            Id = Guid.Empty,
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            AuthorName = UserStateService.UserName,
+            AuthorAvatar = UserStateService.CurrentUser?.AvatarUrl ?? string.Empty,
+            AuthorId = currentUserId,
+            PostType = postRequest.PostType,
+            PublishedAt = DateTime.Now,
+            Tags = postRequest.TagNames.Select(t => new TagDto { Name = t }).ToList()
+        };
+
+        PreviewState.SetBlogPreview(previewDto, "/admin/blog/create");
+        NavigationManager.NavigateTo("/preview/blog");
     }
 
     private async Task HandleSubmit()
