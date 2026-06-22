@@ -1076,6 +1076,10 @@ video {
   margin-top: 2rem;
 }
 
+.mr-1\.5{
+  margin-right: 0.375rem;
+}
+
 .line-clamp-1{
   overflow: hidden;
   display: -webkit-box;
@@ -2745,6 +2749,11 @@ video {
 .py-8{
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.py-5{
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 
 .pb-2{

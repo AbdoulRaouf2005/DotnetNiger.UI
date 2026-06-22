@@ -115,6 +115,11 @@
 								class="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-xs sm:text-sm font-semibold text-gray-700 ring-1 ring-gray-200 transition hover:bg-gray-50">
 								Modifier
 							</button>
+							<button @onclick="ViewRegistrations"
+								class="inline-flex h-10 items-center justify-center rounded-lg bg-secondary px-4 text-xs sm:text-sm font-semibold text-white transition hover:brightness-110">
+								<i class="fas fa-users mr-1.5"></i>
+								Inscrits (@CurrentEvent.RegisteredCount)
+							</button>
 							@if (CurrentEvent.IsPublished)
 							{
 								<button @onclick="ArchiveEvent"
@@ -259,6 +264,12 @@
 	private void GoBack()
 	{
 		NavigationManager.NavigateTo("/admin/events");
+	}
+
+	private void ViewRegistrations()
+	{
+		if (CurrentEvent is null) return;
+		NavigationManager.NavigateTo($"/admin/events/{CurrentEvent.Id}/inscriptions");
 	}
 
 	private void EditEvent()
