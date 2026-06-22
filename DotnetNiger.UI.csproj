@@ -21,8 +21,6 @@
   </ItemGroup>
 
   <Target Name="ApplyEnv" BeforeTargets="BeforeBuild">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Unrestricted -File scripts\apply-env.ps1" Condition="'$(OS)'=='Windows_NT'" />
-    <Exec Command="pwsh -NoProfile -File scripts/apply-env.ps1" Condition="'$(OS)'!='Windows_NT'" />
   </Target>
 
 </Project>
