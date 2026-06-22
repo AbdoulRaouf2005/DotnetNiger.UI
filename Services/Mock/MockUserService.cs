@@ -92,6 +92,8 @@ public class MockUserService : IUserService
             Country = string.Empty,
             City = string.Empty,
             IsActive = true,
+            IsTeamMember = user.IsTeamMember,
+            Position = user.Position,
             CreatedAt = DateTime.Now ,
             LastLoginAt = DateTime.Now,
             Skills = new List<string>(),
@@ -118,6 +120,8 @@ public class MockUserService : IUserService
         existing.Country = user.Country;
         existing.City = user.City;
         existing.IsActive = user.IsActive;
+        existing.IsTeamMember = user.IsTeamMember;
+        existing.Position = user.Position;
         existing.Skills = user.Skills.Count > 0 ? user.Skills.ToList() : existing.Skills;
         existing.Roles = user.Roles.Count > 0 ? user.Roles.ToList() : existing.Roles;
         existing.SocialLinks = user.SocialLinks.Count > 0 ? user.SocialLinks.ToList() : existing.SocialLinks;

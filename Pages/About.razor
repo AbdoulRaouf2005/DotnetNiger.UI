@@ -134,7 +134,7 @@
 						</div>
 					</section>
 
-					<!-- LEADERSHIP -->
+					<!-- TEAM -->
 					<section id="equipe" class="px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
 						<div class="mx-auto max-w-6xl">
 							<div class="text-center">
@@ -146,116 +146,51 @@
 								</p>
 							</div>
 
-							<div class="mt-8 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
-								@foreach (var leader in leaders)
-								{
-									<article
-										class="overflow-hidden rounded-lg border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
-										<div
-											class="relative h-56 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-br @leader.HeaderBackground">
-											<div
-												class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.20),_transparent_48%)]">
-											</div>
-											<img src="/Images/upload/user.png" alt="@leader.Name"
-											     class="absolute inset-0 h-full w-full object-cover object-center opacity-90" />
-										</div>
-
-										<div class="space-y-3 p-4 sm:space-y-4 sm:p-5">
-											<div>
-												<h3 class="text-base sm:text-lg font-bold text-slate-900">@leader.Name</h3>
-												<p class="text-xs sm:text-sm font-semibold text-warning">@leader.Role</p>
-											</div>
-
-											<p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600">
-												@leader.Description</p>
+							@if (teamLoading)
+							{
+								<div class="mt-8 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
+									@for (int i = 0; i < 3; i++)
+									{
+										<article class="overflow-hidden rounded-lg border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+											<Skeleton Type="SkeletonType.Custom" Class="h-56 sm:h-64 md:h-72 w-full" />
+											<div class="space-y-3 p-4 sm:space-y-4 sm:p-5">
+												<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-3/4" />
+												<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2" />
+												<Skeleton Type="SkeletonType.Text" Lines="2" Class="w-full" />
 											</div>
 										</article>
 									}
 								</div>
-							</div>
-						</section>
-
-						<!-- MEMBERS -->
-						<section class="bg-surface px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
-							<div class="mx-auto max-w-6xl text-center">
-								<button type="button" @onclick="ToggleMembersSection"
-									  class="inline-flex items-center gap-2 rounded-full bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-accent-hover">
-									<i class="fa-solid @MembersToggleIconClass"></i>
-									<span>@(showMembersSection ? "Masquer les membres" : "Voir tous les membres")</span>
-								</button>
-
-								@if (showMembersSection)
-								{
-									<div class="mt-6 sm:mt-8 p-4 text-left ">
-										@if (membersLoading)
-										{
-											<div class="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
-												@for (int i = 0; i < 8; i++)
-												{
-													<div class="flex flex-col items-center rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-														<Skeleton Type="SkeletonType.Avatar" Size="80px" Class="h-20 w-20" />
-														<div class="mt-4 w-full space-y-2 text-center">
-															<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-3/4 mx-auto" />
-															<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2 mx-auto" />
-														</div>
-													</div>
-												}
-											</div>
-										}
-										else if (membersError)
-										{
-											<div class="flex flex-col items-center justify-center py-12 text-center">
-												<i class="fa-solid fa-exclamation-triangle text-3xl text-amber-500"></i>
-												<p class="mt-3 text-sm text-slate-600">Impossible de charger la liste des membres.</p>
-												<button type="button" @onclick="LoadMembersAsync"
-														class="mt-3 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white transition hover:bg-accent-hover">
-													<i class="fa-solid fa-rotate"></i> Réessayer
-												</button>
-											</div>
-										}
-										else if (members.Count == 0)
-										{
-											<div class="flex flex-col items-center justify-center py-12 text-center">
-												<i class="fa-solid fa-users-slash text-3xl text-slate-300"></i>
-												<p class="mt-3 text-sm text-slate-500">Aucun membre pour le moment.</p>
-											</div>
-										}
-										else
-										{
-											<div class="flex flex-col sm:flex-row gap-3 mb-8">
-												<div class="relative flex-1">
-													<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-													<input type="text"
-														   placeholder="Rechercher un membre..."
-														   @bind="memberSearch"
-														   @bind:event="oninput"
-														   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
-													@if (!string.IsNullOrEmpty(memberSearch))
-													{
-														<button @onclick="() => { memberSearch = string.Empty; }"
-																class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-															<i class="fas fa-times"></i>
-														</button>
-													}
-												</div>
-											</div>
-
-											<div class="mt-8 sm:mt-10 flex items-center gap-3">
-												<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Membres</h2>
-												<span class="rounded-full bg-border-soft px-3 py-1 text-xs font-bold text-secondary">@filteredMembers.Count</span>
-											</div>
-
-											<div class="mt-5 sm:mt-6 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
-												@foreach (var member in filteredMembers)
-												{
-													<UserCard User="member"/>
-												}
-											</div>
-										}
-									</div>
-								}
-							</div>
-						</section>
+							}
+							else if (teamError)
+							{
+								<div class="mt-8 sm:mt-12 flex flex-col items-center justify-center py-12 text-center">
+									<i class="fa-solid fa-exclamation-triangle text-3xl text-amber-500"></i>
+									<p class="mt-3 text-sm text-slate-600">Impossible de charger l'équipe.</p>
+									<button type="button" @onclick="LoadTeamAsync"
+											class="mt-3 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white transition hover:bg-accent-hover">
+										<i class="fa-solid fa-rotate"></i> Réessayer
+									</button>
+								</div>
+							}
+							else if (teamMembers.Count == 0)
+							{
+								<div class="mt-8 sm:mt-12 flex flex-col items-center justify-center py-12 text-center">
+									<i class="fa-solid fa-users-slash text-3xl text-slate-300"></i>
+									<p class="mt-3 text-sm text-slate-500">Aucun membre dans l'équipe pour le moment.</p>
+								</div>
+							}
+							else
+							{
+								<div class="mt-8 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
+									@foreach (var member in teamMembers)
+									{
+										<TeamMemberCard Member="member" />
+									}
+								</div>
+							}
+						</div>
+					</section>
 					</div>
 
 @code {
@@ -273,67 +208,34 @@
 		new MilestoneItem("2026", "La Reconnaissance", "fa-solid fa-award", "bg-secondary", "text-info", "Signature de partenariats stratégiques avec des institutions locales et intégration officielle dans le réseau global des communautés .NET.")
 	};
 
-	private readonly IReadOnlyList<LeaderItem> leaders = new[]
-	{
-		new LeaderItem("Ahmed Moussa", "Community Lead", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-warning", "Porte la vision de la communauté et structure les initiatives pour faire grandir l'écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
-		new LeaderItem("Abdallah Ibrahim", "Technical Outreach", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-info", "Facilite les ateliers, les rencontres techniques et l'accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
-		new LeaderItem("Ibrahim Sani", "Content Strategy", "bg-gradient-to-br from-[#8A1E16] via-[#4B1711] to-[#1E0B0A]",
-"text-warning", "Expert en communication technique, il simplifie les concepts complexes et les rend utiles à tous.",
-new[] { "Editorial", "UX", "Culture" })
-	};
-
-	private List<UserDto> members = [];
-	private bool showMembersSection;
-	private bool membersLoading;
-	private bool membersError;
-	private string memberSearch = string.Empty;
-
-	private string MembersToggleIconClass => showMembersSection ? "fa-chevron-up" : "fa-users";
-
-	private List<UserDto> filteredMembers =>
-		string.IsNullOrWhiteSpace(memberSearch)
-			? members
-			: members.Where(m =>
-				m.FullName.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
-				m.City.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
-				m.Country.Contains(memberSearch, StringComparison.OrdinalIgnoreCase) ||
-				m.Skills.Any(s => s.Contains(memberSearch, StringComparison.OrdinalIgnoreCase)) ||
-				m.Roles.Any(r => r.Contains(memberSearch, StringComparison.OrdinalIgnoreCase))
-			).ToList();
-
-	private void ToggleMembersSection()
-	{
-		showMembersSection = !showMembersSection;
-		if (showMembersSection && members.Count == 0 && !membersLoading)
-			_ = LoadMembersAsync();
-	}
+	private List<UserDto> teamMembers = [];
+	private bool teamLoading;
+	private bool teamError;
 
 	protected override async Task OnInitializedAsync()
 	{
-		await LoadMembersAsync();
+		await LoadTeamAsync();
 	}
 
-	private async Task LoadMembersAsync()
+	private async Task LoadTeamAsync()
 	{
-		membersLoading = true;
-		membersError = false;
+		teamLoading = true;
+		teamError = false;
 		try
 		{
 			var all = await UserService.GetUsersAsync();
-			members = all
-				.Where(u => u.IsActive)
+			teamMembers = all
+				.Where(u => u.IsActive && u.IsTeamMember)
 				.OrderByDescending(u => u.CreatedAt)
 				.ToList();
 		}
 		catch
 		{
-			membersError = true;
+			teamError = true;
 		}
 		finally
 		{
-			membersLoading = false;
+			teamLoading = false;
 		}
 	}
 
@@ -341,7 +243,4 @@ new[] { "Editorial", "UX", "Culture" })
 
 	private sealed record MilestoneItem(string Year, string Title, string Icon, string BadgeBackground, string TitleColor,
 string Description);
-
-	private sealed record LeaderItem(string Name, string Role, string HeaderBackground, string RoleColor, string
-Description, IReadOnlyList<string> Tags);
 }

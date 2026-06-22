@@ -231,6 +231,19 @@
                                            placeholder="le mot de passe temporaire" />
                             </div>
 
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Position dans l'équipe</label>
+                                <InputText @bind-Value="CreateUser.Position"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none"
+                                           placeholder="Ex: Community Lead" />
+                            </div>
+
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <InputCheckbox @bind-Value="CreateUser.IsTeamMember"
+                                               class="h-5 w-5 rounded border-gray-300 text-secondary focus:ring-secondary" />
+                                <span class="text-sm font-medium">Intégrer à l'équipe</span>
+                            </label>
+
                             <div class="border-t pt-4 flex justify-end gap-3 bg-white">
                                 <button type="button" @onclick="CloseForm"
                                         class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition">
@@ -401,6 +414,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
         CreateUser.FullName = user.FullName;
         CreateUser.Email = user.Email;
         CreateUser.Password = string.Empty;
+        CreateUser.IsTeamMember = user.IsTeamMember;
+        CreateUser.Position = user.Position;
         editPrimaryRole = GetPrimaryRole(user);
         isFormOpen = true;
     }
@@ -408,6 +423,7 @@ StringComparison.OrdinalIgnoreCase))).ToList();
     private async Task OpenCreateAsync()
     {
         editingUserId = null;
+        CreateUser = new CreateUserRequest();
         editModel = new UserDto
         {
             IsActive = true,
@@ -415,8 +431,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             Roles = new List<string> { "Member" }
         };
         editPrimaryRole = "Member";
-        isFormOpen = true;
-        await Task.CompletedTask;
+            isFormOpen = true;
+            await Task.CompletedTask;
     }
 
     private void CloseForm()
@@ -441,6 +457,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
                 editModel.FullName = CreateUser.FullName;
                 editModel.Email = CreateUser.Email;
                 editModel.Id = editingUserId.Value;
+                editModel.IsTeamMember = CreateUser.IsTeamMember;
+                editModel.Position = CreateUser.Position;
                 await UserService.UpdateUserAsync(editModel);
                 ToastService.ShowToast("Utilisateur mis à jour.", ToastLevel.Success);
             }
@@ -467,6 +485,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             Country = user.Country,
             City = user.City,
             IsActive = user.IsActive,
+            IsTeamMember = user.IsTeamMember,
+            Position = user.Position,
             CreatedAt = user.CreatedAt,
             LastLoginAt = user.LastLoginAt,
             Skills = user.Skills.ToList(),

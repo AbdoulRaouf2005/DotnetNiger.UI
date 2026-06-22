@@ -81,6 +81,14 @@
                                     <span class="Link">Partenaires</span>
                               }
                         </NavLink>
+
+                        <NavLink href="/admin/team" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active">
+                              <i class="fas fa-users w-8 text-2xl"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span class="Link">Équipe</span>
+                              }
+                        </NavLink>
                   </nav>
             </div>
 
@@ -158,6 +166,11 @@
                         <NavLink href="/admin/partners" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
                               <i class="fas fa-handshake w-8 text-2xl"></i>
                               <span class="Link">Partenaires</span>
+                        </NavLink>
+
+                        <NavLink href="/admin/team" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
+                              <i class="fas fa-users w-8 text-2xl"></i>
+                              <span class="Link">Équipe</span>
                         </NavLink>
                   </nav>
             </div>
