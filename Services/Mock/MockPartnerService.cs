@@ -1,4 +1,5 @@
-﻿using DotnetNiger.UI.Models.Responses;
+﻿using DotnetNiger.UI.Models.Requests;
+using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Mock;
@@ -39,9 +40,59 @@ public class MockPartnerService : IPartnerService
         return result.OrderBy(p => p.SortOrder).ToList();
     }
 
+    public async Task<List<PartnerResponse>> GetAllAsync()
+    {
+        await Task.Delay(500);
+        return _partners.OrderBy(p => p.SortOrder).ToList();
+    }
+
     public async Task<PartnerResponse?> GetByIdAsync(Guid id)
     {
-        await Task.Delay(800);
+        await Task.Delay(500);
         return _partners.FirstOrDefault(p => p.Id == id);
+    }
+
+    public async Task<PartnerResponse?> CreateAsync(CreatePartnerRequest request)
+    {
+        await Task.Delay(500);
+        var partner = new PartnerResponse
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Slug = request.Name.ToLowerInvariant().Replace(' ', '-'),
+            Description = request.Description,
+            LogoUrl = request.LogoUrl,
+            WebsiteUrl = request.WebsiteUrl,
+            PartnerType = request.PartnerType,
+            SortOrder = request.SortOrder,
+            IsActive = request.IsActive,
+            CreatedAt = DateTime.UtcNow
+        };
+        _partners.Add(partner);
+        return partner;
+    }
+
+    public async Task<PartnerResponse?> UpdateAsync(Guid id, UpdatePartnerRequest request)
+    {
+        await Task.Delay(500);
+        var existing = _partners.FirstOrDefault(p => p.Id == id);
+        if (existing is null) return null;
+
+        existing.Name = request.Name;
+        existing.Description = request.Description;
+        existing.LogoUrl = request.LogoUrl;
+        existing.WebsiteUrl = request.WebsiteUrl;
+        existing.PartnerType = request.PartnerType;
+        existing.SortOrder = request.SortOrder;
+        existing.IsActive = request.IsActive;
+        return existing;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        await Task.Delay(500);
+        var existing = _partners.FirstOrDefault(p => p.Id == id);
+        if (existing is null) return false;
+        return _partners.Remove(existing);
     }
 }

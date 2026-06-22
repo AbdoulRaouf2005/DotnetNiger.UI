@@ -1,0 +1,199 @@
+@page "/admin/partners"
+@using DotnetNiger.UI.Models.Responses
+@inject NavigationManager Navigation
+@inject IPartnerService PartnerService
+@inject IToastService ToastService
+
+@if (isLoading)
+{
+    <div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-8 flex items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <Skeleton Type="SkeletonType.Title" Class="w-48" />
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-64" />
+                </div>
+                <Skeleton Type="SkeletonType.Button" Width="160px" />
+            </div>
+            <div class="overflow-hidden rounded-lg bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="border-b border-gray-100 bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nom</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Ordre</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Statut</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <tr>
+                                    <td class="px-6 py-4"><div class="flex items-center gap-3"><Skeleton Type="SkeletonType.Custom" Class="h-10 w-10 rounded-lg" /><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" /></div></td>
+                                    <td class="px-6 py-4"><Skeleton Type="SkeletonType.Badge" Width="80px" /></td>
+                                    <td class="px-6 py-4"><Skeleton Type="SkeletonType.Text" Lines="1" Class="w-12" /></td>
+                                    <td class="px-6 py-4"><Skeleton Type="SkeletonType.Badge" Width="60px" /></td>
+                                    <td class="px-6 py-4"><Skeleton Type="SkeletonType.Button" Width="32px" Class="h-8" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-8 flex items-center justify-between gap-4">
+                <section>
+                    <AdminBreadcrumb />
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-body md:text-base">Gérez les partenaires de la communauté.</p>
+                </section>
+                <button @onclick='() => Navigation.NavigateTo("/admin/partners/nouveau")'
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
+                    <i class="fas fa-plus text-sm"></i>
+                    <span class="hidden sm:block">Nouveau partenaire</span>
+                </button>
+            </div>
+
+            <div class="overflow-hidden rounded-lg bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="border-b border-gray-100 bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nom</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Type</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Site web</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Ordre</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Statut</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @if (partners.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">Aucun partenaire disponible.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var partner in partners)
+                                {
+                                    <tr @key="partner.Id" class="transition hover:bg-gray-50/80">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
+                                                    @if (!string.IsNullOrWhiteSpace(partner.LogoUrl))
+                                                    {
+                                                        <img src="@partner.LogoUrl" alt="@partner.Name" class="h-full w-full object-cover" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-handshake text-sm text-gray-400"></i>
+                                                    }
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="truncate text-sm font-semibold text-title">@partner.Name</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(partner.PartnerType == "education" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700")">
+                                                @GetPartnerTypeLabel(partner.PartnerType)
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-body">
+                                            @if (!string.IsNullOrWhiteSpace(partner.WebsiteUrl))
+                                            {
+                                                <a href="@partner.WebsiteUrl" target="_blank" rel="noopener noreferrer" class="text-secondary hover:underline">@partner.WebsiteUrl</a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-gray-400">—</span>
+                                            }
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-body">@partner.SortOrder</td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(partner.IsActive ? "bg-success-bg text-success" : "bg-gray-100 text-gray-700")">
+                                                @(partner.IsActive ? "Actif" : "Inactif")
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <AdminActionDropdown ItemId="partner.Id"
+                                                                  Status="@(partner.IsActive ? "Published" : "Pending")"
+                                                                  ViewLabel="Modifier"
+                                                                  EditLabel="Modifier"
+                                                                  DeleteLabel="Supprimer"
+                                                                  OnView="HandleEdit"
+                                                                  OnEdit="HandleEdit"
+                                                                  OnDelete="HandleDelete" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+    private List<PartnerResponse> partners = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPartnersAsync();
+    }
+
+    private async Task LoadPartnersAsync()
+    {
+        isLoading = true;
+        try
+        {
+            partners = await PartnerService.GetAllAsync();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Task HandleEdit(Guid id)
+    {
+        Navigation.NavigateTo($"/admin/partners/edit/{id}");
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleDelete(Guid id)
+    {
+        var deleted = await PartnerService.DeleteAsync(id);
+        if (deleted)
+        {
+            ToastService.ShowToast("Partenaire supprimé avec succès.", ToastLevel.Success);
+            await LoadPartnersAsync();
+        }
+        else
+        {
+            ToastService.ShowToast("Erreur lors de la suppression.", ToastLevel.Error);
+        }
+    }
+
+    private static string GetPartnerTypeLabel(string type)
+    {
+        return type.ToLowerInvariant() switch
+        {
+            "education" => "Éducation",
+            "sponsor" => "Sponsor",
+            _ => type
+        };
+    }
+}

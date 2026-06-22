@@ -1,0 +1,131 @@
+@page "/admin/partners/nouveau"
+@using DotnetNiger.UI.Models.Requests
+@inject NavigationManager Navigation
+@inject IPartnerService PartnerService
+@inject IToastService ToastService
+
+<div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-6 flex items-center justify-between gap-4">
+            <AdminBreadcrumb />
+            <button @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour</span>
+            </button>
+        </div>
+
+        <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
+            <h1 class="text-2xl font-bold text-title">Nouveau partenaire</h1>
+            <p class="mt-1 text-sm text-muted">Ajoutez un partenaire à la communauté.</p>
+
+            <EditForm Model="@partnerRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
+                <DataAnnotationsValidator />
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-semibold text-title">Nom *</label>
+                        <InputText @bind-Value="partnerRequest.Name"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                   placeholder="Nom du partenaire" />
+                        <ValidationMessage For="@(() => partnerRequest.Name)" class="mt-1 text-xs text-red-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-title">Type</label>
+                        <InputSelect @bind-Value="partnerRequest.PartnerType"
+                                     class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20">
+                            <option value="sponsor">Sponsor</option>
+                            <option value="education">Éducation</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-title">Description</label>
+                    <InputTextArea @bind-Value="partnerRequest.Description"
+                                   rows="4"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                   placeholder="Décrivez le partenaire..." />
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-semibold text-title">URL du logo</label>
+                        <InputText @bind-Value="partnerRequest.LogoUrl"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                   placeholder="https://..." />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-title">Site web</label>
+                        <InputText @bind-Value="partnerRequest.WebsiteUrl"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                   placeholder="https://..." />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                        <label class="block text-sm font-semibold text-title">Ordre d'affichage</label>
+                        <InputNumber @bind-Value="partnerRequest.SortOrder"
+                                     class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20" />
+                    </div>
+
+                    <div class="flex items-end pb-3">
+                        <label class="flex items-center gap-2 text-sm text-title">
+                            <InputCheckbox @bind-Value="partnerRequest.IsActive" />
+                            Actif
+                        </label>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">@errorMessage</div>
+                }
+
+                <div class="flex gap-4">
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
+                        <i class="fas fa-paper-plane"></i>
+                        Créer le partenaire
+                    </button>
+                    <button type="button" @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300">
+                        Annuler
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreatePartnerRequest partnerRequest = new()
+    {
+        PartnerType = "sponsor",
+        IsActive = true
+    };
+
+    private string errorMessage = string.Empty;
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/admin/partners");
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            await PartnerService.CreateAsync(partnerRequest);
+            ToastService.ShowToast("Partenaire créé avec succès.", ToastLevel.Success);
+            Navigation.NavigateTo("/admin/partners");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la création du partenaire.", ToastLevel.Error);
+        }
+    }
+}

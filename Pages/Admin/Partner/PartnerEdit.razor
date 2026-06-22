@@ -1,0 +1,229 @@
+@page "/admin/partners/edit/{Id:guid}"
+@using DotnetNiger.UI.Models.Requests
+@using DotnetNiger.UI.Models.Responses
+@inject NavigationManager Navigation
+@inject IPartnerService PartnerService
+@inject IToastService ToastService
+
+<div class="min-h-screen px-4 py-6 md:px-8 md:py-8">
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-6 flex items-center justify-between gap-4">
+            <AdminBreadcrumb />
+            <button @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95">
+                <i class="fas fa-arrow-left"></i>
+                <span>Retour</span>
+            </button>
+        </div>
+
+        <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
+            <h1 class="text-2xl font-bold text-title">Modifier le partenaire</h1>
+            <p class="mt-1 text-sm text-muted">Modifiez les informations du partenaire.</p>
+
+            @if (isLoading)
+            {
+                <div class="mt-8 space-y-6">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-28 rounded-lg w-full" />
+                    </div>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Custom" Class="h-5 w-5 rounded" />
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <Skeleton Type="SkeletonType.Button" Width="140px" />
+                        <Skeleton Type="SkeletonType.Button" Width="100px" />
+                    </div>
+                </div>
+            }
+            else if (notFound)
+            {
+                <div class="mt-8 rounded-lg bg-amber-50 px-4 py-6 text-center text-sm text-amber-700">
+                    Partenaire introuvable.
+                </div>
+            }
+            else
+            {
+                <EditForm Model="@updateRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
+                    <DataAnnotationsValidator />
+
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-title">Nom *</label>
+                            <InputText @bind-Value="updateRequest.Name"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                       placeholder="Nom du partenaire" />
+                            <ValidationMessage For="@(() => updateRequest.Name)" class="mt-1 text-xs text-red-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-title">Type</label>
+                            <InputSelect @bind-Value="updateRequest.PartnerType"
+                                         class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20">
+                                <option value="sponsor">Sponsor</option>
+                                <option value="education">Éducation</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-title">Description</label>
+                        <InputTextArea @bind-Value="updateRequest.Description"
+                                       rows="4"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                       placeholder="Décrivez le partenaire..." />
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-title">URL du logo</label>
+                            <InputText @bind-Value="updateRequest.LogoUrl"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                       placeholder="https://..." />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-title">Site web</label>
+                            <InputText @bind-Value="updateRequest.WebsiteUrl"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                       placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div>
+                            <label class="block text-sm font-semibold text-title">Ordre d'affichage</label>
+                            <InputNumber @bind-Value="updateRequest.SortOrder"
+                                         class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20" />
+                        </div>
+
+                        <div class="flex items-end pb-3">
+                            <label class="flex items-center gap-2 text-sm text-title">
+                                <InputCheckbox @bind-Value="updateRequest.IsActive" />
+                                Actif
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <div class="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">@errorMessage</div>
+                    }
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                            <i class="fas fa-save"></i>
+                            Enregistrer
+                        </button>
+                        <button type="button" @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300">
+                            Annuler
+                        </button>
+                    </div>
+                </EditForm>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private UpdatePartnerRequest updateRequest = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = true;
+    private bool notFound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPartnerAsync();
+    }
+
+    private async Task LoadPartnerAsync()
+    {
+        isLoading = true;
+        notFound = false;
+
+        try
+        {
+            var partner = await PartnerService.GetByIdAsync(Id);
+            if (partner is null)
+            {
+                notFound = true;
+                return;
+            }
+
+            updateRequest = new UpdatePartnerRequest
+            {
+                Name = partner.Name,
+                Description = partner.Description,
+                LogoUrl = partner.LogoUrl,
+                WebsiteUrl = partner.WebsiteUrl,
+                PartnerType = partner.PartnerType,
+                SortOrder = partner.SortOrder,
+                IsActive = partner.IsActive
+            };
+        }
+        catch
+        {
+            notFound = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/admin/partners");
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+
+        try
+        {
+            var updated = await PartnerService.UpdateAsync(Id, updateRequest);
+            if (updated is null)
+            {
+                errorMessage = "Impossible de mettre à jour le partenaire.";
+                ToastService.ShowToast("Erreur lors de la mise à jour.", ToastLevel.Error);
+                return;
+            }
+
+            ToastService.ShowToast("Partenaire mis à jour avec succès.", ToastLevel.Success);
+            Navigation.NavigateTo("/admin/partners");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            ToastService.ShowToast("Erreur lors de la mise à jour du partenaire.", ToastLevel.Error);
+        }
+    }
+}

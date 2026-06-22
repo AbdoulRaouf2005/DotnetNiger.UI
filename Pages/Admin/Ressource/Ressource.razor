@@ -171,8 +171,9 @@
                 <option value="Tous niveaux">Tous niveaux</option>
             </select>
         </div>
-
-        <ViewToggle @bind-IsListView="isListView" />
+        <div class="mb-6">
+            <ViewToggle @bind-IsListView="isListView" />
+        </div>
 
         @if (isListView)
         {

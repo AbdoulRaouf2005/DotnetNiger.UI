@@ -105,9 +105,10 @@ else
                     <option value="year">Cette année</option>
                 </select>
             </section>
-
-            <ViewToggle @bind-IsListView="isListView" />
-
+            <div class="mb-6">
+                <ViewToggle @bind-IsListView="isListView" />
+            </div>
+            
             @if (isListView)
             {
                 <EventTable Event="@pagedEvents" OnChanged="LoadEventsAsync" />
