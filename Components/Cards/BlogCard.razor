@@ -4,7 +4,7 @@
 @using System.Globalization
 
 <a href="@GetPostUrl()" class="group block overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-2">
-      <div class="block h-32 sm:h-40 md:h-44 overflow-hidden bg-secondary relative">
+      <div class="block overflow-hidden bg-secondary relative aspect-video">
                  <img src="@(post?.CoverImageUrl ?? "/Images/ImageBlog.jpg")"
                    alt="@post?.Title"
                    class="h-full w-full object-cover transition group-hover:scale-105" />

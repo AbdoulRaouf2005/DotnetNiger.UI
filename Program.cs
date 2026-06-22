@@ -2,6 +2,7 @@ using DotnetNiger.UI;
 using DotnetNiger.UI.Services.Browser;
 using DotnetNiger.UI.Services.Auth;
 using DotnetNiger.UI.Services.Api;
+using DotnetNiger.UI.Services;
 using DotnetNiger.UI.Services.Mock;
 using DotnetNiger.UI.Services.Contracts;
 using Microsoft.AspNetCore.Components.Authorization;

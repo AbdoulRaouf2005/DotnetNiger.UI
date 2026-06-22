@@ -5,7 +5,7 @@
 @inject IToastService ToastService
 
 <div class="group overflow-hidden rounded-[22px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-    <div class="relative h-44 w-full overflow-hidden bg-gradient-to-br from-[#512BD4] to-[#3F1FB3] flex items-center justify-center">
+    <div class="relative w-full overflow-hidden bg-gradient-to-br from-[#512BD4] to-[#3F1FB3] flex items-center justify-center aspect-video">
         @if (!string.IsNullOrWhiteSpace(Project?.ImageUrl))
         {
             <img src="@Project.ImageUrl" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" alt="@Project?.Title">

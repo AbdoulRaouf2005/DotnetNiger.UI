@@ -59,10 +59,10 @@
                 <div class="lg:col-span-2 space-y-6">
                     @if (!string.IsNullOrWhiteSpace(Project.ImageUrl))
                     {
-                        <div class="overflow-hidden rounded-lg bg-white shadow-sm">
+                        <div class="overflow-hidden rounded-lg bg-white shadow-sm aspect-video">
                             <img src="@Project.ImageUrl"
                                  alt="@Project.Title"
-                                 class="h-64 w-full object-cover sm:h-80" />
+                                 class="h-full w-full object-cover" />
                         </div>
                     }
 
