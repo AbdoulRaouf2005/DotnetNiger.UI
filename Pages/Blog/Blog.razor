@@ -1,45 +1,60 @@
 ﻿@page "/blog"
-@using DotnetNiger.UI.Components
-@using DotnetNiger.UI.Components.Admin.Cards
+@using Microsoft.AspNetCore.Components
+@using DotnetNiger.UI.Components.Cards;
+@using DotnetNiger.UI.Components.Admin.Cards 
 @inject IPostService PostService
+
 
 <PageTitle>Blog - .NET Niger</PageTitle>
 
-<section class="bg-[#e8e3f6] px-4 py-8 sm:py-12 md:py-14 lg:px-10">
+<section class="bg-accent-bg px-4 py-8 sm:py-12 md:py-14 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl">
 		<div class="mb-6 sm:mb-8 text-center">
 			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">DotnetBlog</h1>
 			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base leading-6 sm:leading-7 text-secondary/80">un espace ouvert à tous les acteurs du numérique : technologies, actualités, projets, événements, partage d'expérience.</p>
 		</div>
 
-			<div class="mb-8 sm:mb-10 flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 rounded-md bg-white p-3 sm:p-4 shadow-sm">
-				<button type="button"
-					class="inline-flex h-10 sm:h-12 w-10 sm:w-12 items-center justify-center rounded-md border border-gray-100 bg-white text-gray-500 shadow-sm flex-shrink-0"
-					aria-label="Filtrer les contenus du blog">
-					<i class="fa-solid fa-sliders text-base sm:text-lg"></i>
-				</button>
-
-				<label class="relative flex-1 w-full min-w-[220px]">
-					<span class="pointer-events-none absolute inset-y-0 left-3 sm:left-4 flex items-center text-gray-400">
-						<i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
-					</span>
-					<input type="search" placeholder="Rechercher un article..."
-						class="h-10 sm:h-12 w-full rounded-md border border-gray-100 bg-white pl-10 sm:pl-12 pr-3 sm:pr-4 text-xs sm:text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-				</label>
-
-				<select
-					class="h-10 sm:h-10 min-w-[170px] sm:min-w-[140px] rounded-lg border border-gray-100 bg-white px-3 sm:px-4 text-xs sm:text-sm text-gray-700 shadow-sm focus:border-secondary focus:outline-none flex-shrink-0">
-					<option>Catégorie</option>
-					<option>Auteur</option>
-					<option>Lecteur</option>
-					<option>Mentor</option>
+			<div class="flex flex-col sm:flex-row gap-3 mb-8">
+				<div class="relative flex-1">
+					<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+					<input type="text"
+						   placeholder="Rechercher un article..."
+						   @bind="searchQuery"
+						   @bind:event="oninput"
+						   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+					@if (!string.IsNullOrEmpty(searchQuery))
+					{
+						<button @onclick="() => { searchQuery = string.Empty; }"
+								class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+							<i class="fas fa-times"></i>
+						</button>
+					}
+				</div>
+				<select @bind="selectedCategory"
+						class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+					<option value="">Catégorie</option>
+					<option value="Auteur">Auteur</option>
+					<option value="Lecteur">Lecteur</option>
+					<option value="Mentor">Mentor</option>
 				</select>
 			</div>
+
+			@if (!string.IsNullOrWhiteSpace(tag))
+				{
+					<div class="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 rounded-lg bg-info-bg px-4 py-3 text-sm text-gray-700">
+						<i class="fa-solid fa-tag text-xs"></i>
+						<span>Articles filtrés par le tag : <strong>#@tag</strong></span>
+						<a href="/blog" class="ml-auto text-xs font-semibold text-info-text hover:underline">Réinitialiser</a>
+					</div>
+				}
 
 			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 				@if (IsLoading)
 				{
-					<p class="col-span-full text-center text-xs sm:text-sm md:text-base text-secondary/70">Chargement des articles...</p>
+					@for (int i = 0; i < 8; i++)
+					{
+						<SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" Class="rounded-lg" />
+					}
 				}
 				else if (!string.IsNullOrWhiteSpace(LoadError))
 				{
@@ -47,7 +62,16 @@
 				}
 				else if (pagedPosts.Count == 0)
 				{
-					<p class="col-span-full text-center text-xs sm:text-sm md:text-base text-secondary/70">Aucun article publié pour le moment.</p>
+					<p class="col-span-full text-center text-xs sm:text-sm md:text-base text-secondary/70">
+						@if (!string.IsNullOrWhiteSpace(tag))
+						{
+							<span>Aucun article trouvé pour le tag <strong>#@tag</strong>.</span>
+						}
+						else
+						{
+							<span>Aucun article publié pour le moment.</span>
+						}
+					</p>
 				}
 				else
 				{
@@ -72,21 +96,56 @@
 	private int currentPage = 1;
 	private bool IsLoading { get; set; } = true;
 	private string? LoadError { get; set; }
+	private string searchQuery = string.Empty;
+	private string selectedCategory = string.Empty;
+
+	[SupplyParameterFromQuery]
+	public string? tag { get; set; }
 
 	private int pageSize = 7;
+
+	private List<PostDto> filteredPosts
+	{
+		get
+		{
+			var posts = allPosts ?? new List<PostDto>();
+			if (!string.IsNullOrWhiteSpace(searchQuery))
+			{
+				var q = searchQuery.ToLowerInvariant();
+				posts = posts.Where(p =>
+					(p.Title?.ToLowerInvariant().Contains(q) ?? false) ||
+					(p.Excerpt?.ToLowerInvariant().Contains(q) ?? false) ||
+					(p.AuthorName?.ToLowerInvariant().Contains(q) ?? false))
+					.ToList();
+			}
+			if (!string.IsNullOrWhiteSpace(selectedCategory))
+			{
+				posts = posts.Where(p =>
+					string.Equals(p.PostType, selectedCategory, StringComparison.OrdinalIgnoreCase))
+					.ToList();
+			}
+			return posts;
+		}
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		IsLoading = true;
 		try
 		{
-			allPosts = await PostService.GetPublishedPostsAsync();
+			if (!string.IsNullOrWhiteSpace(tag))
+			{
+				allPosts = await PostService.GetPostsByTagAsync(tag);
+			}
+			else
+			{
+				allPosts = await PostService.GetPublishedPostsAsync();
+			}
 			currentPage = 1;
-			await JS.InvokeVoidAsync("console.log", $"Blog: loaded {allPosts?.Count ?? 0} posts");
 		}
-		catch (Exception ex)
+		catch
 		{
 			LoadError = "Impossible de charger les articles du blog.";
-			await JS.InvokeVoidAsync("console.error", ex.ToString());
 		}
 		finally
 		{
@@ -94,14 +153,12 @@
 		}
 	}
 
-	private int totalPages => Math.Max(1, (int)Math.Ceiling((double)(allPosts?.Count ?? 0) / pageSize));
+	private int totalPages => Math.Max(1, (int)Math.Ceiling((double)filteredPosts.Count / pageSize));
 
-	private List<PostDto> pagedPosts => (allPosts ?? new List<PostDto>())
+	private List<PostDto> pagedPosts => filteredPosts
 		.Skip((SafeCurrentPage - 1) * pageSize)
 		.Take(pageSize)
 		.ToList();
 
 	private int SafeCurrentPage => Math.Clamp(currentPage, 1, totalPages);
-
-	[Inject] private IJSRuntime JS { get; set; } = default!;
 }

@@ -1,0 +1,67 @@
+﻿@* Composant partagé : barre de navigation principale du site public (desktop + mobile). *@
+
+<nav class="sticky z-50 w-full bg-white shadow-lg">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 justify-between">
+            <!-- Logo / Marque -->
+            <div class="flex items-center">
+                <NavLink href="/" class="flex items-center space-x-2">
+                    <img src="/Logo.svg" alt="logo dotnet.niger" class="h-9 w-9">
+                </NavLink>
+            </div>
+
+            <!-- Navigation Desktop (à droite) -->
+            <div class="hidden items-center space-x-6 md:flex">
+                <NavLink href="/" class="text-secondary transition duration-150 ease-in-out hover:text-hover"
+                         Match="NavLinkMatch.All" ActiveClass="bg-secondary/30 text-secondary">
+                    <span class="text-sm font-normal">Accueil</span>
+                </NavLink>
+                <NavLink href="/propos" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">À Propos</span>
+                </NavLink>
+                <NavLink href="/ressources" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Ressources</span>
+                </NavLink>
+                <NavLink href="/community" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Communauté</span>
+                </NavLink>
+                <NavLink href="/blog" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Blog</span>
+                </NavLink>
+                <NavLink href="/evenements" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Événements</span>
+                </NavLink>
+                <NavLink href="/partners"
+                         class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Partenaires</span>
+                </NavLink>
+                <NavLink href="/contact" class="text-secondary transition duration-150 ease-in-out hover:text-hover">
+                    <span class="text-sm font-normal">Contact</span>
+                </NavLink>
+                
+                @* <ThemeToggle /> *@
+                <TopBarAuthState />
+            </div>
+
+            <!-- Bouton menu mobile -->
+            <div class="flex items-center gap-2 md:hidden">
+                <TopBarAuthState Mobile="true" OnActionCompleted="OnAuthActionFromMobile" />
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code {
+    private bool mobileMenuOpen = false;
+
+    private void ToggleMobileMenu()
+    {
+        mobileMenuOpen = !mobileMenuOpen;
+    }
+
+
+    private void OnAuthActionFromMobile()
+    {
+        mobileMenuOpen = false;
+    }
+}

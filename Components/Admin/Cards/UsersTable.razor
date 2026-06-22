@@ -1,4 +1,4 @@
-@using DotnetNiger.UI.Models.Responses
+﻿@using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Components.Admin.Shared
 
 <div class="overflow-hidden rounded-lg bg-white shadow">
@@ -26,7 +26,7 @@
                         {
                               @foreach (var user in Users)
                               {
-                              <tr class="transition hover:bg-gray-50">
+                              <tr @key="user.Id" class="transition hover:bg-gray-50">
                                     <td class="px-6 py-4 text-sm font-medium text-text">
                                           <img src="@(string.IsNullOrWhiteSpace(user.AvatarUrl) ? "/Images/user.png" : user.AvatarUrl)" class="h-10 w-10 rounded-full object-cover" />
                                     </td>

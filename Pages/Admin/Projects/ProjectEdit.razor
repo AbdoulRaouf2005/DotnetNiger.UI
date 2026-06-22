@@ -1,4 +1,4 @@
-@page "/admin/projects/edit/{Id:guid}"
+﻿@page "/admin/projects/edit/{Id:guid}"
 @* Page admin : édition d'un projet existant. *@
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Models.Responses
@@ -17,14 +17,48 @@
         </div>
 
         <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
-            <h1 class="text-2xl font-bold text-[#111827]">Modifier le projet</h1>
-            <p class="mt-1 text-sm text-[#6b7280]">Modifiez les informations du projet.</p>
+            <h1 class="text-2xl font-bold text-title">Modifier le projet</h1>
+            <p class="mt-1 text-sm text-muted">Modifiez les informations du projet.</p>
 
             @if (isLoading)
             {
-                <div class="mt-8 flex items-center justify-center py-12">
-                    <i class="fas fa-spinner fa-spin text-2xl text-[#5b4df5]"></i>
-                    <span class="ml-3 text-sm text-[#6b7280]">Chargement...</span>
+                <div class="mt-8 space-y-6">
+                    <Skeleton Type="SkeletonType.Title" Class="w-48" />
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-72" />
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                        <div class="space-y-2">
+                            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-28 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="space-y-2">
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-11 rounded-lg w-full" />
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <Skeleton Type="SkeletonType.Custom" Class="h-5 w-5 rounded" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-5 w-5 rounded" />
+                    </div>
+                    <div class="flex gap-4">
+                        <Skeleton Type="SkeletonType.Button" Width="140px" />
+                        <Skeleton Type="SkeletonType.Button" Width="100px" />
+                    </div>
                 </div>
             }
             else if (notFound)
@@ -40,17 +74,17 @@
 
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div>
-                            <label class="block text-sm font-semibold text-[#111827]">Titre *</label>
+                            <label class="block text-sm font-semibold text-title">Titre *</label>
                             <InputText @bind-Value="updateRequest.Title"
-                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                        placeholder="Nom du projet" />
                             <ValidationMessage For="@(() => updateRequest.Title)" class="mt-1 text-xs text-red-500" />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-[#111827]">Statut</label>
+                            <label class="block text-sm font-semibold text-title">Statut</label>
                             <InputSelect @bind-Value="updateRequest.Status"
-                                         class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20">
+                                         class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20">
                                 <option value="active">Actif</option>
                                 <option value="archived">Archivé</option>
                             </InputSelect>
@@ -58,50 +92,41 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-[#111827]">Description *</label>
+                        <label class="block text-sm font-semibold text-title">Description *</label>
                         <InputTextArea @bind-Value="updateRequest.Description"
                                        rows="5"
-                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                        placeholder="Décrivez le projet..." />
                         <ValidationMessage For="@(() => updateRequest.Description)" class="mt-1 text-xs text-red-500" />
                     </div>
 
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#111827]">URL du projet</label>
-                            <InputText @bind-Value="updateRequest.Url"
-                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
-                                       placeholder="https://..." />
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-[#111827]">URL GitHub</label>
-                            <InputText @bind-Value="updateRequest.GithubUrl"
-                                       class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
-                                       placeholder="https://github.com/..." />
-                        </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-title">URL GitHub</label>
+                        <InputText @bind-Value="updateRequest.GithubUrl"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                                   placeholder="https://github.com/..." />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-[#111827]">Technologies</label>
+                        <label class="block text-sm font-semibold text-title">Technologies</label>
                         <InputText @bind-Value="updateRequest.Technologies"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                    placeholder="ASP.NET Core, Blazor, PostgreSQL..." />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-[#111827]">Image URL</label>
+                        <label class="block text-sm font-semibold text-title">Image URL</label>
                         <InputText @bind-Value="updateRequest.ImageUrl"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                    placeholder="https://..." />
                     </div>
 
                     <div class="flex items-center gap-6">
-                        <label class="flex items-center gap-2 text-sm text-[#111827]">
+                        <label class="flex items-center gap-2 text-sm text-title">
                             <InputCheckbox @bind-Value="updateRequest.IsFeatured" />
                             Projet à la une
                         </label>
-                        <label class="flex items-center gap-2 text-sm text-[#111827]">
+                        <label class="flex items-center gap-2 text-sm text-title">
                             <InputCheckbox @bind-Value="updateRequest.IsPublished" />
                             Publié
                         </label>
@@ -158,7 +183,6 @@
             {
                 Title = project.Title,
                 Description = project.Description,
-                Url = project.Url,
                 GithubUrl = project.GithubUrl,
                 ImageUrl = project.ImageUrl,
                 Technologies = project.Technologies,

@@ -1,23 +1,59 @@
 ﻿@using DotnetNiger.UI.Components.Admin.Shared
+@using System.Security.Claims
 @inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
-<div class="flex flex-col h-screen">
-  <Topbar ToggleSidebar="ToggleSidebar"/>
-  <div class="flex flex-1 overflow-hidden">
-      <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
-    <main class="flex-1 overflow-y-auto bg-primary transition-all duration-300">
-      <div class="container mx-auto ">
-        @Body
+@if (_authorized)
+{
+    <div class="flex flex-col h-screen">
+       <Topbar ToggleSidebar="ToggleSidebar" ToggleCollapsed="ToggleCollapsed" IsCollapsed="isCollapsed"/>
+      <div class="flex flex-1 overflow-hidden">
+           <Sidebar IsOpen="sidebarOpen" IsCollapsed="isCollapsed" Closed="ToggleSidebar"/>
+        <main class="flex-1 overflow-y-auto bg-primary transition-all duration-300">
+          <div class="container mx-auto ">
+            @Body
+          </div>
+        </main>
       </div>
-    </main>
-  </div>
-</div>
-
-<ToastContainer />
+    </div>
+    <ToastContainer />
+}
+else
+{
+    <div class="flex items-center justify-center h-screen">
+        <p>Vérification des autorisations...</p>
+    </div>
+}
 
 @code{
   bool sidebarOpen = false;
   bool isCollapsed = false;
+  bool _authorized;
+
+  protected override async Task OnInitializedAsync()
+  {
+      var state = await AuthStateProvider.GetAuthenticationStateAsync();
+      if (state.User.Identity?.IsAuthenticated != true)
+      {
+          Navigation.NavigateTo("/", forceLoad: true);
+          return;
+      }
+
+      var roles = state.User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+      var isAdmin = roles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                                || r.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase)
+                                || r.Equals("Moderator", StringComparison.OrdinalIgnoreCase));
+
+      if (!isAdmin)
+      {
+          Navigation.NavigateTo("/");
+          return;
+      }
+
+      _authorized = true;
+  }
+
   void ToggleCollapsed(){
     isCollapsed = !isCollapsed;
   }

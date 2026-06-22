@@ -7,7 +7,7 @@
 <PageTitle>Vérification e-mail - .NET Niger</PageTitle>
 
 <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Vérification de votre email</h1>
             <p class="text-gray-500 mt-2">Validation de votre compte en cours...</p>
@@ -15,7 +15,12 @@
 
         @if (isLoading)
         {
-            <div class="text-center text-gray-500 py-6">Traitement...</div>
+            <div class="text-center py-6 space-y-4">
+                <Skeleton Type="SkeletonType.Custom" Class="h-16 w-16 rounded-full mx-auto" />
+                <Skeleton Type="SkeletonType.Title" Class="w-3/4 mx-auto" />
+                <Skeleton Type="SkeletonType.Text" Lines="2" Class="w-1/2 mx-auto" />
+                <Skeleton Type="SkeletonType.Button" Class="mx-auto" Width="200px" />
+            </div>
         }
         else if (isVerified)
         {
@@ -54,21 +59,26 @@
     {
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Token))
         {
-            isLoading = false;
             errorMessage = "Le lien de vérification est incomplet.";
+            isLoading = false;
             return;
         }
 
-        isVerified = await Auth.VerifyEmailAsync(new VerifyEmailRequest
+        try
         {
-            Email = Email,
-            Code = Token
-        });
+            isVerified = await Auth.VerifyEmailAsync(new VerifyEmailRequest
+            {
+                Email = Email,
+                Code = Token
+            });
 
-        if (!isVerified)
-            errorMessage = "La vérification a échoué. Vous pouvez demander un nouveau lien.";
-
-        isLoading = false;
+            if (!isVerified)
+                errorMessage = "La vérification a échoué. Vous pouvez demander un nouveau lien.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private async Task ResendVerification()
@@ -91,7 +101,10 @@
     private void NavigateToLogin()
     {
         var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
-        var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+        var apiBase = Config["ApiBaseUrl"];
+        if (string.IsNullOrWhiteSpace(apiBase)) return;
+        var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+        var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
         Navigation.NavigateTo(loginUrl);
     }
 }

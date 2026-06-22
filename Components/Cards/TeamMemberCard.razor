@@ -1,0 +1,68 @@
+@namespace DotnetNiger.UI.Components
+
+@using DotnetNiger.UI.Models.Responses
+
+<article class="overflow-hidden rounded-lg border border-white bg-white shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
+    <div class="relative h-56 sm:h-64 md:h-72 overflow-hidden bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.20),_transparent_48%)]"></div>
+        <img src="@GetAvatarUrl()" alt="@GetDisplayName()"
+             class="absolute inset-0 h-full w-full object-cover object-center opacity-90" />
+    </div>
+
+    <div class="space-y-3 p-4 sm:space-y-4 sm:p-5">
+        <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">@GetDisplayName()</h3>
+            @if (!string.IsNullOrWhiteSpace(Member?.Position))
+            {
+                <p class="text-xs sm:text-sm font-semibold text-warning">@Member.Position</p>
+            }
+            else
+            {
+                <p class="text-xs sm:text-sm font-semibold text-warning">@GetRole()</p>
+            }
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Member?.Bio))
+        {
+            <p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600">@Member.Bio</p>
+        }
+
+        @if (Member?.SocialLinks?.Any() == true)
+        {
+            <div class="flex items-center gap-3 pt-2">
+                @foreach (var link in Member.SocialLinks)
+                {
+                    <a href="@link.Url" target="_blank" rel="noopener noreferrer"
+                       class="text-slate-400 hover:text-secondary transition text-base"
+                       title="@link.Platform">
+                        <i class="@link.Icone"></i>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</article>
+
+@code {
+    [Parameter]
+    public UserDto? Member { get; set; }
+
+    private string GetDisplayName()
+    {
+        if (string.IsNullOrWhiteSpace(Member?.FullName))
+        {
+            return string.IsNullOrWhiteSpace(Member?.Username) ? "Membre" : Member!.Username;
+        }
+        return Member!.FullName;
+    }
+
+    private string GetRole()
+    {
+        return Member?.Roles?.FirstOrDefault() ?? "Membre";
+    }
+
+    private string GetAvatarUrl()
+    {
+        return string.IsNullOrWhiteSpace(Member?.AvatarUrl) ? "/Images/upload/user.png" : Member.AvatarUrl;
+    }
+}

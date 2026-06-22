@@ -4,22 +4,19 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiNewsletterService : INewsletterService
+public class ApiNewsletterService : ApiServiceBase, INewsletterService
 {
-    private readonly HttpClient _http;
-    private const string Base = "api/v1/newsletter";
-
-    public ApiNewsletterService(HttpClient http) => _http = http;
+    public ApiNewsletterService(HttpClient http) : base(http) { }
 
     public async Task<bool> SubscribeAsync(SubscribeRequest request)
     {
-        var response = await _http.PostAsJsonAsync($"{Base}/subscribe", request);
+        var response = await Http.PostAsJsonAsync($"{ApiEndpoints.Newsletters}/subscribe", request);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> UnsubscribeAsync(UnsubscribeRequest request)
     {
-        var response = await _http.PostAsJsonAsync($"{Base}/unsubscribe", request);
+        var response = await Http.PostAsJsonAsync($"{ApiEndpoints.Newsletters}/unsubscribe", request);
         return response.IsSuccessStatusCode;
     }
 }

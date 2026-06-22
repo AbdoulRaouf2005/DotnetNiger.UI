@@ -1,7 +1,7 @@
-@using DotnetNiger.UI.Models.Responses
+﻿@using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Components.Admin.Shared
 
-<div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+<div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
     <div class="flex items-start justify-between gap-4">
         <div class="flex min-w-0 items-center gap-3">
             <img src="@(string.IsNullOrWhiteSpace(User.AvatarUrl) ? "/Images/user.png" : User.AvatarUrl)"
@@ -16,7 +16,7 @@
         <AdminActionDropdown ItemId="User.Id"
                              Status="@(User.IsActive ? "Active" : "Inactive")"
                              ViewLabel="Voir"
-                             EditLabel="Éditer"
+                             EditLabel="é‰diter"
                              DeleteLabel="Supprimer"
                              ToggleStatusLabel="Activer / Désactiver"
                              OnView="OnView"

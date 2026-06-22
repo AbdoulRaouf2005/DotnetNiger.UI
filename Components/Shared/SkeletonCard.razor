@@ -1,0 +1,35 @@
+@namespace DotnetNiger.UI.Components
+
+<div class="animate-pulse rounded-xl bg-white shadow-sm @Class">
+    @if (HasImage)
+    {
+        <div class="h-40 rounded-t-xl bg-gray-300 sm:h-48"></div>
+    }
+    <div class="space-y-3 p-4 sm:p-5">
+        @if (HasBadge)
+        {
+            <div class="h-5 rounded-full bg-gray-300" style="width: 100px"></div>
+        }
+        <div class="h-5 rounded bg-gray-300"></div>
+        <div class="h-5 rounded bg-gray-300" style="width: 75%"></div>
+        <div class="space-y-2">
+            <div class="h-3 rounded bg-gray-300"></div>
+            <div class="h-3 rounded bg-gray-300"></div>
+            <div class="h-3 rounded bg-gray-300" style="width: 60%"></div>
+        </div>
+        @if (HasFooter)
+        {
+            <div class="flex items-center gap-3 pt-2">
+                <div class="h-8 w-8 rounded-full bg-gray-300"></div>
+                <div class="h-3 rounded bg-gray-300" style="width: 120px"></div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public bool HasImage { get; set; }
+    [Parameter] public bool HasBadge { get; set; }
+    [Parameter] public bool HasFooter { get; set; }
+}

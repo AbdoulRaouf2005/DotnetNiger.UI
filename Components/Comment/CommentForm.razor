@@ -10,7 +10,7 @@
 {
     <div class="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-4 py-3 shadow-sm">
         <!-- User avatar -->
-        <div class="h-9 w-9 flex-shrink-0 rounded-full bg-[#e5edf9] flex items-center justify-center text-sm font-bold text-[#5b4df5] overflow-hidden">
+        <div class="h-9 w-9 flex-shrink-0 rounded-full bg-avatar-bg flex items-center justify-center text-sm font-bold text-accent overflow-hidden">
             @if (!string.IsNullOrWhiteSpace(userAvatar))
             {
                 <img src="@userAvatar" alt="Avatar" class="h-full w-full object-cover" />
@@ -28,11 +28,12 @@
                 class="w-full border-0 bg-transparent text-sm text-gray-700 outline-none placeholder:text-gray-400"
                 @bind="commentContent"
                 @bind:event="oninput"
-                maxlength="1000" />
+                maxlength="1000"
+                @onkeydown="HandleKeyDown" />
         </div>
         <button
             type="button"
-            class="flex h-10 w-10 items-center justify-center rounded-full bg-[#5b4df5] text-white shadow-lg shadow-[#5b4df5]/30 hover:bg-[#4a3cd5] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-accent/30 hover:bg-accent-active transition disabled:opacity-50 disabled:cursor-not-allowed"
             disabled="@(isSubmitting || string.IsNullOrWhiteSpace(commentContent))"
             @onclick="HandleSubmit">
             <i class="fa-solid fa-paper-plane text-sm"></i>
@@ -41,7 +42,7 @@
 }
 else
 {
-    <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 sm:p-6 text-center">
+    <div class="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 sm:p-6 text-center">
         <i class="fa-solid fa-lock text-lg text-gray-400 mb-2 block"></i>
         <p class="text-sm text-gray-500">
             <a href="/login" class="text-secondary font-semibold hover:underline">Connectez-vous</a> pour laisser un commentaire.
@@ -64,6 +65,7 @@ else
     [Parameter]
     public EventCallback OnCommentAdded { get; set; }
 
+    private bool isSubmitting;
     private string commentContent = string.Empty;
     private string errorMessage = string.Empty;
     private string userAvatar = string.Empty;
@@ -78,6 +80,14 @@ else
             userInitial = string.IsNullOrWhiteSpace(user.FullName)
                 ? "?"
                 : user.FullName.Trim()[0].ToString().ToUpperInvariant();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await HandleSubmit();
         }
     }
 

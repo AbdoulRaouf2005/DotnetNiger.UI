@@ -4,8 +4,7 @@ namespace DotnetNiger.UI.Models.Requests;
 
 public class UpdateCommentRequest
 {
-    [Required]
-    public string? Content { get; set; }
+    public string Content { get; set; } = string.Empty;
     [Required]
     public Guid Id { get; set; }
 }

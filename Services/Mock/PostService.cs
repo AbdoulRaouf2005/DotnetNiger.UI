@@ -1,6 +1,7 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 
 namespace DotnetNiger.UI.Services.Mock
 {
@@ -15,7 +16,7 @@ namespace DotnetNiger.UI.Services.Mock
                 new PostDto
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Les nouveaut�s de .NET 9",
+                    Title = "Les nouveautés de .NET 9",
                     Slug = "les-nouveautes-de-dotnet-9",
                     Excerpt = "Découvrez les dernières fonctionnalités et améliorations de .NET 9, avec C# 13 comme langage phare.",
                     Content = "<h1>Introduction</h1><p>...</p>",
@@ -39,7 +40,7 @@ namespace DotnetNiger.UI.Services.Mock
                 new PostDto
                 {
                     Id = Guid.NewGuid(),
-                    Title = "Introduction � Blazor WebAssembly",
+                    Title = "Introduction à Blazor WebAssembly",
                     Slug = "introduction-a-blazor-webassembly",
                     Excerpt = "Apprenez les bases de Blazor WASM...",
                     Content = "<h1>Blazor WASM</h1><p>...</p>",
@@ -63,7 +64,7 @@ namespace DotnetNiger.UI.Services.Mock
             };
         }
 
-        public async Task<PostDto> CreatePostAsync(CreatePostRequest request, Guid CurrentId)
+        public async Task<PostDto?> CreatePostAsync(CreatePostRequest request, Guid CurrentId)
         {
             var newPost = new PostDto
             {
@@ -73,7 +74,7 @@ namespace DotnetNiger.UI.Services.Mock
                 Excerpt = request.Excerpt,
                 Content = request.Content,
                 CoverImageUrl = request.CoverImageUrl ?? "/images/default.jpg",
-                AuthorId = CurrentId, // � remplacer par l'utilisateur connect�
+                AuthorId = CurrentId, // à remplacer par l'utilisateur connecté
                 AuthorName = "Admin",
                 AuthorAvatar = "/images/avatars/default.jpg",
                 PostType = request.PostType,
@@ -100,6 +101,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> GetAllPostsAsync()
         {
+            await Task.Delay(2000);
             var posts = _posts
                 .OrderByDescending(p => p.PublishedAt)
                 .ToList();
@@ -109,6 +111,7 @@ namespace DotnetNiger.UI.Services.Mock
   
         public async Task<List<PostDto>> GetPublishedPostsAsync()
         {
+            await Task.Delay(2000);
             var posts = _posts
                 .Where(p => p.PublishedAt != DateTime.MinValue)
                 .OrderByDescending(p => p.PublishedAt)
@@ -119,6 +122,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> GetPostsByCategoryAsync(string categorySlug)
         {
+            await Task.Delay(800);
             var posts = _posts
                 .Where(p => p.Categories.Any(c => c.Slug == categorySlug))
                 .OrderByDescending(p => p.PublishedAt)
@@ -129,6 +133,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> GetPostsByTagAsync(string tagSlug)
         {
+            await Task.Delay(2000);
             var posts = _posts
                 .Where(p => p.Tags.Any(t => t.Slug == tagSlug))
                 .OrderByDescending(p => p.PublishedAt)
@@ -139,6 +144,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<PostDto?> GetPostByIdAsync(Guid id)
         {
+            await Task.Delay(800);
             var post = _posts.FirstOrDefault(p => p.Id == id);
 
             if (post == null)
@@ -149,6 +155,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<PostDto?> GetPostBySlugAsync(string slug)
         {
+            await Task.Delay(2000);
             var post = _posts.FirstOrDefault(p => p.Slug == slug);
 
             if (post == null)
@@ -183,6 +190,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         public async Task<List<PostDto>> SearchPostsAsync(string query)
         {
+            await Task.Delay(800);
             var posts = _posts
                 .Where(p =>
                     p.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
@@ -217,28 +225,7 @@ namespace DotnetNiger.UI.Services.Mock
 
         }
 
-        private string GenerateSlug(string title)
-        {
-            return title
-                .ToLowerInvariant()
-                .Replace(" ", "-")
-                .Replace("�", "a")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "e")
-                .Replace("�", "i")
-                .Replace("�", "i")
-                .Replace("�", "o")
-                .Replace("�", "u")
-                .Replace("�", "u")
-                .Replace("�", "c")
-                .Replace("'", "-")
-                .Replace("\"", "")
-                .Replace(",", "")
-                .Replace(".", "")
-                .Replace("?", "")
-                .Replace("!", "");
-        }
+        private static string GenerateSlug(string title)
+            => StringHelper.GenerateSlug(title);
     }
 }

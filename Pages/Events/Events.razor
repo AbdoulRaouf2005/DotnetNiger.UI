@@ -1,57 +1,68 @@
 ﻿@page "/evenements"
-@using DotnetNiger.UI.Components
+@using DotnetNiger.UI.Components.Cards;
+@using DotnetNiger.UI.Components.Admin.Cards;
+
 @inject IEventService EventService
 @inject IJSRuntime JS
 
 <PageTitle>Événements - .NET Niger</PageTitle>
 
-<section class="bg-[#e8e3f6] px-4 py-14 sm:px-6 lg:px-10">
+<section class="bg-accent-bg px-4 py-14 sm:px-6 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl">
 		<div class="mb-8 sm:mb-10 text-center">
 			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Événements et Meetups .NET Niger</h1>
 			<p class="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700">Découvrez tous nos événements en ligne et en personne</p>
 		</div>
 
-		<div class="mb-8 flex flex-wrap items-center gap-3 rounded-md bg-white p-3 shadow-sm">
-			<button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-md border border-gray-200 text-gray-500 transition hover:text-secondary" aria-label="Filtrer les événements">
-				<i class="fa-solid fa-sliders text-base"></i>
-			</button>
-			<label class="relative w-full min-w-[220px] flex-1">
-				<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-500">
-					<i class="fa-solid fa-magnifying-glass text-sm"></i>
-				</span>
-				<input type="search" placeholder="Rechercher un événement..." class="h-10 w-full rounded-md border border-gray-200 bg-white pl-10 pr-3 text-sm text-gray-600 placeholder:text-gray-400 focus:border-secondary focus:outline-none" />
-			</label>
-
-			<select class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-				<option>Lieu d’événement</option>
-				<option>En ligne</option>
-				<option>Niamey</option>
-				<option>Autres villes</option>
+		<div class="flex flex-col sm:flex-row gap-3 mb-8">
+			<div class="relative flex-1">
+				<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+				<input type="text"
+					   placeholder="Rechercher un événement..."
+					   @bind="searchQuery"
+					   @bind:event="oninput"
+					   class="w-full bg-white pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary text-sm transition" />
+				@if (!string.IsNullOrEmpty(searchQuery))
+				{
+					<button @onclick="() => { searchQuery = string.Empty; }"
+							class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+						<i class="fas fa-times"></i>
+					</button>
+				}
+			</div>
+			<select @bind="selectedLocation"
+					class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+				<option value="">Lieu d'événement</option>
+				<option value="Online">En ligne</option>
+				<option value="Niamey">Niamey</option>
+				<option value="other">Autres villes</option>
 			</select>
-
-			<select class="h-10 min-w-[170px] rounded-md border border-gray-200 px-3 text-sm text-gray-600 focus:border-secondary focus:outline-none">
-				<option>Date d’événement</option>
-				<option>Cette semaine</option>
-				<option>Ce mois</option>
-				<option>Ce trimestre</option>
+			<select @bind="selectedDateFilter"
+					class="bg-white px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 text-sm min-w-[150px]">
+				<option value="">Date d'événement</option>
+				<option value="week">Cette semaine</option>
+				<option value="month">Ce mois</option>
+				<option value="quarter">Ce trimestre</option>
 			</select>
-
-			
 		</div>
 
 		@if (IsLoading)
 		{
-			<div class="rounded-xl bg-white p-4 sm:p-6 text-xs sm:text-sm md:text-base text-gray-600 shadow-sm">Chargement des événements...</div>
+			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+				@for (int i = 0; i < 8; i++)
+				{
+					<SkeletonCard HasImage="true" HasBadge="true" HasFooter="true" Class="rounded-lg bg-white shadow-sm" />
+				}
+			</div>
 		}
 		else if (!string.IsNullOrWhiteSpace(LoadError))
 		{
-			<div class="rounded-xl bg-red-50 p-4 sm:p-6 text-xs sm:text-sm md:text-base text-red-600 shadow-sm">@LoadError</div>
+			<div class="rounded-lg bg-red-50 p-4 sm:p-6 text-xs sm:text-sm md:text-base text-red-600 shadow-sm">@LoadError</div>
 		}
 		else
 		{
 			<div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				@foreach (var evt in AllEvents)
+				@foreach (var evt in FilteredEvents)
 				{
 					<EventCard Event="@evt" />
 				}
@@ -65,6 +76,51 @@
 	public List<EventDto> AllEvents = new();
 	private bool IsLoading { get; set; } = true;
 	private string? LoadError { get; set; }
+	private string searchQuery = string.Empty;
+	private string selectedLocation = string.Empty;
+	private string selectedDateFilter = string.Empty;
+
+	private List<EventDto> FilteredEvents
+	{
+		get
+		{
+			var events = AllEvents;
+			if (!string.IsNullOrWhiteSpace(searchQuery))
+			{
+				var q = searchQuery.ToLowerInvariant();
+				events = events.Where(e =>
+					(e.Title?.ToLowerInvariant().Contains(q) ?? false) ||
+					(e.Description?.ToLowerInvariant().Contains(q) ?? false) ||
+					(e.Location?.ToLowerInvariant().Contains(q) ?? false))
+					.ToList();
+			}
+			if (!string.IsNullOrWhiteSpace(selectedLocation))
+			{
+				events = events.Where(e =>
+				{
+					var loc = selectedLocation.ToLowerInvariant();
+					if (loc == "online")
+						return e.EventType?.Equals("Online", StringComparison.OrdinalIgnoreCase) == true;
+					if (loc == "other")
+						return !e.EventType?.Equals("Online", StringComparison.OrdinalIgnoreCase) == true
+							&& e.Location?.Equals("Niamey", StringComparison.OrdinalIgnoreCase) != true;
+					return e.Location?.Equals(selectedLocation, StringComparison.OrdinalIgnoreCase) == true;
+				}).ToList();
+			}
+			if (!string.IsNullOrWhiteSpace(selectedDateFilter))
+			{
+				var now = DateTime.Now;
+				events = events.Where(e => selectedDateFilter switch
+				{
+					"week" => e.StartDate >= now && e.StartDate <= now.AddDays(7),
+					"month" => e.StartDate >= now && e.StartDate <= now.AddMonths(1),
+					"quarter" => e.StartDate >= now && e.StartDate <= now.AddMonths(3),
+					_ => true
+				}).ToList();
+			}
+			return events;
+		}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -72,12 +128,10 @@
 		try
 		{
 			AllEvents = await EventService.GetPublishedEventsAsync();
-			await JS.InvokeVoidAsync("console.log", AllEvents);
 		}
-		catch (Exception ex)
+		catch
 		{
 			LoadError = "Impossible de charger les événements.";
-			await JS.InvokeVoidAsync("console.error", ex.ToString());
 		}
 		finally
 		{
@@ -85,7 +139,6 @@
 		}
 	}
 
- 
 	private static string BuildEventUrl(EventDto eventDto)
 	{
 		if (!string.IsNullOrWhiteSpace(eventDto.Slug))
@@ -95,6 +148,4 @@
 
 		return $"/evenements/{eventDto.Id}";
 	}
-
-	@* Suppressed: NavigateToEvent was a no-op. Navigation via EventCard link. *@
 }

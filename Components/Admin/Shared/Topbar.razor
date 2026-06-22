@@ -8,15 +8,16 @@
             <button class="sm:hidden" @onclick="ToggleSidebar">
                   <i class="fas fa-bars text-xl"></i>
             </button>
+            <button class="hidden sm:flex items-center text-gray-500 hover:text-gray-800 transition-colors" @onclick="ToggleCollapsed" title="@(IsCollapsed ? "Développer" : "Réduire")">
+                  <i class="fas @(IsCollapsed ? "fa-chevron-right" : "fa-chevron-left") text-xl"></i>
+            </button>
             <div class="flex items-center text-2xl font-bold">
                   <img src="/Logo.svg" alt="Logo du dotnet Niger" class="w-10 h-10">
                   <span class="Link">Dotnet Niger</span>
             </div>
       </div>
       <div class="flex items-center space-x-4">
-            <div>
-
-            </div>
+            <ThemeToggle />
             <button @onclick="HandleLogout" class="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-white hover:bg-hover">
                   <span class="Button hidden sm:inline"> Deconnexion</span>
                   <i class="fas fa-sign-out-alt text-2xl sm:text-xl"></i>
@@ -28,12 +29,21 @@
       [Parameter]
       public EventCallback ToggleSidebar { get; set; }
 
+      [Parameter]
+      public EventCallback ToggleCollapsed { get; set; }
+
+      [Parameter]
+      public bool IsCollapsed { get; set; }
+
 
       private async Task HandleLogout()
       {
             await AuthService.LogoutAsync();
             var returnUrl = $"{NavigationManager.BaseUri.TrimEnd('/')}/auth/external-callback";
-            var loginUrl = $"{Config["ApiBaseUrl"] ?? "http://localhost:5000"}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+            var apiBase = Config["ApiBaseUrl"];
+            if (string.IsNullOrWhiteSpace(apiBase)) return;
+            var path = Config["IdentityEndpoints:Login"] ?? "/Account/Login";
+            var loginUrl = $"{apiBase}{path}?returnUrl={Uri.EscapeDataString(returnUrl)}";
             NavigationManager.NavigateTo(loginUrl, forceLoad: true);
       }
 

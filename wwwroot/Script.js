@@ -1,3 +1,21 @@
+window.getImageDimensionsFromStream = async (dotNetStreamRef) => {
+    const arrayBuffer = await dotNetStreamRef.arrayBuffer();
+    const blob = new Blob([arrayBuffer]);
+    const url = URL.createObjectURL(blob);
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve({ width: img.width, height: img.height });
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject("Format d'image invalide");
+        };
+        img.src = url;
+    });
+};
+
 window.closeMenuOnOutsideClick = (dotnetHelper) => {
       document.addEventListener("click",function(event){
             dotnetHelper.invokeMethodAsync("CloseMenu")

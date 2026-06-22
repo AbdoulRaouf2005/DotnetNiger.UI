@@ -1,7 +1,7 @@
-@page "/auth/external-callback"
+﻿@page "/auth/external-callback"
 @using Microsoft.AspNetCore.Components
 @inject IAuthService AuthService
-@inject DotnetNiger.UI.Services.Auth.CustomAuthStateProvider AuthProvider
+@inject IUserStateService UserStateService
 @inject NavigationManager Navigation
 
 <PageTitle>Connexion en cours - .NET Niger</PageTitle>
@@ -11,7 +11,11 @@
         <div class="text-gray-500 mb-4">
             @if (isProcessing)
             {
-                <p>Connexion en cours...</p>
+                <div class="space-y-4">
+                    <Skeleton Type="SkeletonType.Custom" Class="h-16 w-16 rounded-full mx-auto" />
+                    <Skeleton Type="SkeletonType.Title" Class="w-3/4 mx-auto" />
+                    <Skeleton Type="SkeletonType.Text" Lines="2" Class="w-1/2 mx-auto" />
+                </div>
             }
             else if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -44,6 +48,8 @@
         {
             isProcessing = false;
             errorMessage = "Aucun ticket de connexion reçu.";
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/login");
             return;
         }
 
@@ -51,16 +57,15 @@
 
         if (response.Success && response.Data != null)
         {
-            await AuthProvider.SaveTokensAsync(
-                response.Data.Token.AccessToken,
-                response.Data.Token.RefreshToken);
-
+            if (response.Data.User is not null)
+                await UserStateService.SetUserAsync(response.Data.User);
             Navigation.NavigateTo("/");
         }
         else
         {
-            isProcessing = false;
             errorMessage = response.Message ?? "Erreur lors de la connexion externe.";
+            await Task.Delay(3000);
+            Navigation.NavigateTo("/login");
         }
     }
 }

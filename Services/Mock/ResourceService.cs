@@ -1,6 +1,7 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 using DotnetNiger.UI.Services.Contracts;
+using DotnetNiger.UI.Services.Helpers;
 
 namespace DotnetNiger.UI.Services.Mock;
 
@@ -102,7 +103,7 @@ public class ResourceService : IResourceService
                 Id = Guid.NewGuid(),
                 Title = "Projet .NET Niger — API Gateway Ocelot",
                 Slug = "projet-dotnet-niger-api-gateway-ocelot",
-                Description = "Architecture et mise en œuvre de la passerelle API du projet DotNet Niger avec Ocelot et Consul.",
+                Description = "Architecture et mise en oeuvre de la passerelle API du projet DotNet Niger avec Ocelot et Consul.",
                 Url = "https://github.com/dotnetniger/platform",
                 ResourceType = "GitHub",
                 Level = "Avancé",
@@ -138,23 +139,27 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetAllResourcesAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.OrderByDescending(r => r.CreatedAt).ToList());
     }
 
     public async Task<ResourceDto?> GetResourceByIdAsync(Guid id)
     {
+        await Task.Delay(800);
         return await Task.FromResult(_resources.FirstOrDefault(r => r.Id == id));
     }
 
     public async Task<ResourceDto?> GetResourceBySlugAsync(string slug)
     {
+        await Task.Delay(800);
         var resource = _resources.FirstOrDefault(r => r.Slug == slug);
         return await Task.FromResult(resource);
     }
 
     public async Task<List<ResourceDto>> GetResourcesByTypeAsync(string resourceType)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r => r.ResourceType.Equals(resourceType, StringComparison.OrdinalIgnoreCase))
                       .OrderByDescending(r => r.ViewCount)
@@ -163,6 +168,7 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> GetResourcesByLevelAsync(string level)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r => r.Level.Equals(level, StringComparison.OrdinalIgnoreCase))
                       .OrderByDescending(r => r.ViewCount)
@@ -171,6 +177,7 @@ public class ResourceService : IResourceService
 
     public async Task<List<ResourceDto>> SearchResourcesAsync(string query)
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Where(r =>
                     r.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
@@ -183,12 +190,14 @@ public class ResourceService : IResourceService
 
     public async Task<List<string>> GetResourceTypesAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Select(r => r.ResourceType).Distinct().OrderBy(t => t).ToList());
     }
 
     public async Task<List<string>> GetLevelsAsync()
     {
+        await Task.Delay(800);
         return await Task.FromResult(
             _resources.Select(r => r.Level).Distinct().OrderBy(l => l switch
             {
@@ -200,7 +209,7 @@ public class ResourceService : IResourceService
             }).ToList());
     }
 
-    public async Task<ResourceDto> CreateResourceAsync(CreateResourceRequest request)
+    public async Task<ResourceDto?> CreateResourceAsync(CreateResourceRequest request)
     {
         var newResource = new ResourceDto
         {
@@ -220,7 +229,7 @@ public class ResourceService : IResourceService
         return await Task.FromResult(newResource);
     }
 
-    public async Task<ResourceDto> AddResourceAsync(AddResourceRequest request)
+    public async Task<ResourceDto?> AddResourceAsync(AddResourceRequest request)
     {
         var newResource = new ResourceDto
         {
@@ -271,18 +280,5 @@ public class ResourceService : IResourceService
     }
 
     private static string GenerateSlug(string title)
-    {
-        return title
-            .ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("à", "a").Replace("â", "a")
-            .Replace("é", "e").Replace("è", "e").Replace("ê", "e").Replace("ë", "e")
-            .Replace("î", "i").Replace("ï", "i")
-            .Replace("ô", "o")
-            .Replace("ù", "u").Replace("û", "u")
-            .Replace("ç", "c")
-            .Replace("'", "-").Replace("\"", "")
-            .Replace(",", "").Replace(".", "")
-            .Replace("?", "").Replace("!", "").Replace("#", "");
-    }
+        => StringHelper.GenerateSlug(title);
 }

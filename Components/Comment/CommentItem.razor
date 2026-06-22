@@ -1,4 +1,4 @@
-@namespace DotnetNiger.UI.Components
+﻿@namespace DotnetNiger.UI.Components
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Models.Requests
 @using DotnetNiger.UI.Services.Contracts
@@ -6,17 +6,18 @@
 
 @inject ICommentService CommentService
 @inject IToastService ToastService
+@inject IUserStateService UserStateService
 
 <div class="flex gap-4">
     <!-- Avatar -->
-    <div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-[#e5edf9]">
+    <div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-avatar-bg">
         @if (!string.IsNullOrWhiteSpace(Comment.AuthorAvatar))
         {
             <img src="@Comment.AuthorAvatar" alt="@Comment.AuthorName" class="h-full w-full object-cover" />
         }
         else
         {
-            <div class="flex h-full w-full items-center justify-center text-sm font-bold text-[#5b4df5]">
+            <div class="flex h-full w-full items-center justify-center text-sm font-bold text-accent">
                 @GetInitial(Comment.AuthorName)
             </div>
         }
@@ -35,24 +36,33 @@
                 }
             </div>
 
-            <!-- Action buttons (visible only if current user is the author) -->
+            <!-- Action dropdown (visible only if current user is the author) -->
             @if (Comment.UserId == CurrentUserId && !isEditing && !showDeleteConfirm)
             {
-                <div class="flex items-center gap-2">
+                <div class="relative">
                     <button
                         type="button"
-                        class="text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
-                        title="Modifier"
-                        @onclick="ToggleEdit">
-                        <i class="fa-solid fa-edit text-sm"></i>
+                        class="text-gray-400 hover:text-gray-600 px-2 py-1"
+                        @onclick="ToggleActionMenu">
+                        <i class="fa-solid fa-ellipsis-v text-sm"></i>
                     </button>
-                    <button
-                        type="button"
-                        class="text-xs text-red-400 hover:text-red-600 px-2 py-1"
-                        title="Supprimer"
-                        @onclick="ShowDeleteConfirmation">
-                        <i class="fa-solid fa-trash text-sm"></i>
-                    </button>
+                    @if (showActionMenu)
+                    {
+                        <div class="absolute right-0 top-full z-10 mt-1 w-36 rounded-lg border border-gray-200 bg-white shadow-lg" @onclick:stopPropagation>
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                @onclick="ToggleEdit">
+                                <i class="fa-solid fa-edit text-sm"></i> Modifier
+                            </button>
+                            <button
+                                type="button"
+                                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
+                                @onclick="ShowDeleteConfirmation">
+                                <i class="fa-solid fa-trash text-sm"></i> Supprimer
+                            </button>
+                        </div>
+                    }
                 </div>
             }
 
@@ -75,14 +85,15 @@
             <div class="mt-3 space-y-3">
                 <textarea
                     @bind="editedContent"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                     rows="3"
                     maxlength="1000"
-                    placeholder="Modifiez votre commentaire..."></textarea>
+                    placeholder="Modifiez votre commentaire..."
+                    @onkeydown="HandleEditKeyDown"></textarea>
                 <div class="flex gap-2">
                     <button
                         type="button"
-                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5]"
+                        class="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-active"
                         @onclick="HandleUpdate">
                         Enregistrer
                     </button>
@@ -128,28 +139,38 @@
         <!-- Reply button -->
         @if (!isEditing && !showDeleteConfirm)
         {
-            <button
-                type="button"
-                class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
-                @onclick="ToggleReplyForm">
-                @(showReplyForm ? "Annuler" : "Répondre")
-            </button>
+            if (UserStateService.IsAuthenticated)
+            {
+                <button
+                    type="button"
+                    class="mt-3 text-sm font-semibold text-gray-600 hover:text-accent"
+                    @onclick="ToggleReplyForm">
+                    @(showReplyForm ? "Annuler" : "Répondre")
+                </button>
+            }
+            else
+            {
+                <a href="/auth/login" class="mt-3 inline-block text-sm font-semibold text-gray-400 hover:text-accent">
+                    Connectez-vous pour répondre
+                </a>
+            }
         }
 
         <!-- Reply form -->
-        @if (showReplyForm && !isEditing && !showDeleteConfirm)
+        @if (showReplyForm && !isEditing && !showDeleteConfirm && UserStateService.IsAuthenticated)
         {
             <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <textarea
                     @bind="replyContent"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                     rows="3"
                     maxlength="1000"
-                    placeholder="Écrivez votre réponse..."></textarea>
+                    placeholder="Écrivez votre réponse..."
+                    @onkeydown="HandleReplyKeyDown"></textarea>
                 <div class="mt-3 flex gap-2">
                     <button
                         type="button"
-                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5] disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-active disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled="@(string.IsNullOrWhiteSpace(replyContent) || isSubmittingReply)"
                         @onclick="HandleReplySubmit">
                         @(isSubmittingReply ? "Envoi..." : "Envoyer la réponse")
@@ -205,6 +226,7 @@
     private bool showReplyForm;
     private bool isEditing;
     private bool showDeleteConfirm;
+    private bool showActionMenu;
     private bool deleteAllReplies = true;
     private string replyContent = string.Empty;
     private string editedContent = string.Empty;
@@ -215,6 +237,7 @@
     private void ToggleEdit()
     {
         isEditing = !isEditing;
+        showActionMenu = false;
         if (isEditing)
         {
             editedContent = Comment.Content;
@@ -227,6 +250,17 @@
     {
         showDeleteConfirm = true;
         showReplyForm = false;
+        showActionMenu = false;
+    }
+
+    private void ToggleActionMenu() => showActionMenu = !showActionMenu;
+
+    private async Task HandleReplyKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && (e.CtrlKey || e.MetaKey))
+        {
+            await HandleReplySubmit();
+        }
     }
 
     private async Task HandleReplySubmit()
@@ -272,6 +306,14 @@
         finally
         {
             isSubmittingReply = false;
+        }
+    }
+
+    private async Task HandleEditKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && (e.CtrlKey || e.MetaKey))
+        {
+            await HandleUpdate();
         }
     }
 
@@ -333,7 +375,7 @@
         }
     }
 
-    private async Task HandleReport()
+    private void HandleReport()
     {
         ToastService.ShowToast("Commentaire signalé à l'équipe de modération.", ToastLevel.Info);
     }
@@ -350,7 +392,7 @@
         html = Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
         html = Regex.Replace(html, @"\*(.+?)\*", "<em>$1</em>");
         html = Regex.Replace(html, @"`(.+?)`", "<code class=\"bg-gray-100 px-1 rounded text-red-600 text-xs\">$1</code>");
-        html = Regex.Replace(html, @"\[([^\]]+)\]\(([^)]+)\)", "<a href=\"$2\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[#5b4df5] underline\">$1</a>");
+        html = Regex.Replace(html, @"\[([^\]]+)\]\(([^)]+)\)", "<a href=\"$2\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-accent underline\">$1</a>");
 
         return new MarkupString(html);
     }
@@ -360,7 +402,12 @@
 
     private string GetTimeLabel(DateTime createdAt)
     {
-        var now = DateTime.Now;
+        if (createdAt.Kind == DateTimeKind.Local)
+            createdAt = createdAt.ToUniversalTime();
+        else if (createdAt.Kind == DateTimeKind.Unspecified)
+            createdAt = DateTime.SpecifyKind(createdAt, DateTimeKind.Utc);
+
+        var now = DateTime.UtcNow;
         var diff = now - createdAt;
 
         if (diff.TotalMinutes < 1)

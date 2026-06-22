@@ -4,12 +4,9 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiSearchService : ISearchService
+public class ApiSearchService : ApiServiceBase, ISearchService
 {
-    private readonly HttpClient _http;
-    private const string Base = "api/v1/search";
-
-    public ApiSearchService(HttpClient http) => _http = http;
+    public ApiSearchService(HttpClient http) : base(http) { }
 
     public async Task<PaginatedDto<SearchResultDto>> SearchAsync(SearchQueryRequest request)
     {
@@ -20,19 +17,12 @@ public class ApiSearchService : ISearchService
             ["page"] = request.Page.ToString(),
             ["pageSize"] = request.PageSize.ToString()
         };
-        var url = BuildUrl(Base, q);
-        var response = await _http.GetAsync(url);
+        var url = BuildUrl(ApiEndpoints.Search, q);
+        var response = await Http.GetAsync(url);
         if (!response.IsSuccessStatusCode)
             return new PaginatedDto<SearchResultDto>();
         return await ApiResponseReader.ReadAsync<PaginatedDto<SearchResultDto>>(response)
                ?? new PaginatedDto<SearchResultDto>();
     }
 
-    private static string BuildUrl(string path, Dictionary<string, string?> query)
-    {
-        var qs = string.Join("&", query
-            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}"));
-        return string.IsNullOrWhiteSpace(qs) ? path : $"{path}?{qs}";
-    }
 }

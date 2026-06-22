@@ -11,13 +11,15 @@
 	<HeadContent>
 		<meta property="og:title" content="@resource.Title" />
 		<meta property="og:description" content="@resource.Description" />
-		<meta property="og:image" content="@GetAbsoluteUrl("/Logo.svg")" />
-		<meta property="og:url" content="@GetAbsoluteUrl(Navigation.Uri)" />
+		<meta property="og:image" content="@ResolveImageUrl(null)" />
+		<meta property="og:url" content="@Navigation.Uri" />
 		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="Dotnet Niger" />
+		<meta property="og:locale" content="fr_FR" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content="@resource.Title" />
 		<meta name="twitter:description" content="@resource.Description" />
-		<meta name="twitter:image" content="@GetAbsoluteUrl("/Logo.svg")" />
+		<meta name="twitter:image" content="@ResolveImageUrl(null)" />
 	</HeadContent>
 }
 
@@ -46,7 +48,7 @@ else if (resource is null)
 }
 else
 {
-    <section class="bg-gradient-to-b from-[#e8e3f6] to-white px-4 py-10 sm:py-14 lg:px-10">
+    <section class="bg-gradient-to-b from-accent-bg to-white px-4 py-10 sm:py-14 lg:px-10">
         <div class="mx-auto w-full max-w-4xl">
             <nav class="mb-6 text-sm text-gray-500">
                 <a href="/ressources" class="hover:text-secondary transition">Ressources</a>
@@ -54,7 +56,7 @@ else
                 <span class="text-gray-900 font-medium">@resource.Title</span>
             </nav>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
                 <div class="@GradientClass h-44 sm:h-56 flex items-center justify-center relative">
                     <div class="absolute inset-0 bg-white/10"></div>
                     <div class="relative flex flex-col items-center gap-3">
@@ -113,7 +115,7 @@ else
                     </div>
 
                     <ShareButtons Title="@resource.Title"
-                                  Url="@GetAbsoluteUrl(Navigation.Uri)"
+                                  Url="@Navigation.Uri"
                                   Description="@resource.Description" />
                 </div>
             </div>
@@ -193,10 +195,16 @@ else
         _ => "fas fa-tag"
     };
 
-    private string GetAbsoluteUrl(string relativeUrl)
+    private string ResolveImageUrl(string? imageUrl)
     {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return $"{Navigation.BaseUri.TrimEnd('/')}/images/og-default.jpg";
+
+        if (imageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            imageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return imageUrl;
+
         var baseUri = Navigation.BaseUri.TrimEnd('/');
-        var url = relativeUrl.TrimStart('/');
-        return $"{baseUri}/{url}";
+        return $"{baseUri}/{imageUrl.TrimStart('/')}";
     }
 }

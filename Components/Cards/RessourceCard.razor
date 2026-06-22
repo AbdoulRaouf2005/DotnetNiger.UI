@@ -1,0 +1,101 @@
+﻿@* Carte ressource réutilisable : page publique, accueil, admin *@
+
+<div class="group bg-white rounded-lg shadow-sm hover:shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col cursor-pointer"
+     @onclick="NavigateToDetail">
+    <div class="relative h-36 sm:h-40 @GradientClass flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+        <i class="@IconClass text-white text-4xl sm:text-5xl opacity-90"></i>
+        <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            <span class="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                <i class="@LevelIconClass text-xs"></i>
+                @Resource.Level
+            </span>
+        </div>
+        <div class="absolute top-3 right-3">
+            <span class="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-medium text-white">
+                <i class="fas fa-eye text-xs"></i>
+                @Resource.ViewCount
+            </span>
+        </div>
+    </div>
+    <div class="flex flex-col flex-1 p-4 sm:p-5">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="inline-flex rounded-full bg-indigo-50 text-indigo-700 px-2.5 py-0.5 text-[11px] font-semibold">@Resource.ResourceType</span>
+            @if (CreatedDate is not null)
+            {
+                <span class="text-[11px] text-gray-400 ml-auto">@CreatedDate</span>
+            }
+        </div>
+        <h3 class="text-sm sm:text-base font-bold text-gray-900 mb-1.5 line-clamp-2 leading-snug group-hover:text-secondary transition-colors">@Resource.Title</h3>
+        <p class="text-xs sm:text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">@Resource.Description</p>
+        @if (Resource.Tags.Count > 0)
+        {
+            <div class="flex flex-wrap gap-1.5 mb-3">
+                @foreach (var tag in Resource.Tags.Take(3))
+                {
+                    <span class="inline-flex rounded-full bg-gray-100 text-gray-600 px-2 py-0.5 text-[10px] font-medium">#@tag.Name</span>
+                }
+                @if (Resource.Tags.Count > 3)
+                {
+                    <span class="text-[10px] text-gray-400 self-center">+@(Resource.Tags.Count - 3)</span>
+                }
+            </div>
+        }
+        <a href="@Resource.Url" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center justify-center gap-2 w-full rounded-lg bg-secondary text-white py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+           @onclick:stopPropagation>
+            Accéder à la ressource
+            <i class="fas fa-external-link-alt text-xs"></i>
+        </a>
+    </div>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Parameter, EditorRequired] public ResourceDto Resource { get; set; } = default!;
+
+    private string? CreatedDate => Resource.CreatedAt != default
+        ? Resource.CreatedAt.ToString("dd MMM yyyy")
+        : null;
+
+    private void NavigateToDetail()
+    {
+        if (!string.IsNullOrWhiteSpace(Resource.Slug))
+        {
+            Navigation.NavigateTo($"/ressource/{Resource.Slug}");
+        }
+    }
+
+    private string GradientClass => Resource.ResourceType switch
+    {
+        "Documentation" => "bg-gradient-to-br from-blue-600 to-blue-400",
+        "Tutoriel" => "bg-gradient-to-br from-emerald-600 to-emerald-400",
+        "Article" => "bg-gradient-to-br from-purple-600 to-purple-400",
+        "GitHub" => "bg-gradient-to-br from-gray-800 to-gray-600",
+        "Cours" => "bg-gradient-to-br from-orange-600 to-orange-400",
+        "Livre" => "bg-gradient-to-br from-rose-600 to-rose-400",
+        "Outil" => "bg-gradient-to-br from-cyan-600 to-cyan-400",
+        _ => "bg-gradient-to-br from-indigo-600 to-indigo-400"
+    };
+
+    private string IconClass => Resource.ResourceType switch
+    {
+        "Documentation" => "fas fa-book",
+        "Tutoriel" => "fas fa-graduation-cap",
+        "Article" => "fas fa-newspaper",
+        "GitHub" => "fab fa-github",
+        "Cours" => "fas fa-video",
+        "Livre" => "fas fa-book-open",
+        "Outil" => "fas fa-wrench",
+        _ => "fas fa-file"
+    };
+
+    private string LevelIconClass => Resource.Level switch
+    {
+        "Débutant" => "fas fa-seedling",
+        "Intermédiaire" or "Intermediaire" => "fas fa-chart-line",
+        "Avancé" => "fas fa-rocket",
+        "Tous niveaux" => "fas fa-users",
+        _ => "fas fa-tag"
+    };
+}

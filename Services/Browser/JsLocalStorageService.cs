@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 
 namespace DotnetNiger.UI.Services.Browser;
 
-public class JsLocalStorageService : global::DotnetNiger.UI.Services.Contracts.ILocalStorageService
+public class JsLocalStorageService : ILocalStorageService
 {
     private readonly IJSRuntime _jsRuntime;
 

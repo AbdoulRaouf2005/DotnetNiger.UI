@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr" data-theme="light">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DotnetNiger.UI</title>
+    <title>Dotnet Niger - Communauté .NET du Niger</title>
     <base href="/" />
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/svg" href="Logo.svg" />
 
-    <!-- style tailwind -->
     <link href="css/output.css" rel="stylesheet">
 
     <link href="lib/fontawesome/css/all.min.css" rel="stylesheet" />
@@ -17,8 +22,13 @@
     <link rel="stylesheet" href="lib/tinymce/skins/ui/oxide/skin.min.css" />
     <link rel="stylesheet" href="lib/tinymce/skins/ui/oxide/content.min.css" />
 
-    <!--<link href="DotnetNiger.UI.styles.css" rel="stylesheet" />-->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <meta property="og:title" content="Dotnet Niger" />
+    <meta property="og:description" content="Communauté .NET du Niger" />
+    <meta property="og:image" content="/images/og-default.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dotnet Niger" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta name="twitter:card" content="summary_large_image" />
 </head>
 
 <body>
@@ -30,18 +40,17 @@
         </div>
         <div class="loading-progress-text"></div>
     </div>
-    <!-- 
-    <div id="blazor-error-ui" class="bg-red-600 text-white px-4 py-2 rounded-md">
+    <div id="blazor-error-ui" class="bg-red-600 text-white px-4 py-2 rounded-md" style="display:none;">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
-    </div> -->
+    </div>
 
     <!-- Charger TinyMCE depuis npm (mode hors ligne) -->
     <script src="lib/tinymce/tinymce.min.js"></script>
     <!-- Puis charger les fonctions d'initialisation -->
     <script src="tinymce-init.js"></script>
-    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+    <script src="lib/iconify/iconify-icon.min.js"></script>
     <!-- Chargement de Blazor -->
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="Script.js"></script>

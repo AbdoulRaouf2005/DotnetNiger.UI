@@ -1,4 +1,5 @@
-﻿<HeadOutlet />
+﻿@inject ThemeService ThemeService
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
@@ -17,3 +18,10 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+    }
+}

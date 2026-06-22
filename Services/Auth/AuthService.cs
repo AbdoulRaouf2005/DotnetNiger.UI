@@ -2,8 +2,10 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using DotnetNiger.UI.Helpers;
 using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
+using DotnetNiger.UI.Services.Api;
 using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Auth;
@@ -12,13 +14,15 @@ public class AuthService : IAuthService
 {
     private readonly HttpClient _http;
     private readonly CustomAuthStateProvider _authProvider;
+    private readonly IUserStateService _userStateService;
+    private readonly string _clientId;
 
-    public event Action? OnAuthStateChanged;
-
-    public AuthService(HttpClient http, CustomAuthStateProvider authProvider)
+    public AuthService(HttpClient http, CustomAuthStateProvider authProvider, IUserStateService userStateService, string clientId = "web-ui")
     {
         _http = http;
         _authProvider = authProvider;
+        _userStateService = userStateService;
+        _clientId = clientId;
     }
 
     public async Task<ApiSuccessResponse<AuthDto>> LoginAsync(LoginRequest request)
@@ -30,10 +34,11 @@ public class AuthService : IAuthService
                 ["grant_type"] = "password",
                 ["username"] = request.Email,
                 ["password"] = request.Password,
-                ["scope"] = "openid profile email roles offline_access"
+                ["scope"] = "openid profile email roles offline_access",
+                ["client_id"] = _clientId
             };
 
-            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+            var response = await _http.PostAsync(ApiEndpoints.Auth.Token, new FormUrlEncodedContent(formData));
 
             if (!response.IsSuccessStatusCode)
             {
@@ -50,6 +55,10 @@ public class AuthService : IAuthService
             var (authDto, error) = await ParseTokenResponseAsync(response);
             if (authDto is not null)
             {
+                if (authDto.Token is not null)
+                    await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+                if (authDto.User is not null)
+                    await _userStateService.SetUserAsync(authDto.User);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 
@@ -84,7 +93,7 @@ public class AuthService : IAuthService
 
         try
         {
-            var payloadJson = Encoding.UTF8.GetString(ParseBase64WithoutPadding(segments[1]));
+            var payloadJson = Encoding.UTF8.GetString(JwtParser.ParseBase64WithoutPadding(segments[1]));
             using var document = JsonDocument.Parse(payloadJson);
             var root = document.RootElement;
 
@@ -105,52 +114,6 @@ public class AuthService : IAuthService
         }
     }
 
-    /// <summary>
-    /// Détermine le chemin de redirection après connexion basé sur les rôles de l'utilisateur.
-    /// </summary>
-    /// <param name="roles">Liste des rôles de l'utilisateur</param>
-    /// <returns>Le chemin vers lequel rediriger l'utilisateur</returns>
-    public string GetPostLoginRedirectPath(List<string>? roles)
-    {
-        if (roles == null || roles.Count == 0)
-            return "/";
-
-        // Vérifier les rôles par ordre de priorité
-        var rolesLower = roles.Select(r => r.ToLowerInvariant()).ToList();
-
-        if (rolesLower.Contains("superadmin"))
-            return "/admin/dashboard";
-
-        if (rolesLower.Contains("admin"))
-            return "/admin/dashboard";
-
-        if (rolesLower.Contains("moderator"))
-            return "/admin/dashboard";
-
-        // Rôles utilisateur normal
-        return "/";
-    }
-
-    /// <summary>
-    /// Détermine le chemin de redirection après connexion basé sur le token d'accès (obsolète).
-    /// Utiliser GetPostLoginRedirectPath(List&lt;string&gt;) avec les rôles de l'utilisateur.
-    /// </summary>
-    [Obsolete("Utilisez GetPostLoginRedirectPath(List<string> roles) avec les rôles du UserDto")]
-    public string GetPostLoginRedirectPathFromToken(string? accessToken)
-    {
-        var role = GetRoleFromAccessToken(accessToken);
-        if (string.IsNullOrWhiteSpace(role))
-            return "/";
-
-        return role.ToLowerInvariant() switch
-        {
-            "admin" => "/admin/dashboard",
-            "superadmin" => "/admin/dashboard",
-            "moderator" => "/admin/dashboard",
-            _ => "/"
-        };
-    }
-
     public async Task<ApiSuccessResponse<AuthDto>> CompleteExternalLoginAsync(string ticket)
     {
         try
@@ -159,11 +122,11 @@ public class AuthService : IAuthService
             {
                 ["grant_type"] = "external_login",
                 ["ticket"] = ticket,
-                ["client_id"] = "web-ui",
+                ["client_id"] = _clientId,
                 ["scope"] = "openid profile email roles offline_access"
             };
 
-            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+            var response = await _http.PostAsync(ApiEndpoints.Auth.Token, new FormUrlEncodedContent(formData));
 
             if (!response.IsSuccessStatusCode)
             {
@@ -179,6 +142,10 @@ public class AuthService : IAuthService
             var (authDto, error) = await ParseTokenResponseAsync(response);
             if (authDto is not null)
             {
+                if (authDto.Token is not null)
+                    await _authProvider.SaveTokensAsync(authDto.Token.AccessToken, authDto.Token.RefreshToken);
+                if (authDto.User is not null)
+                    await _userStateService.SetUserAsync(authDto.User);
                 return new ApiSuccessResponse<AuthDto> { Success = true, Data = authDto };
             }
 
@@ -207,7 +174,7 @@ public class AuthService : IAuthService
                 lastName = names.Length > 1 ? names[1] : ""
             };
 
-            var response = await _http.PostAsJsonAsync("api/auth/register", registerPayload);
+            var response = await _http.PostAsJsonAsync(ApiEndpoints.Auth.Register, registerPayload);
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = await TryReadErrorMessageAsync(response.Content);
@@ -269,37 +236,18 @@ public class AuthService : IAuthService
         }
     }
 
-    public async Task<ApiSuccessResponse<Guid>> RegisterStep1Async(RegisterRequest request)
-    {
-        var result = await RegisterAsync(request);
-        if (!result.Success)
-        {
-            return new ApiSuccessResponse<Guid>
-            {
-                Success = false,
-                Message = result.Message ?? "Erreur lors de l'étape d'inscription."
-            };
-        }
-
-        return new ApiSuccessResponse<Guid>
-        {
-            Success = true,
-            Message = result.Message ?? "Étape 1 validée.",
-            Data = result.Data?.User?.Id ?? Guid.Empty
-        };
-    }
-
     public async Task LogoutAsync()
     {
         var refreshToken = await _authProvider.GetRefreshTokenAsync();
 
         if (!string.IsNullOrWhiteSpace(refreshToken))
         {
-            _ = await _http.PostAsJsonAsync("api/auth/logout",
-                new RefreshTokenRequest { RefreshToken = refreshToken });
+            await _http.PostAsJsonAsync(ApiEndpoints.Auth.Logout,
+                new RefreshTokenRequest { RefreshToken = refreshToken, ClientId = _clientId });
         }
 
         await _authProvider.ClearTokensAsync();
+        await _userStateService.ClearUserAsync();
     }
 
     private static readonly SemaphoreSlim _refreshLock = new(1, 1);
@@ -323,15 +271,15 @@ public class AuthService : IAuthService
             {
                 ["grant_type"] = "refresh_token",
                 ["refresh_token"] = refreshToken,
-                ["scope"] = "openid profile email roles offline_access"
+                ["scope"] = "openid profile email roles offline_access",
+                ["client_id"] = _clientId
             };
 
-            var response = await _http.PostAsync("connect/token", new FormUrlEncodedContent(formData));
+            var response = await _http.PostAsync(ApiEndpoints.Auth.Token, new FormUrlEncodedContent(formData));
 
             if (!response.IsSuccessStatusCode)
             {
                 await _authProvider.ClearTokensAsync();
-                OnAuthStateChanged?.Invoke();
                 return null;
             }
 
@@ -388,9 +336,7 @@ public class AuthService : IAuthService
         var token = await _authProvider.GetAccessTokenAsync();
         var role = GetRoleFromAccessToken(token);
 
-        return string.Equals(role, "admin", StringComparison.OrdinalIgnoreCase)
-               || string.Equals(role, "superadmin", StringComparison.OrdinalIgnoreCase)
-               || string.Equals(role, "moderator", StringComparison.OrdinalIgnoreCase);
+        return RoleConstants.IsAdminRole(role);
     }
 
     public Task<string?> GetAccessTokenAsync()
@@ -398,14 +344,14 @@ public class AuthService : IAuthService
 
     public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/auth/forgot-password", request);
+        var response = await _http.PostAsJsonAsync(ApiEndpoints.Auth.ForgotPassword, request);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<ApiSuccessResponse<object>> ResetPasswordAsync(ResetPasswordRequest request)
     {
         var resetPayload = new { email = request.Email, token = request.Token, password = request.NewPassword };
-        var response = await _http.PostAsJsonAsync("api/auth/reset-password", resetPayload);
+        var response = await _http.PostAsJsonAsync(ApiEndpoints.Auth.ResetPassword, resetPayload);
         if (!response.IsSuccessStatusCode)
         {
             var errorMessage = await TryReadErrorMessageAsync(response.Content);
@@ -438,13 +384,13 @@ public class AuthService : IAuthService
 
     public async Task<bool> RequestEmailVerificationAsync(RequestEmailVerificationRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/auth/request-email-verification", request);
+        var response = await _http.PostAsJsonAsync(ApiEndpoints.Auth.RequestEmailVerification, request);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> VerifyEmailAsync(VerifyEmailRequest request)
     {
-        var response = await _http.PostAsJsonAsync("api/auth/verify-email", request);
+        var response = await _http.PostAsJsonAsync(ApiEndpoints.Auth.VerifyEmail, request);
         return response.IsSuccessStatusCode;
     }
 
@@ -535,17 +481,6 @@ public class AuthService : IAuthService
         return false;
     }
 
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        base64 = base64.Replace('-', '+').Replace('_', '/');
-        return (base64.Length % 4) switch
-        {
-            2 => Convert.FromBase64String(base64 + "=="),
-            3 => Convert.FromBase64String(base64 + "="),
-            _ => Convert.FromBase64String(base64),
-        };
-    }
-
     private static async Task<string?> TryReadErrorMessageAsync(HttpContent content)
     {
         try
@@ -575,21 +510,5 @@ public class AuthService : IAuthService
     }
 
     private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-    {
-        var payload = jwt.Split('.')[1];
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-        var kvs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
-
-        return kvs.SelectMany(kv =>
-        {
-            if (kv.Key is "roles" or "role")
-            {
-                if (kv.Value.ValueKind == JsonValueKind.Array)
-                    return kv.Value.EnumerateArray().Select(r => new Claim(ClaimTypes.Role, r.GetString()!));
-                return new[] { new Claim(ClaimTypes.Role, kv.Value.GetString()!) };
-            }
-
-            return new[] { new Claim(kv.Key, kv.Value.ToString()) };
-        });
-    }
+        => JwtParser.ParseClaimsFromJwt(jwt);
 }

@@ -8,28 +8,44 @@
 @inject NavigationManager NavigationManager
 @inject IPostService PostService
 @inject IToastService ToastService
+@inject PreviewStateService PreviewState
 
 <div class="min-h-screen p-6">
     <div class="mb-6 flex items-center justify-between">
           <AdminBreadcrumb />
     </div>
 
-    <div class="rounded-xl bg-white p-6 shadow">
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-                <label class="mb-2 block text-sm font-semibold text-gray-700">Titre</label>
-                <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none" />
+    @if (!isLoading)
+    {
+    <div class="rounded-lg bg-white p-6 shadow">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div class="lg:col-span-2 order-2 lg:order-1 space-y-6">
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Titre</label>
+                    <input @bind="postRequest.Title" type="text" class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none" />
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Type d'article</label>
+                    <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none">
+                        <option value="">Sélectionner</option>
+                        <option value="Tutorial">Tutorial</option>
+                        <option value="Article">Article</option>
+                        <option value="Interview">Interview</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm font-semibold text-gray-700">Contenu</label>
+                    <Editor @ref="EditorRef" EditorId="blogDescriptionEdit" InitialContent="@(postRequest.Content ?? string.Empty)" />
+                    @if (showContentError)
+                    {
+                        <p class="text-red-500 text-sm mt-1">Le contenu de l'article est obligatoire.</p>
+                    }
+                </div>
             </div>
-            <div>
-                <label class="mb-2 block text-sm font-semibold text-gray-700">Type d'article</label>
-                <select @bind="postRequest.PostType" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 focus:outline-none">
-                    <option value="">Sélectionner</option>
-                    <option value="Tutorial">Tutorial</option>
-                    <option value="Article">Article</option>
-                    <option value="Interview">Interview</option>
-                </select>
-            </div>
-            <div>
+
+            <div class="order-1 lg:order-2">
                 <label class="mb-2 block text-sm font-semibold text-gray-700">Image de couverture</label>
                 <ImageUploader UploadType="UploadType.Blog"
                                ExistingImageUrl="@postRequest.CoverImageUrl"
@@ -38,18 +54,9 @@
             </div>
         </div>
 
-        <div class="mt-6">
-            <label class="mb-2 block text-sm font-semibold text-gray-700">Contenu</label>
-            <Editor @ref="EditorRef" EditorId="blogDescriptionEdit" InitialContent="@(postRequest.Content ?? string.Empty)" />
-            @if (showContentError)
-            {
-                <p class="text-red-500 text-sm mt-1">Le contenu de l'article est obligatoire.</p>
-            }
-        </div>
-
         @if (!string.IsNullOrWhiteSpace(errorMessage))
         {
-            <div class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
+            <div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">@errorMessage</div>
         }
 
         <div class="mt-6 flex flex-wrap gap-4">
@@ -57,17 +64,56 @@
                 <i class="fas fa-save"></i>
                 Annuler
             </button>
-            <button @onclick="Publish" class="flex items-center gap-2 rounded-lg bg-green-500 px-6 py-3 text-white transition hover:bg-green-600">
+            <button type="button" @onclick="HandlePreview"
+                    class="flex items-center gap-2 rounded-lg bg-gray-700 px-6 py-3 text-white transition hover:bg-gray-800">
+                <i class="fas fa-eye"></i>
+                Aperçu
+            </button>
+            <button type="submit" @onclick="Publish"
+                    class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
                 <i class="fas fa-paper-plane"></i>
                 Publier
             </button>
         </div>
     </div>
+    }
+    else
+    {
+        <div class="rounded-lg bg-white p-6 shadow">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div class="lg:col-span-2 order-2 lg:order-1 space-y-6">
+                    <div>
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16 mb-2" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 w-full rounded-lg" />
+                    </div>
+                    <div>
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-24 mb-2" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 w-full rounded-lg" />
+                    </div>
+                    <div>
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-16 mb-2" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-64 w-full rounded-lg" />
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40 mb-2" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-40 w-full rounded-lg" />
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-4">
+                <Skeleton Type="SkeletonType.Button" Width="120px" />
+                <Skeleton Type="SkeletonType.Button" Width="120px" />
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     [Parameter] public Guid Id { get; set; }
 
+    private bool isLoading = true;
+    private PostDto? originalPost;
     private UpdatePostRequest postRequest = new();
     private string errorMessage = string.Empty;
 
@@ -84,7 +130,31 @@
             return;
         }
 
-        postRequest = MapToUpdateRequest(post);
+        // Restaurer le formulaire si on revient d'un aperçu
+        var expectedReturn = $"/admin/blog/edit/{Id}";
+        if (PreviewState.PendingPostRequest is not null && PreviewState.ReturnUrl == expectedReturn)
+        {
+            originalPost = post;
+            postRequest = new UpdatePostRequest
+            {
+                Title = PreviewState.PendingPostRequest.Title,
+                Content = PreviewState.PendingPostRequest.Content,
+                Excerpt = PreviewState.PendingPostRequest.Excerpt,
+                CoverImageUrl = PreviewState.PendingPostRequest.CoverImageUrl,
+                PostType = PreviewState.PendingPostRequest.PostType,
+                CategoryIds = PreviewState.PendingPostRequest.CategoryIds.ToList(),
+                TagNames = PreviewState.PendingPostRequest.TagNames.ToList(),
+                IsPublished = PreviewState.PendingPostRequest.IsPublished
+            };
+            PreviewState.PendingPostRequest = null;
+        }
+        else
+        {
+            originalPost = post;
+            postRequest = MapToUpdateRequest(post);
+        }
+
+        isLoading = false;
     }
     private void HandleImageUploaded(string imageUrl)
     {
@@ -94,6 +164,43 @@
     private void HandleImageDeleted()
     {
         postRequest.CoverImageUrl = string.Empty;
+    }
+
+    private async Task HandlePreview()
+    {
+        postRequest.Content = await EditorRef.GetContentAsync();
+
+        // Sauvegarder l'état du formulaire pour restauration après retour
+        PreviewState.PendingPostRequest = new CreatePostRequest
+        {
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            PostType = postRequest.PostType,
+            CategoryIds = postRequest.CategoryIds.ToList(),
+            TagNames = postRequest.TagNames.ToList(),
+            IsPublished = postRequest.IsPublished
+        };
+
+        var previewDto = new PostDto
+        {
+            Id = Id,
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            AuthorName = originalPost?.AuthorName ?? string.Empty,
+            AuthorAvatar = originalPost?.AuthorAvatar ?? string.Empty,
+            AuthorId = originalPost?.AuthorId ?? Guid.Empty,
+            PostType = postRequest.PostType,
+            PublishedAt = originalPost?.PublishedAt ?? DateTime.Now,
+            Categories = originalPost?.Categories ?? new(),
+            Tags = postRequest.TagNames.Select(t => new TagDto { Name = t }).ToList()
+        };
+
+        PreviewState.SetBlogPreview(previewDto, $"/admin/blog/edit/{Id}");
+        NavigationManager.NavigateTo("/preview/blog");
     }
 
     private async Task SaveDraft()
@@ -162,7 +269,7 @@
             PostType = post.PostType,
             CategoryIds = post.Categories.Select(c => c.Id).ToList(),
             TagNames = post.Tags.Select(t => t.Name).ToList(),
-            IsPublished = post.PublishedAt != DateTime.MinValue
+            IsPublished = post.PublishedAt.HasValue
         };
     }
 }

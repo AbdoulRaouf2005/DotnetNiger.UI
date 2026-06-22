@@ -1,4 +1,4 @@
-@page "/profile/informations"
+﻿@page "/profile/informations"
 @using DotnetNiger.UI.Models
 @using DotnetNiger.UI.Components.Shared
 @implements IDisposable
@@ -6,148 +6,207 @@
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
 
-<div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
-    <header class="mb-8 space-y-3">
-        <h1 class="text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl">Informations utilisateur</h1>
-        <p class="max-w-3xl text-lg text-slate-600">Mets a jour ton profil public, ton avatar et tes liens sociaux.</p>
-    </header>
+@if (!isLoading)
+{
+    <div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+        <header class="mb-8 space-y-3">
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-800 sm:text-3xl">Informations utilisateur</h1>
+            <p class="max-w-3xl text-lg text-slate-600">Mets a jour ton profil public, ton avatar et tes liens sociaux.</p>
+        </header>
 
-    <div class="space-y-6">
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
-                <div>
-                    <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Informations personnelles</h2>
-                    <p class="mt-4 text-lg leading-relaxed text-slate-600">Ce que les membres voient sur ton profil.</p>
-                </div>
-
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <div class="md:col-span-1">
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Nom complet</label>
-                        <InputText @bind-Value="model.FullName" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Ville</label>
-                        <InputText @bind-Value="model.City" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Adresse email</label>
-                        <InputText Value="@displayEmail" ValueExpression="() => displayEmail" disabled class="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-base text-slate-500" />
-                    </div>
-                    <div class="md:col-span-1">
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Telephone</label>
-                        <InputText @bind-Value="model.PhoneNumber" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Pays</label>
-                        <InputText @bind-Value="model.Country" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
-                <div>
-                    <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Biographie</h2>
-                    <p class="mt-4 text-lg leading-relaxed text-slate-600">Un court texte pour te presenter.</p>
-                </div>
-
-                <div class="space-y-5">
+        <div class="space-y-6">
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
                     <div>
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Bio</label>
-                        <InputTextArea @bind-Value="model.Bio" rows="5" class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base leading-relaxed text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Informations personnelles</h2>
+                        <p class="mt-4 text-lg leading-relaxed text-slate-600">Ce que les membres voient sur ton profil.</p>
                     </div>
-                    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
-                            <div class="relative mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-indigo-100 bg-slate-100 sm:mx-0 sm:h-28 sm:w-28">
-                                <img src="@AvatarPreviewUrl" alt="Apercu avatar" class="h-full w-full object-cover" />
-                            </div>
 
-                            <div class="flex-1 space-y-3">
-                                <ImageUploader UploadType="UploadType.User"
-                                               ExistingImageUrl="@model.AvatarUrl"
-                                               OnImageUploaded="HandleImageUploaded"
-                                               OnImageDeleted="HandleImageDeleted" />
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div class="md:col-span-1">
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Nom complet</label>
+                            <InputText @bind-Value="model.FullName" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Ville</label>
+                            <InputText @bind-Value="model.City" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Adresse email</label>
+                            <InputText Value="@displayEmail" ValueExpression="() => displayEmail" disabled class="h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-base text-slate-500" />
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Telephone</label>
+                            <InputText @bind-Value="model.PhoneNumber" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Pays</label>
+                            <InputText @bind-Value="model.Country" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                                <div>
-                                    <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar</label>
-                                    <p class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Le fichier selectionne met automatiquement a jour l'apercu et la valeur du profil.</p>
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-[340px_1fr] md:gap-8">
+                    <div>
+                        <h2 class="text-4xl font-semibold tracking-tight text-slate-800">Biographie</h2>
+                        <p class="mt-4 text-lg leading-relaxed text-slate-600">Un court texte pour te presenter.</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Bio</label>
+                            <InputTextArea @bind-Value="model.Bio" rows="5" class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-base leading-relaxed text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                            <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                                <div class="relative mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-indigo-100 bg-slate-100 sm:mx-0 sm:h-28 sm:w-28">
+                                    <img src="@AvatarPreviewUrl" alt="Apercu avatar" class="h-full w-full object-cover" />
+                                </div>
+
+                                <div class="flex-1 space-y-3">
+                                    <ImageUploader UploadType="UploadType.User"
+                                                   ExistingImageUrl="@model.AvatarUrl"
+                                                   OnImageUploaded="HandleImageUploaded"
+                                                   OnImageDeleted="HandleImageDeleted" />
+
+                                    <div>
+                                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar</label>
+                                        <p class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Le fichier selectionne met automatiquement a jour l'apercu et la valeur du profil.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mt-5">
-                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar URL</label>
-                            <InputText @bind-Value="model.AvatarUrl" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
-            <div class="mb-5 flex items-center justify-between gap-3">
-                <h2 class="text-3xl font-semibold tracking-tight text-slate-800">Liens sociaux</h2>
-                <span class="text-sm text-slate-500">Gestion rapide des plateformes</span>
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(messageSocial))
-            {
-                <p class="mb-4 rounded-lg bg-white px-4 py-2 text-sm text-slate-700">@messageSocial</p>
-            }
-
-            @if (socialLinks.Count == 0)
-            {
-                <p class="mb-4 text-sm text-slate-600">Aucun lien social enregistre.</p>
-            }
-            else
-            {
-                <ul class="mb-5 space-y-2">
-                    @foreach (var link in socialLinks)
-                    {
-                        <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-                            <div class="text-sm text-slate-700">
-                                <span class="font-semibold">@link.Platform</span>
-                                <span class="mx-2 text-slate-300">|</span>
-                                <a href="@link.Url" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">@link.Url</a>
+                            <div class="mt-5">
+                                <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar URL</label>
+                                <InputText @bind-Value="model.AvatarUrl" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
                             </div>
-                            <button type="button"
-                                    @onclick="() => DeleteSocialLink(link.Id)"
-                                    class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
-                                Supprimer
-                            </button>
-                        </li>
-                    }
-                </ul>
-            }
-
-            <EditForm Model="socialModel" OnValidSubmit="HandleAddSocialLink">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
-                    <div>
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Plateforme</label>
-                        <InputText @bind-Value="socialModel.Platform" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
                     </div>
-                    <div>
-                        <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">URL</label>
-                        <InputText @bind-Value="socialModel.Url" class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
-                    </div>
-                    <button type="submit" class="h-12 rounded-xl bg-indigo-600 px-6 font-semibold text-white hover:bg-indigo-500">
-                        Ajouter
-                    </button>
                 </div>
-            </EditForm>
-        </section>
+            </section>
 
-        <div class="flex flex-wrap items-center gap-3 pt-1">
-            <button type="button" @onclick="HandleSubmit" class="inline-flex h-12 items-center rounded-xl bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-500">
-                Enregistrer
-            </button>
-            <button type="button" @onclick="Annuler" class="inline-flex h-12 items-center rounded-xl border border-slate-300 bg-white px-8 font-semibold text-slate-700 transition hover:bg-slate-100">
-                Annuler
-            </button>
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <h2 class="text-3xl font-semibold tracking-tight text-slate-800">Liens sociaux</h2>
+                    <span class="text-sm text-slate-500">Gestion rapide des plateformes</span>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(messageSocial))
+                {
+                    <p class="mb-4 rounded-lg bg-white px-4 py-2 text-sm text-slate-700">@messageSocial</p>
+                }
+
+                @if (socialLinks.Count == 0)
+                {
+                    <p class="mb-4 text-sm text-slate-600">Aucun lien social enregistre.</p>
+                }
+                else
+                {
+                    <ul class="mb-5 space-y-2">
+                        @foreach (var link in socialLinks)
+                        {
+                            <li class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
+                                <div class="text-sm text-slate-700">
+                                    <span class="font-semibold">@link.Platform</span>
+                                    <span class="mx-2 text-slate-300">|</span>
+                                    <a href="@link.Url" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline">@link.Url</a>
+                                </div>
+                                <button type="button"
+                                        @onclick="() => DeleteSocialLink(link.Id)"
+                                        class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                                    Supprimer
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <EditForm Model="socialModel" OnValidSubmit="HandleAddSocialLink">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Plateforme</label>
+                            <InputText @bind-Value="socialModel.Platform" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">URL</label>
+                            <InputText @bind-Value="socialModel.Url" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                        </div>
+                        <button type="submit" class="h-12 rounded-lg bg-indigo-600 px-6 font-semibold text-white hover:bg-indigo-500">
+                            Ajouter
+                        </button>
+                    </div>
+                </EditForm>
+            </section>
+
+            <div class="flex flex-wrap items-center gap-3 pt-1">
+                <button type="button" @onclick="HandleSubmit" class="inline-flex h-12 items-center rounded-lg bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-500">
+                    Enregistrer
+                </button>
+                <button type="button" @onclick="Annuler" class="inline-flex h-12 items-center rounded-lg border border-slate-300 bg-white px-8 font-semibold text-slate-700 transition hover:bg-slate-100">
+                    Annuler
+                </button>
+            </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+        <header class="mb-8 space-y-3">
+            <Skeleton Type="SkeletonType.Title" Class="w-1/3" />
+            <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2" />
+        </header>
+
+        <div class="space-y-6">
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <div class="space-y-5">
+                    <Skeleton Type="SkeletonType.Title" Class="w-1/3" />
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2" />
+                    <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                        <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full md:col-span-2" />
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <div class="space-y-5">
+                    <Skeleton Type="SkeletonType.Title" Class="w-1/3" />
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-32 rounded-lg w-full" />
+                    <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+                        <Skeleton Type="SkeletonType.Avatar" Size="112px" Class="h-28 w-28" />
+                        <div class="flex-1 space-y-3">
+                            <Skeleton Type="SkeletonType.Button" Class="w-full" />
+                            <Skeleton Type="SkeletonType.Text" Lines="2" />
+                        </div>
+                    </div>
+                    <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                </div>
+            </section>
+
+            <section class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm md:p-8">
+                <Skeleton Type="SkeletonType.Title" Class="w-1/3 mb-5" />
+                <Skeleton Type="SkeletonType.Text" Lines="2" />
+                <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-[1fr_1fr_auto]">
+                    <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                    <Skeleton Type="SkeletonType.Custom" Class="h-12 rounded-lg w-full" />
+                    <Skeleton Type="SkeletonType.Button" Class="h-12" Width="100px" />
+                </div>
+            </section>
+
+            <div class="flex gap-3">
+                <Skeleton Type="SkeletonType.Button" Class="h-12" Width="140px" />
+                <Skeleton Type="SkeletonType.Button" Class="h-12" Width="140px" />
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private UpdateProfileRequest model = new();
@@ -155,22 +214,27 @@
     private List<SocialLinkDto> socialLinks = new();
     private string? messageSocial;
     private string displayEmail = string.Empty;
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         UserStateService.OnChange += HandleStateChanged;
 
-        // Charger l'état si absent.
-        if (UserStateService.CurrentUser is null)
-            await UserStateService.LoadUserFromStorageAsync();
-
-        if (UserStateService.CurrentUser is null)
+        try
         {
-            var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
-        }
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
 
-        SyncFormFromState();
+            var profil = await ProfileService.GetProfileAsync();
+            if (profil.Id != Guid.Empty)
+                await UserStateService.SetUserAsync(profil);
+
+            SyncFormFromState();
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     public void Dispose()
@@ -206,7 +270,7 @@
     private async Task HandleSubmit()
     {
         await ProfileService.UpdateProfileAsync(model);
-        // La synchronisation est assurée par ProfileService → UserStateService.UpdateUserAsync.
+        // La synchronisation est assurée par ProfileService â" ' UserStateService.UpdateUserAsync.
         Navigation.NavigateTo("/profile");
     }
 

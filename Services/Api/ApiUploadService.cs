@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using DotnetNiger.UI.Models;
 using DotnetNiger.UI.Models.Responses;
@@ -7,18 +7,16 @@ using Microsoft.AspNetCore.Components.Forms;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiUploadService : IUploadService
+public class ApiUploadService : ApiServiceBase, IUploadService
 {
-    private readonly HttpClient _http;
     private const long MaxFileSize = 5 * 1024 * 1024;
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".jpg", ".jpeg", ".png", ".webp", ".gif"
     };
 
-    public ApiUploadService(HttpClient http)
+    public ApiUploadService(HttpClient http) : base(http)
     {
-        _http = http;
     }
 
     public async Task<UploadResponse> UploadImageAsync(IBrowserFile file, UploadType type)
@@ -48,9 +46,8 @@ public class ApiUploadService : IUploadService
         var fileContent = new StreamContent(stream);
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
         content.Add(fileContent, "file", file.Name);
-        content.Add(new StringContent(type.ToString()), "type");
 
-        var response = await _http.PostAsync("/api/upload", content);
+        var response = await Http.PostAsync(BuildUrl(ApiEndpoints.Upload, new Dictionary<string, string?> { ["type"] = type.ToString() }), content);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -93,7 +90,7 @@ public class ApiUploadService : IUploadService
             type = type.ToString()
         };
 
-        var response = await _http.PostAsJsonAsync("/api/upload/base64", request);
+        var response = await Http.PostAsJsonAsync(ApiEndpoints.UploadBase64, request);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -118,13 +115,20 @@ public class ApiUploadService : IUploadService
 
     public async Task<bool> DeleteImageAsync(string imageUrl)
     {
-        var response = await _http.DeleteAsync($"/api/upload?path={Uri.EscapeDataString(imageUrl)}");
+        var response = await Http.DeleteAsync(BuildUrl(ApiEndpoints.Upload, new Dictionary<string, string?> { ["path"] = imageUrl }));
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<string?> ResolveImageUrlAsync(string imageUrl)
+    public Task<string?> ResolveImageUrlAsync(string imageUrl)
     {
-        return await Task.FromResult(imageUrl);
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            return Task.FromResult<string?>(null);
+
+        if (Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
+            return Task.FromResult<string?>(imageUrl);
+
+        var baseUri = Http.BaseAddress?.ToString().TrimEnd('/');
+        return Task.FromResult<string?>($"{baseUri}{imageUrl}");
     }
 
     public string GetFolderPath(UploadType type) => type switch

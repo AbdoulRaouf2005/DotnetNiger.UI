@@ -13,6 +13,8 @@ public class UserDto
     public string Country { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public bool IsTeamMember { get; set; }
+    public string Position { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public List<string> Skills { get; set; } = new();

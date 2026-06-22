@@ -6,6 +6,8 @@
 @inject IToastService ToastService
 
 <div class="min-h-screen p-6">
+    @if (!isLoading)
+    {
     <div class="mb-8 flex items-center justify-between gap-4">
         <div>
             <AdminBreadcrumb />
@@ -13,7 +15,7 @@
         </div>
 
         <button @onclick="OpenCreateAsync"
-                class="flex min-h-12 items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600">
+                class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
             <i class="fas fa-plus text-sm"></i>
             <span class="hidden sm:block">Nouveau</span>
         </button>
@@ -66,7 +68,7 @@
 
         @if (pendingUsers.Count == 0)
         {
-            <p class="rounded-xl border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">Aucune demande en
+            <p class="rounded-lg border border-dashed border-gray-200 px-4 py-6 text-sm text-gray-500">Aucune demande en
                 attente.</p>
             }
         else
@@ -112,6 +114,89 @@
         }
 
         <Paginated @bind-CurrentPage="currentPage" TotalPages="@totalPages" />
+    }
+    else
+    {
+        <div class="mb-8 flex items-center justify-between gap-4">
+            <div>
+                <AdminBreadcrumb />
+                <Skeleton Type="SkeletonType.Title" Class="h-6 w-96 mt-2" />
+            </div>
+            <Skeleton Type="SkeletonType.Button" Class="h-12 w-32" />
+        </div>
+
+        <div class="mb-6 grid gap-4 sm:grid-cols-3">
+            @for (int i = 0; i < 3; i++)
+            {
+                <article class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20" />
+                    <Skeleton Type="SkeletonType.Title" Class="h-8 w-16 mt-2" />
+                </article>
+            }
+        </div>
+
+        <div class="mb-6 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
+            <div class="flex-1">
+                <Skeleton Type="SkeletonType.Custom" Class="h-12 w-full rounded-lg" />
+            </div>
+            <Skeleton Type="SkeletonType.Custom" Class="h-12 w-40 rounded-lg" />
+            <Skeleton Type="SkeletonType.Custom" Class="h-12 w-24 rounded-lg" />
+        </div>
+
+        <section class="mb-8 rounded-lg bg-white p-5 shadow-sm ring-1 ring-gray-100">
+            <div class="mb-4 flex items-center justify-between gap-3">
+                <div>
+                    <Skeleton Type="SkeletonType.Title" Class="h-6 w-48" />
+                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-64 mt-1" />
+                </div>
+                <Skeleton Type="SkeletonType.Button" Class="h-10 w-28" />
+            </div>
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @for (int i = 0; i < 3; i++)
+                {
+                    <article class="rounded-lg border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <Skeleton Type="SkeletonType.Avatar" Size="56px" Class="h-14 w-14" />
+                                <div class="min-w-0">
+                                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-32" />
+                                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40 mt-1" />
+                                    <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-20 mt-1" />
+                                </div>
+                            </div>
+                            <Skeleton Type="SkeletonType.Custom" Class="h-8 w-24 rounded-lg" />
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+
+        <div class="rounded-lg bg-white ring-1 ring-gray-100 overflow-hidden">
+            <div class="divide-y divide-gray-100">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="flex items-center gap-3 px-5 py-4">
+                        <Skeleton Type="SkeletonType.Custom" Class="h-4 w-4 rounded" />
+                        <Skeleton Type="SkeletonType.Avatar" Size="36px" Class="h-9 w-9" />
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/4" />
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/4" />
+                        <Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/6" />
+                        <div class="flex gap-2 ml-auto">
+                            <Skeleton Type="SkeletonType.Custom" Class="h-8 w-8 rounded-lg" />
+                            <Skeleton Type="SkeletonType.Custom" Class="h-8 w-8 rounded-lg" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-center gap-2">
+            @for (int i = 0; i < 3; i++)
+            {
+                <Skeleton Type="SkeletonType.Custom" Class="h-10 w-10 rounded-lg" />
+            }
+        </div>
+    }
 
         @if (isFormOpen)
         {
@@ -141,9 +226,23 @@
                             <div>
                                 <label class="block text-sm font-medium mb-1">Mot de Passe</label>
                                 <InputText @bind-Value="CreateUser.Password"
+                                           type="password"
                                            class="w-full border rounded-lg px-4 py-2 focus:outline-none"
                                            placeholder="le mot de passe temporaire" />
                             </div>
+
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Position dans l'équipe</label>
+                                <InputText @bind-Value="CreateUser.Position"
+                                           class="w-full border rounded-lg px-4 py-2 focus:outline-none"
+                                           placeholder="Ex: Community Lead" />
+                            </div>
+
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <InputCheckbox @bind-Value="CreateUser.IsTeamMember"
+                                               class="h-5 w-5 rounded border-gray-300 text-secondary focus:ring-secondary" />
+                                <span class="text-sm font-medium">Intégrer à l'équipe</span>
+                            </label>
 
                             <div class="border-t pt-4 flex justify-end gap-3 bg-white">
                                 <button type="button" @onclick="CloseForm"
@@ -151,7 +250,8 @@
                                     Annuler
                                 </button>
                                 <button type="submit"
-                                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                                        class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
+                                    <i class="fas fa-paper-plane"></i>
                                     Créer
                                 </button>
                             </div>
@@ -164,6 +264,7 @@
     </div>
 
 @code {
+    private bool isLoading = true;
     private bool isListView = true;
     private string searchQuery = string.Empty;
     private string selectedRole = string.Empty;
@@ -197,9 +298,9 @@
     private async Task ReloadAsync()
     {
         allUsers = await UserService.GetUsersAsync();
-        pendingUsers = await UserService.GetPendingUsersAsync();
-        totalUsers = await UserService.GetUsersCountAsync();
-        activeUsers = await UserService.GetActiveUsersCountAsync();
+        totalUsers = allUsers.Count;
+        activeUsers = allUsers.Count(u => u.IsActive);
+        pendingUsers = allUsers.Where(u => !u.IsActive).ToList();
         await ApplyFiltersAsync();
     }
 
@@ -217,6 +318,7 @@ StringComparison.OrdinalIgnoreCase))).ToList();
 
         filteredUsers = users;
         currentPage = 1;
+        isLoading = false;
     }
 
     private Task HandleSearchInput(ChangeEventArgs args)
@@ -309,6 +411,11 @@ StringComparison.OrdinalIgnoreCase))).ToList();
 
         editingUserId = userId;
         editModel = CloneUser(user);
+        CreateUser.FullName = user.FullName;
+        CreateUser.Email = user.Email;
+        CreateUser.Password = string.Empty;
+        CreateUser.IsTeamMember = user.IsTeamMember;
+        CreateUser.Position = user.Position;
         editPrimaryRole = GetPrimaryRole(user);
         isFormOpen = true;
     }
@@ -316,6 +423,7 @@ StringComparison.OrdinalIgnoreCase))).ToList();
     private async Task OpenCreateAsync()
     {
         editingUserId = null;
+        CreateUser = new CreateUserRequest();
         editModel = new UserDto
         {
             IsActive = true,
@@ -323,8 +431,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             Roles = new List<string> { "Member" }
         };
         editPrimaryRole = "Member";
-        isFormOpen = true;
-        await Task.CompletedTask;
+            isFormOpen = true;
+            await Task.CompletedTask;
     }
 
     private void CloseForm()
@@ -346,7 +454,11 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             }
             else
             {
+                editModel.FullName = CreateUser.FullName;
+                editModel.Email = CreateUser.Email;
                 editModel.Id = editingUserId.Value;
+                editModel.IsTeamMember = CreateUser.IsTeamMember;
+                editModel.Position = CreateUser.Position;
                 await UserService.UpdateUserAsync(editModel);
                 ToastService.ShowToast("Utilisateur mis à jour.", ToastLevel.Success);
             }
@@ -373,6 +485,8 @@ StringComparison.OrdinalIgnoreCase))).ToList();
             Country = user.Country,
             City = user.City,
             IsActive = user.IsActive,
+            IsTeamMember = user.IsTeamMember,
+            Position = user.Position,
             CreatedAt = user.CreatedAt,
             LastLoginAt = user.LastLoginAt,
             Skills = user.Skills.ToList(),

@@ -362,3 +362,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Audit / internal reports
+audit-frontend.md
+
+# Environment variables (local overrides)
+.env

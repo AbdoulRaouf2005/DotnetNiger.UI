@@ -1,4 +1,4 @@
-using DotnetNiger.UI.Models.Requests;
+﻿using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 
 namespace DotnetNiger.UI.Services.Contracts;
@@ -13,7 +13,6 @@ public interface IEventService
     Task<EventDto?> GetEventBySlugAsync(string slug);
     Task<List<EventDto>> SearchEventsAsync(string query);
     Task<List<EventDto>> GetEventsByTypeAsync(string eventType);
-    // Task<EventDto> CreateEventAsync(CreateEventRequest request);
     Task<EventDto?> UpdateEventAsync(Guid id, CreateEventRequest request);
     Task<bool> DeleteEventAsync(Guid id);
     Task<bool> TogglePublishAsync(Guid id);
@@ -22,7 +21,7 @@ public interface IEventService
     Task<List<EventRegistrationDto>> GetRegistrationsByEventAsync(Guid eventId);
 
      // Création d'événement (soumis ou publié selon rôle)
-    Task<EventDto> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin);
+    Task<EventDto?> CreateEventAsync(CreateEventRequest request, Guid currentUserId, bool isAdmin);
 
     // Admin : récupérer les événements en attente
     Task<List<EventDto>> GetPendingEventsAsync();

@@ -8,110 +8,112 @@
 @inject IProjectService ProjectService
 @inject NavigationManager Navigation
 
-<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-4 py-6 md:px-8 md:py-8">
+<div class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(91,77,245,0.09),_transparent_34%),linear-gradient(180deg,_#faf9fc_0%,_#f4f2f7_100%)] px-3 sm:px-4 py-4 sm:py-6 md:px-8 md:py-8">
 	<div class="mx-auto max-w-7xl">
 		<AdminBreadcrumb />
 
+		@if (!isLoading)
+		{
 		<section class="mt-2 flex flex-col gap-3">
-			<div class="inline-flex items-center gap-2 text-sm font-semibold text-[#5b4df5]">
-				<span class="h-2.5 w-2.5 rounded-full bg-[#5b4df5]"></span>
+			<div class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-accent">
+				<span class="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-accent"></span>
 				Administration
 			</div>
 			<div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 				<div>
-				<h1 class="text-3xl font-bold tracking-tight text-[#111827] md:text-4xl">Tableau de bord</h1>
-				<p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Aperçu rapide des performances, des validations en attente et des activités clés du site.</p>
+				<h1 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-title">Tableau de bord</h1>
+				<p class="mt-2 max-w-2xl text-xs sm:text-sm leading-5 sm:leading-6 text-body md:text-base">Aperçu rapide des performances, des validations en attente et des activités clés du site.</p>
 				</div>
 
-				<div class="w-full max-w-md rounded-[18px] bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-					<div class="flex items-center gap-3">
-						<div class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
+				<div class="w-full max-w-md rounded-[18px] bg-white p-3 sm:p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+					<div class="flex items-center gap-2 sm:gap-3">
+						<div class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center overflow-hidden rounded-2xl bg-fond_transparent text-accent flex-shrink-0">
 							@if (CurrentUserHasAvatar)
 							{
 								<img src="@CurrentUserAvatarUrl" alt="@CurrentUserDisplayName" class="h-full w-full object-cover" />
 							}
 							else
 							{
-								<span class="text-lg font-semibold">@CurrentUserInitial</span>
+								<span class="text-sm sm:text-lg font-semibold">@CurrentUserInitial</span>
 							}
 						</div>
 						<div class="min-w-0">
-							<p class="truncate text-sm font-semibold text-[#111827]">@CurrentUserDisplayName</p>
-							<p class="truncate text-xs text-[#6b7280]">@CurrentUserRoleLabel</p>
+							<p class="truncate text-xs sm:text-sm font-semibold text-title">@CurrentUserDisplayName</p>
+							<p class="truncate text-[10px] sm:text-xs text-muted">@CurrentUserRoleLabel</p>
 						</div>
 					</div>
-					<div class="mt-4 grid gap-3 sm:grid-cols-2">
-						<div class="rounded-2xl bg-[#F9FAFB] px-3 py-3">
-							<p class="text-[11px] font-semibold uppercase tracking-wide text-[#6b7280]">Statut</p>
-							<p class="mt-1 text-sm font-semibold text-[#111827]">@(IsCurrentUserLoaded ? (IsCurrentUserActive ? "Actif" : "Inactif") : "En cours")</p>
+					<div class="mt-3 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3">
+						<div class="rounded-2xl bg-surface px-2 sm:px-3 py-2 sm:py-3">
+							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-muted">Statut</p>
+							<p class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-semibold text-title">@(IsCurrentUserLoaded ? (IsCurrentUserActive ? "Actif" : "Inactif") : "En cours")</p>
 						</div>
-						<div class="rounded-2xl bg-[#F9FAFB] px-3 py-3">
-							<p class="text-[11px] font-semibold uppercase tracking-wide text-[#6b7280]">Accès</p>
-							<p class="mt-1 text-sm font-semibold text-[#111827]">@(IsCurrentUserAdmin ? "Administration" : "Membre")</p>
+						<div class="rounded-2xl bg-surface px-2 sm:px-3 py-2 sm:py-3">
+							<p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-muted">Accès</p>
+							<p class="mt-0.5 sm:mt-1 text-xs sm:text-sm font-semibold text-title">@(IsCurrentUserAdmin ? "Administration" : "Membre")</p>
 						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<section class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+		<section class="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
 			@foreach (var metric in Metrics)
 			{
 				<article class="overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
-					<div class="flex min-h-[150px] flex-col items-center justify-center gap-3 px-6 py-7 text-center">
-						<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
-							<i class="@metric.IconClass text-2xl"></i>
+					<div class="flex flex-col items-center justify-center gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 sm:py-7 text-center min-h-[90px] sm:min-h-[150px]">
+						<div class="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-fond_transparent text-accent">
+							<i class="@metric.IconClass text-base sm:text-2xl"></i>
 						</div>
-						<p class="text-4xl font-semibold leading-none text-[#111827]">@metric.Value</p>
-						<p class="text-sm font-medium text-[#4b5563]">@metric.Label</p>
+						<p class="text-lg sm:text-3xl md:text-4xl font-semibold leading-none text-title">@metric.Value</p>
+						<p class="text-[10px] sm:text-sm font-medium text-body">@metric.Label</p>
 					</div>
-					<button type="button" class="flex w-full items-center justify-center gap-2 border-t border-[#EEEAFE] bg-[#EEEAFE] px-4 py-3 text-sm font-semibold text-[#111827] transition hover:brightness-95" @onclick='() => Navigation.NavigateTo(metric.Url)'>
-						Voir Les Détails <i class="fas fa-angle-double-right text-xs"></i>
+					<button type="button" class="flex w-full items-center justify-center gap-1 sm:gap-2 border-t border-fond_transparent bg-fond_transparent px-2 sm:px-4 py-2 sm:py-3 text-[10px] sm:text-sm font-semibold text-title transition hover:brightness-95" @onclick='() => Navigation.NavigateTo(metric.Url)'>
+						Voir Les Détails <i class="fas fa-angle-double-right text-[10px] sm:text-xs"></i>
 					</button>
 				</article>
 			}
 		</section>
 
-		<section class="mt-8 grid gap-6 xl:grid-cols-2">
-			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
-							<i class="fas fa-user-plus text-lg"></i>
+		<section class="mt-6 sm:mt-8 grid gap-4 sm:gap-6 xl:grid-cols-2">
+			<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+				<div class="flex items-center justify-between gap-2 sm:gap-3">
+					<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+						<div class="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-fond_transparent text-accent">
+							<i class="fas fa-user-plus text-sm sm:text-lg"></i>
 						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Demandes d’intégration</h2>
-							<p class="text-sm text-[#6b7280]">Membres de la communauté en attente d’approbation</p>
+						<div class="min-w-0">
+							<h2 class="text-sm sm:text-lg font-semibold text-title truncate">Demandes d'intégration</h2>
+							<p class="text-xs sm:text-sm text-muted truncate">Membres en attente d'approbation</p>
 						</div>
 					</div>
-					<span class="rounded-full bg-[#EEEAFE] px-3 py-1 text-xs font-semibold text-[#5b4df5]">@PendingUsers.Count</span>
+					<span class="rounded-full bg-fond_transparent px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold text-accent flex-shrink-0">@PendingUsers.Count</span>
 				</div>
 
-				<div class="mt-5 space-y-3">
+				<div class="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
 					@if (PendingUsers.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune demande d’intégration en attente.</p>
+						<p class="rounded-2xl border border-dashed border-gray-200 px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-muted">Aucune demande d'intégration en attente.</p>
 					}
 					else
 					{
 						@foreach (var item in PendingUsers)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
-								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 text-[#5b4df5]">
+							<div class="flex items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100 bg-white px-2 sm:px-3 py-2 sm:py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-2 sm:gap-3">
+									<div class="flex h-8 w-8 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100 text-accent">
 										@if (!string.IsNullOrWhiteSpace(item.AvatarUrl))
 										{
 											<img src="@item.AvatarUrl" alt="@item.DisplayName" class="h-full w-full object-cover" />
 										}
 										else
 										{
-											<span class="text-sm font-semibold">@(string.IsNullOrWhiteSpace(item.DisplayName) ? "U" : item.DisplayName[..1].ToUpperInvariant())</span>
+											<span class="text-[10px] sm:text-sm font-semibold">@(string.IsNullOrWhiteSpace(item.DisplayName) ? "U" : item.DisplayName[..1].ToUpperInvariant())</span>
 										}
 									</div>
 									<div class="min-w-0">
-										<p class="truncate text-sm font-semibold text-[#111827]">@item.DisplayName</p>
-										<p class="truncate text-xs text-[#6b7280]">@item.Email</p>
-										<p class="truncate text-xs text-[#9ca3af]">@item.PrimaryRole</p>
+										<p class="truncate text-xs sm:text-sm font-semibold text-title">@item.DisplayName</p>
+										<p class="truncate text-[10px] sm:text-xs text-muted">@item.Email</p>
+										<p class="truncate text-[10px] sm:text-xs text-placeholder hidden sm:block">@item.PrimaryRole</p>
 									</div>
 								</div>
 								<AdminActionDropdown ItemId="item.Id"
@@ -132,44 +134,44 @@
 				</div>
 			</article>
 
-			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEF6FF] text-[#2563eb]">
-							<i class="fas fa-calendar-check text-lg"></i>
+			<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 ">
+				<div class="flex items-center justify-between gap-2 sm:gap-3">
+					<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+						<div class="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-info-light-bg text-info">
+							<i class="fas fa-calendar-check text-sm sm:text-lg"></i>
 						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">File de validation</h2>
-							<p class="text-sm text-[#6b7280]">Événements en attente</p>
+						<div class="min-w-0">
+							<h2 class="text-sm sm:text-lg font-semibold text-title truncate">File de validation</h2>
+							<p class="text-xs sm:text-sm text-muted truncate">Événements en attente</p>
 						</div>
 					</div>
-					<span class="rounded-full bg-[#EEF6FF] px-3 py-1 text-xs font-semibold text-[#2563eb]">@PendingEvents.Count</span>
+					<span class="rounded-full bg-info-light-bg px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold text-info flex-shrink-0">@PendingEvents.Count</span>
 				</div>
 
-				<div class="mt-5 space-y-3">
+				<div class="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
 					@if (PendingEvents.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun événement en attente de validation.</p>
+						<p class="rounded-2xl border border-dashed border-gray-200 px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-muted">Aucun événement en attente de validation.</p>
 					}
 					else
 					{
 						@foreach (var item in PendingEvents)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
-								<div class="flex min-w-0 items-center gap-3">
-									<div class="h-11 w-11 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+							<div class="flex items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100 bg-white px-2 sm:px-3 py-2 sm:py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-2 sm:gap-3">
+									<div class="h-8 w-8 sm:h-11 sm:w-11 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
 										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
 										{
 											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
 										}
 										else
 										{
-											<div class="flex h-full w-full items-center justify-center text-[#5b4df5]"><i class="fas fa-pen-nib"></i></div>
+											<div class="flex h-full w-full items-center justify-center text-accent"><i class="fas fa-pen-nib text-xs sm:text-base"></i></div>
 										}
 									</div>
 									<div class="min-w-0">
-										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
-										<p class="truncate text-xs text-[#6b7280]">@item.Description</p>
+										<p class="truncate text-xs sm:text-sm font-semibold text-title">@item.Title</p>
+										<p class="truncate text-[10px] sm:text-xs text-muted">@item.Description</p>
 									</div>
 								</div>
 								<AdminActionDropdown ItemId="item.Id"
@@ -190,37 +192,37 @@
 				</div>
 			</article>
 
-			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F0FDF4] text-[#16a34a]">
-							<i class="fas fa-folder-open text-lg"></i>
+			<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+				<div class="flex items-center justify-between gap-2 sm:gap-3">
+					<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+						<div class="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-success-light-bg text-success">
+							<i class="fas fa-folder-open text-sm sm:text-lg"></i>
 						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Ressources récentes</h2>
-							<p class="text-sm text-[#6b7280]">Documents les plus consultés</p>
+						<div class="min-w-0">
+							<h2 class="text-sm sm:text-lg font-semibold text-title truncate">Ressources récentes</h2>
+							<p class="text-xs sm:text-sm text-muted truncate">Documents les plus consultés</p>
 						</div>
 					</div>
-					<span class="rounded-full bg-[#F0FDF4] px-3 py-1 text-xs font-semibold text-[#16a34a]">@RecentResources.Count</span>
+					<span class="rounded-full bg-success-light-bg px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold text-success flex-shrink-0">@RecentResources.Count</span>
 				</div>
 
-				<div class="mt-5 space-y-3">
+				<div class="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
 					@if (RecentResources.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucune ressource disponible.</p>
+						<p class="rounded-2xl border border-dashed border-gray-200 px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-muted">Aucune ressource disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentResources)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
-								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F3F4F6] text-[#111827]">
-										<i class="fas fa-folder-open text-base"></i>
+							<div class="flex items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100 bg-white px-2 sm:px-3 py-2 sm:py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-2 sm:gap-3">
+									<div class="flex h-8 w-8 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-surface-alt text-title">
+										<i class="fas fa-folder-open text-xs sm:text-base"></i>
 									</div>
 									<div class="min-w-0">
-										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
-										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+										<p class="truncate text-xs sm:text-sm font-semibold text-title">@item.Title</p>
+										<p class="truncate text-[10px] sm:text-xs text-muted">@item.Subtitle</p>
 									</div>
 								</div>
 								<AdminActionDropdown ItemId="item.Id"
@@ -237,37 +239,37 @@
 				</div>
 			</article>
 
-			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
-							<i class="fas fa-code-branch text-lg"></i>
+			<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+				<div class="flex items-center justify-between gap-2 sm:gap-3">
+					<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+						<div class="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-fond_transparent text-accent">
+							<i class="fas fa-code-branch text-sm sm:text-lg"></i>
 						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Projets récents</h2>
-							<p class="text-sm text-[#6b7280]">Derniers projets publiés</p>
+						<div class="min-w-0">
+							<h2 class="text-sm sm:text-lg font-semibold text-title truncate">Projets récents</h2>
+							<p class="text-xs sm:text-sm text-muted truncate">Derniers projets publiés</p>
 						</div>
 					</div>
-					<button type="button" class="text-sm font-semibold text-[#5b4df5] transition hover:text-[#4837e0]" @onclick='() => Navigation.NavigateTo("/admin/projects")'>Voir tout</button>
+					<button type="button" class="text-xs sm:text-sm font-semibold text-accent transition hover:text-accent-active flex-shrink-0" @onclick='() => Navigation.NavigateTo("/admin/projects")'>Voir tout</button>
 				</div>
 
-				<div class="mt-5 space-y-3">
+				<div class="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
 					@if (RecentProjects.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun projet récent disponible.</p>
+						<p class="rounded-2xl border border-dashed border-gray-200 px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-muted">Aucun projet récent disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentProjects)
 						{
-							<div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
-								<div class="flex min-w-0 items-center gap-3">
-									<div class="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#EEEAFE] text-[#5b4df5]">
-										<i class="fas fa-code-branch text-base"></i>
+							<div class="flex items-center justify-between gap-2 sm:gap-3 rounded-2xl border border-gray-100 bg-white px-2 sm:px-3 py-2 sm:py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-2 sm:gap-3">
+									<div class="flex h-8 w-8 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-fond_transparent text-accent">
+										<i class="fas fa-code-branch text-xs sm:text-base"></i>
 									</div>
 									<div class="min-w-0">
-										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
-										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+										<p class="truncate text-xs sm:text-sm font-semibold text-title">@item.Title</p>
+										<p class="truncate text-[10px] sm:text-xs text-muted">@item.Subtitle</p>
 									</div>
 								</div>
 								<AdminActionDropdown ItemId="item.Id"
@@ -284,48 +286,48 @@
 				</div>
 			</article>
 
-			<article class="rounded-[22px] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6 xl:col-span-2">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex items-center gap-3">
-						<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF7ED] text-[#ea580c]">
-							<i class="fas fa-calendar-days text-lg"></i>
+			<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6 xl:col-span-2">
+				<div class="flex items-center justify-between gap-2 sm:gap-3">
+					<div class="flex items-center gap-2 sm:gap-3 min-w-0">
+						<div class="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFF7ED] text-[#ea580c]">
+							<i class="fas fa-calendar-days text-sm sm:text-lg"></i>
 						</div>
-						<div>
-							<h2 class="text-lg font-semibold text-[#111827]">Événements récents</h2>
-							<p class="text-sm text-[#6b7280]">Dernières publications visibles</p>
+						<div class="min-w-0">
+							<h2 class="text-sm sm:text-lg font-semibold text-title truncate">Événements récents</h2>
+							<p class="text-xs sm:text-sm text-muted truncate">Dernières publications visibles</p>
 						</div>
 					</div>
-					<button type="button" class="text-sm font-semibold text-[#5b4df5] transition hover:text-[#4837e0]" @onclick='() => Navigation.NavigateTo("/admin/events")'>Voir tout</button>
+					<button type="button" class="text-xs sm:text-sm font-semibold text-accent transition hover:text-accent-active flex-shrink-0" @onclick='() => Navigation.NavigateTo("/admin/events")'>Voir tout</button>
 				</div>
 
-				<div class="mt-5 space-y-3">
+				<div class="mt-3 sm:mt-5 space-y-2 sm:space-y-3">
 					@if (RecentEvents.Count == 0)
 					{
-						<p class="rounded-2xl border border-dashed border-gray-200 px-4 py-6 text-sm text-[#6b7280]">Aucun évènement récent disponible.</p>
+						<p class="rounded-2xl border border-dashed border-gray-200 px-3 sm:px-4 py-4 sm:py-6 text-xs sm:text-sm text-muted">Aucun évènement récent disponible.</p>
 					}
 					else
 					{
 						@foreach (var item in RecentEvents)
 						{
-							<div class="flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-3 py-3 shadow-sm">
-								<div class="flex min-w-0 items-center gap-3">
-									<div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
+							<div class="flex items-center justify-between gap-1 sm:gap-4 rounded-2xl border border-gray-100 bg-white px-1.5 sm:px-3 py-2 sm:py-3 shadow-sm">
+								<div class="flex min-w-0 items-center gap-1.5 sm:gap-3">
+									<div class="h-8 w-8 sm:h-12 sm:w-12 flex-shrink-0 overflow-hidden rounded-2xl bg-gray-100">
 										@if (!string.IsNullOrWhiteSpace(item.CoverImageUrl))
 										{
 											<img src="@item.CoverImageUrl" alt="@item.Title" class="h-full w-full object-cover" />
 										}
 										else
 										{
-											<div class="flex h-full w-full items-center justify-center text-[#5b4df5]"><i class="fas fa-calendar"></i></div>
+											<div class="flex h-full w-full items-center justify-center text-accent"><i class="fas fa-calendar text-xs sm:text-base"></i></div>
 										}
 									</div>
 									<div class="min-w-0">
-										<p class="truncate text-sm font-semibold text-[#111827]">@item.Title</p>
-										<p class="truncate text-xs text-[#6b7280]">@item.Subtitle</p>
+										<p class="truncate text-xs sm:text-sm font-semibold text-title">@item.Title</p>
+										<p class="truncate text-[10px] sm:text-xs text-muted">@item.Subtitle</p>
 									</div>
 								</div>
-								<div class="flex items-center gap-3">
-									<span class="rounded-md px-3 py-1.5 text-xs font-semibold @GetEventStatusClass(item)">@GetEventStatusLabel(item)</span>
+								<div class="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+									<span class="rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold @GetEventStatusClass(item) hidden sm:inline-block">@GetEventStatusLabel(item)</span>
 									<AdminActionDropdown ItemId="item.Id"
 												Status="@(item.IsPublished ? "Published" : "Pending")"
 												ViewLabel="Voir l'article"
@@ -345,6 +347,66 @@
 				</div>
 			</article>
 		</section>
+		}
+		else
+		{
+			<section class="mt-2 flex flex-col gap-3">
+				<div class="inline-flex items-center gap-2 text-sm font-semibold text-accent">
+					<span class="h-2.5 w-2.5 rounded-full bg-accent"></span>
+					Administration
+				</div>
+				<div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+					<div>
+						<Skeleton Type="SkeletonType.Title" Class="h-8 w-64" />
+						<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-96 mt-2" />
+					</div>
+					<Skeleton Type="SkeletonType.Custom" Class="h-24 w-80 rounded-[18px]" />
+				</div>
+			</section>
+
+			<section class="mt-6 sm:mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
+				@for (int i = 0; i < 5; i++)
+				{
+					<article class="overflow-hidden rounded-[18px] bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+						<div class="flex flex-col items-center justify-center gap-1.5 sm:gap-3 px-2 sm:px-6 py-3 sm:py-7 text-center min-h-[90px] sm:min-h-[150px]">
+							<Skeleton Type="SkeletonType.Custom" Class="h-8 w-8 sm:h-12 sm:w-12 rounded-2xl" />
+							<Skeleton Type="SkeletonType.Title" Class="h-5 w-10 sm:h-8 sm:w-16" />
+							<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-12 sm:w-20" />
+						</div>
+						<Skeleton Type="SkeletonType.Custom" Class="h-8 sm:h-11 w-full rounded-none" />
+					</article>
+				}
+			</section>
+
+			<section class="mt-6 sm:mt-8 grid gap-4 sm:gap-6 xl:grid-cols-2">
+				@for (int i = 0; i < 4; i++)
+				{
+					<article class="rounded-lg bg-white p-4 sm:p-5 md:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+						<div class="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-5">
+							<Skeleton Type="SkeletonType.Custom" Class="h-9 w-9 sm:h-11 sm:w-11 rounded-2xl flex-shrink-0" />
+							<div class="flex-1 min-w-0">
+								<Skeleton Type="SkeletonType.Title" Class="h-4 sm:h-5 w-32 sm:w-48" />
+								<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-40 sm:w-64 mt-1" />
+							</div>
+							<Skeleton Type="SkeletonType.Badge" Width="24px" Class="h-5 sm:h-6 flex-shrink-0" />
+						</div>
+						<div class="space-y-2 sm:space-y-3">
+							@for (int j = 0; j < 5; j++)
+							{
+								<div class="flex items-center gap-2 sm:gap-3 rounded-2xl border border-gray-100 bg-white px-2 sm:px-3 py-2 sm:py-3 shadow-sm">
+									<Skeleton Type="SkeletonType.Custom" Class="h-8 w-8 sm:h-11 sm:w-11 rounded-2xl flex-shrink-0" />
+									<div class="flex-1 min-w-0">
+										<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-3/4" />
+										<Skeleton Type="SkeletonType.Text" Lines="1" Class="w-1/2 mt-1" />
+									</div>
+									<Skeleton Type="SkeletonType.Custom" Class="h-7 sm:h-8 w-16 sm:w-20 rounded-lg flex-shrink-0" />
+								</div>
+							}
+						</div>
+					</article>
+				}
+			</section>
+		}
 	</div>
 </div>
 
@@ -367,6 +429,7 @@
 	private List<DashboardItem> RecentEvents { get; set; } = [];
 	private UserDto? CurrentProfile { get; set; }
 	private UserDto? CurrentUser => UserStateService.CurrentUser;
+	private bool isLoading = true;
 	private bool IsCurrentUserLoaded { get; set; }
 	private bool IsCurrentUserActive => CurrentUser?.IsActive ?? false;
 	private bool IsCurrentUserAdmin => UserStateService.IsAdmin;
@@ -490,6 +553,7 @@
 			RecentResources = [];
 			RecentEvents = [];
 		}
+		isLoading = false;
 	}
 
 	private static string GetPublishLabel(DateTime? publishedAt)
@@ -514,7 +578,7 @@
 			return "bg-gray-100 text-gray-700";
 		}
 
-		return item.IsPublished ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700";
+		return item.IsPublished ? "bg-success-bg text-success" : "bg-amber-100 text-amber-700";
 	}
 
 	private DashboardItem? FindItem(Guid id)
@@ -729,15 +793,15 @@
 @* Modal de saisie de raison pour le rejet *@
 @if (showRejectModal)
 {
-	<div class="fixed inset-0 z-50 flex items-center justify-center">
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div class="absolute inset-0 bg-black/40" @onclick="CancelRejectAsync"></div>
-		<div class="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
-			<h3 class="text-lg font-semibold">Raison du rejet</h3>
-			<p class="text-sm text-gray-600 mt-2">Veuillez saisir une raison pour le rejet de cet élément (optionnel).</p>
-			<textarea @bind="rejectReason" rows="4" class="w-full mt-4 rounded-md border-gray-200 p-3"></textarea>
-			<div class="mt-4 flex justify-end gap-2">
-				<button class="px-4 py-2 rounded bg-gray-200" @onclick="CancelRejectAsync">Annuler</button>
-				<button class="px-4 py-2 rounded bg-red-600 text-white" @onclick="ConfirmRejectAsync">Confirmer le rejet</button>
+		<div class="relative w-full max-w-lg rounded-lg bg-white p-4 sm:p-6 shadow-lg">
+			<h3 class="text-base sm:text-lg font-semibold">Raison du rejet</h3>
+			<p class="text-xs sm:text-sm text-gray-600 mt-2">Veuillez saisir une raison pour le rejet de cet élément (optionnel).</p>
+			<textarea @bind="rejectReason" rows="4" class="w-full mt-4 rounded-md border-gray-200 p-2 sm:p-3 text-sm"></textarea>
+			<div class="mt-4 flex flex-col-reverse sm:flex-row justify-end gap-2">
+				<button class="w-full sm:w-auto px-4 py-2 rounded bg-gray-200 text-sm" @onclick="CancelRejectAsync">Annuler</button>
+				<button class="w-full sm:w-auto px-4 py-2 rounded bg-red-600 text-white text-sm" @onclick="ConfirmRejectAsync">Confirmer le rejet</button>
 			</div>
 		</div>
 	</div>

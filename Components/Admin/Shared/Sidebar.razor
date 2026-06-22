@@ -20,7 +20,7 @@
                         {
                               <div class="min-w-0">
                                     <span class="Button block truncate text-white">@DisplayName</span>
-                                    <span class="Badge block truncate text-[#04FE00]">@PrimaryRole</span>
+                                    <span class="Badge block truncate text-role-badge">@PrimaryRole</span>
                               </div>
                         }
                   </NavLink>
@@ -73,17 +73,35 @@
                                     <span class="Link">Projets</span>
                               }
                         </NavLink>
+
+                        <NavLink href="/admin/partners" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active">
+                              <i class="fas fa-handshake w-8 text-2xl"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span class="Link">Partenaires</span>
+                              }
+                        </NavLink>
+
+                        <NavLink href="/admin/team" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active">
+                              <i class="fas fa-users w-8 text-2xl"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span class="Link">Équipe</span>
+                              }
+                        </NavLink>
                   </nav>
             </div>
 
-            <div class="border-t border-slate-700 p-4">
-                  <NavLink href="/" class="flex items-center gap-2 text-gray-300 transition-colors hover:text-white">
-                        <i class="fas fa-arrow-left mr-3"></i>
-                        @if (!IsCollapsed)
-                        {
-                              <span>Retour au site</span>
-                        }
-                  </NavLink>
+            <div>
+                  <div class="border-t border-slate-700 p-4">
+                        <NavLink href="/" class="@GetBackLinkClass()">
+                              <i class="fas fa-arrow-left mr-3"></i>
+                              @if (!IsCollapsed)
+                              {
+                                    <span>Retour au site</span>
+                              }
+                        </NavLink>
+                  </div>
             </div>
       </aside>
 
@@ -110,7 +128,7 @@
 
                         <div class="min-w-0">
                               <span class="Button block truncate text-white">@DisplayName</span>
-                              <span class="Badge block truncate text-[#04FE00]">@PrimaryRole</span>
+                              <span class="Badge block truncate text-role-badge">@PrimaryRole</span>
                         </div>
                   </NavLink>
 
@@ -144,6 +162,16 @@
                               <i class="fas fa-code-branch w-8 text-2xl"></i>
                               <span class="Link">Projets</span>
                         </NavLink>
+
+                        <NavLink href="/admin/partners" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
+                              <i class="fas fa-handshake w-8 text-2xl"></i>
+                              <span class="Link">Partenaires</span>
+                        </NavLink>
+
+                        <NavLink href="/admin/team" class="flex items-center gap-2 rounded-lg px-3 py-3 transition-colors hover:bg-hover" ActiveClass="bg-active" @onclick="Closed">
+                              <i class="fas fa-users w-8 text-2xl"></i>
+                              <span class="Link">Équipe</span>
+                        </NavLink>
                   </nav>
             </div>
 
@@ -165,6 +193,8 @@
 
       [Parameter]
       public bool IsOpen { get; set; }
+
+	private string GetBackLinkClass() => $"flex items-center gap-2 text-gray-300 transition-colors hover:text-white {(IsCollapsed ? "justify-center" : "")}";
 
 	private string DesktopSidebarWidthClass => IsCollapsed ? "w-20" : "w-64"; 
 

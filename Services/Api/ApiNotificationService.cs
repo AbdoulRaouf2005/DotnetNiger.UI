@@ -4,25 +4,22 @@ using DotnetNiger.UI.Services.Contracts;
 
 namespace DotnetNiger.UI.Services.Api;
 
-public class ApiNotificationService : INotificationService
+public class ApiNotificationService : ApiServiceBase, INotificationService
 {
-    private readonly HttpClient _http;
-    private const string Base = "api/v1/notifications";
-
-    public ApiNotificationService(HttpClient http) => _http = http;
+    public ApiNotificationService(HttpClient http) : base(http) { }
 
     public event Action<Guid>? NotificationsChanged;
 
     public async Task<List<NotificationDto>> GetNotificationsAsync(Guid userId)
     {
-        var response = await _http.GetAsync($"{Base}/{userId}");
+        var response = await Http.GetAsync($"{ApiEndpoints.Notifications}/{userId}");
         if (!response.IsSuccessStatusCode) return [];
         return await ApiResponseReader.ReadCollectionAsync<NotificationDto>(response);
     }
 
     public async Task<int> GetUnreadCountAsync(Guid userId)
     {
-        var response = await _http.GetAsync($"{Base}/{userId}/unread-count");
+        var response = await Http.GetAsync($"{ApiEndpoints.Notifications}/{userId}/unread-count");
         if (!response.IsSuccessStatusCode) return 0;
         var result = await ApiResponseReader.ReadAsync<UnreadCountResponse>(response);
         return result?.Count ?? 0;
@@ -30,21 +27,27 @@ public class ApiNotificationService : INotificationService
 
     public async Task SendNotificationAsync(Guid userId, string message)
     {
-        var response = await _http.PostAsJsonAsync($"{Base}/{userId}", new { message });
-        response.EnsureSuccessStatusCode();
-        NotificationsChanged?.Invoke(userId);
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{ApiEndpoints.Notifications}/{userId}", new { message });
+            if (response.IsSuccessStatusCode)
+                NotificationsChanged?.Invoke(userId);
+        }
+        catch (HttpRequestException)
+        {
+        }
     }
 
     public async Task MarkAsReadAsync(Guid userId, Guid notificationId)
     {
-        var response = await _http.PatchAsync($"{Base}/{userId}/{notificationId}/read", null);
+        var response = await Http.PatchAsync($"{ApiEndpoints.Notifications}/{userId}/{notificationId}/read", null);
         if (response.IsSuccessStatusCode)
             NotificationsChanged?.Invoke(userId);
     }
 
     public async Task MarkAllAsReadAsync(Guid userId)
     {
-        var response = await _http.PatchAsync($"{Base}/{userId}/read-all", null);
+        var response = await Http.PatchAsync($"{ApiEndpoints.Notifications}/{userId}/read-all", null);
         if (response.IsSuccessStatusCode)
             NotificationsChanged?.Invoke(userId);
     }

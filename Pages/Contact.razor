@@ -6,7 +6,7 @@
 
 <PageTitle>Contact - .NET Niger</PageTitle>
 
-<div class="bg-[#F4F2F2] text-slate-800 min-h-screen">
+<div class="bg-primary text-slate-800 min-h-screen">
     <section class="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
         <div
             class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(81,43,212,0.10),_transparent_36%),linear-gradient(180deg,_#fbfafc_0%,_#f4f2f2_100%)]">
@@ -29,7 +29,7 @@
     <section class="px-4 pb-20 sm:px-6 lg:px-8">
         <div class="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[1fr_1.5fr] lg:items-start">
             @* Coordonnées & Réseaux *@
-            <div class="rounded-2xl bg-white p-8 sm:p-10 shadow-xl">
+            <div class="rounded-lg bg-white p-8 sm:p-10 shadow-xl">
                 <h2 class="text-lg font-bold text-slate-900">Nos coordonnées</h2>
                 <p class="mt-2 text-sm text-slate-600">Restons en contact via nos differents canaux.</p>
 
@@ -92,7 +92,7 @@
             <div>
                 @if (isSuccess)
                 {
-                    <div class="rounded-2xl bg-white p-8 sm:p-10 shadow-xl text-center">
+                    <div class="rounded-lg bg-white p-8 sm:p-10 shadow-xl text-center">
                         <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                             <i class="fas fa-check text-2xl text-green-600"></i>
                         </div>
@@ -100,14 +100,14 @@
                         <p class="mt-2 text-sm text-slate-600">Merci de nous avoir contactés. Nous reviendrons vers vous
                             rapidement.</p>
                             <button @onclick="ResetForm"
-                                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-[#6a4df0]">
+                                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-accent-hover">
                                 Envoyer un autre message
                             </button>
                         </div>
                     }
             else
                     {
-                        <div class="rounded-2xl bg-white p-8 sm:p-10 shadow-xl">
+                        <div class="rounded-lg bg-white p-8 sm:p-10 shadow-xl">
                             @if (!string.IsNullOrEmpty(errorMessage))
                             {
                                 <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm">
@@ -124,7 +124,7 @@
                                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i
                                             class="fas fa-user"></i></span>
                                             <InputText @bind-Value="model.FullName"
-                                                       class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                                       class="w-full rounded-lg bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
                                                        placeholder="Votre nom" />
                                         </div>
                                         <ValidationMessage For="@(() => model.FullName)" class="text-xs text-red-500 mt-1" />
@@ -136,7 +136,7 @@
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i
                                                 class="fas fa-envelope"></i></span>
                                                 <InputText @bind-Value="model.Email" type="email"
-                                                           class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                                           class="w-full rounded-lg bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
                                                            placeholder="nom@exemple.com" />
                                             </div>
                                             <ValidationMessage For="@(() => model.Email)" class="text-xs text-red-500 mt-1" />
@@ -148,7 +148,7 @@
                                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><i
                                                     class="fas fa-tag"></i></span>
                                                     <InputText @bind-Value="model.Subject"
-                                                               class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
+                                                               class="w-full rounded-lg bg-gray-50 border border-transparent px-4 py-3 pl-12 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition"
                                                                placeholder="Sujet de votre message" />
                                                 </div>
                                                 <ValidationMessage For="@(() => model.Subject)" class="text-xs text-red-500 mt-1" />
@@ -157,13 +157,13 @@
                                             <div class="mb-6">
                                                 <label class="block text-xs font-medium text-gray-600 mb-2">MESSAGE</label>
                                                 <InputTextArea @bind-Value="model.Message" rows="5"
-                                                               class="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition resize-y"
+                                                               class="w-full rounded-lg bg-gray-50 border border-transparent px-4 py-3 text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition resize-y"
                                                                placeholder="Votre message..." />
                                                 <ValidationMessage For="@(() => model.Message)" class="text-xs text-red-500 mt-1" />
                                             </div>
 
                                             <button type="submit" disabled="@isLoading"
-                                                    class="w-full rounded-xl bg-secondary hover:bg-[#6a4df0] text-white py-3 font-medium shadow-md transition disabled:opacity-60">
+                                                    class="w-full rounded-lg bg-secondary hover:bg-accent-hover text-white py-3 font-medium shadow-md transition disabled:opacity-60">
                                                 @(isLoading ? "Envoi en cours..." : "Envoyer le message")
                                             </button>
                                         </EditForm>

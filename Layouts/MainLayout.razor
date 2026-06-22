@@ -1,9 +1,10 @@
 ﻿@inherits LayoutComponentBase
 @using DotnetNiger.UI.Components.Shared;
+@using DotnetNiger.UI.Components.Shared.TopBar;
 
 <div class="flex flex-col h-screen overflow-hidden">
      <TopBar/>
-    <main class="overflow-y-scroll">
+    <main class="flex-1 overflow-y-auto">
         <article class="mt-0 z-0">
             @Body
         </article>

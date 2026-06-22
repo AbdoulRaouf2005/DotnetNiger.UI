@@ -4,164 +4,237 @@
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
 
-<div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
-    <AdminBreadcrumb />
+@if (!isLoading)
+{
+    <div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+        <AdminBreadcrumb />
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
-        <div class="space-y-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div class="mb-5 flex justify-center">
-                    <div class="relative">
-                        <img src="@GetAvatarUrl(CurrentUser?.AvatarUrl)"
-                             alt="Avatar"
-                             class="h-40 w-40 rounded-full border-4 border-indigo-100 object-cover" />
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
+            <div class="space-y-6">
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-5 flex justify-center">
+                        <div class="relative">
+                            <img src="@GetAvatarUrl(CurrentUser?.AvatarUrl)"
+                                 alt="Avatar"
+                                 class="h-40 w-40 rounded-full border-4 border-indigo-100 object-cover" />
+                            <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
+                                    title="Modifier l'avatar"
+                                    class="absolute -bottom-1 -right-1 inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
+                                <i class="fas fa-camera text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-center">
+                        <h2 class="text-xl sm:text-4xl font-semibold tracking-tight text-slate-800">@DisplayOrFallback(CurrentUser?.FullName, CurrentUser?.Username ?? "Utilisateur")</h2>
+                        <p class="text-lg text-slate-500">@DisplayPrimaryRole(CurrentUser?.Roles)</p>
+                    </div>
+
+                    <div class="mt-7 space-y-3 text-sm text-slate-700">
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-map-marker-alt text-slate-500"></i>
+                            <span>@BuildLocation(CurrentUser?.City, CurrentUser?.Country)</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-envelope text-slate-500"></i>
+                            <span>@DisplayOrFallback(CurrentUser?.Email, "Email non renseigne")</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-phone text-slate-500"></i>
+                            <span>@DisplayOrFallback(CurrentUser?.PhoneNumber, "Telephone non renseigne")</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
+                            <i class="fas fa-calendar-alt text-slate-500"></i>
+                            <span>Membre depuis @FormatMemberSince(CurrentUser?.CreatedAt)</span>
+                        </div>
+                        <div class="inline-flex w-full items-center justify-center gap-2 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600") px-4 py-2">
+                            <span class="h-2.5 w-2.5 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-500" : "bg-slate-400")"></span>
+                            <span>@((CurrentUser?.IsActive ?? false) ? "En ligne" : "Hors ligne")</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-slate-700">Réseaux sociaux</h3>
                         <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
-                                title="Modifier l'avatar"
-                                class="absolute -bottom-1 -right-1 inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500">
-                            <i class="fas fa-camera text-sm"></i>
+                                class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                            <i class="fas fa-pen text-xs"></i>
+                            Modifier
                         </button>
                     </div>
-                </div>
 
-                <div class="space-y-2 text-center">
-                    <h2 class="text-xl sm:text-4xl font-semibold tracking-tight text-slate-800">@DisplayOrFallback(CurrentUser?.FullName, CurrentUser?.Username ?? "Utilisateur")</h2>
-                    <p class="text-lg text-slate-500">@DisplayPrimaryRole(CurrentUser?.Roles)</p>
-                </div>
+                    @if (SocialLinks.Count == 0)
+                    {
+                        <p class="text-sm text-slate-500">Aucun lien social enregistré.</p>
+                    }
+                    else
+                    {
+                        <div class="flex flex-wrap gap-3">
+                            @foreach (var link in SocialLinks)
+                            {
+                                <a href="@link.Url"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-600 text-xl text-white transition hover:bg-indigo-500"
+                                   title="@link.Platform">
+                                    <i class="@link.Icone"></i>
+                                </a>
+                            }
+                        </div>
+                    }
+                </section>
+            </div>
 
-                <div class="mt-7 space-y-3 text-sm text-slate-700">
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
-                        <i class="fas fa-map-marker-alt text-slate-500"></i>
-                        <span>@BuildLocation(CurrentUser?.City, CurrentUser?.Country)</span>
+            <div class="space-y-6">
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-center justify-between gap-4">
+                        <h2 class="text-lg font-semibold tracking-tight text-slate-800">A propos</h2>
+                        <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
+                                title="Modifier la biographie"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                            <i class="fas fa-pen"></i>
+                        </button>
                     </div>
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
-                        <i class="fas fa-envelope text-slate-500"></i>
-                        <span>@DisplayOrFallback(CurrentUser?.Email, "Email non renseigne")</span>
-                    </div>
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
-                        <i class="fas fa-phone text-slate-500"></i>
-                        <span>@DisplayOrFallback(CurrentUser?.PhoneNumber, "Telephone non renseigne")</span>
-                    </div>
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-2">
-                        <i class="fas fa-calendar-alt text-slate-500"></i>
-                        <span>Membre depuis @FormatMemberSince(CurrentUser?.CreatedAt)</span>
-                    </div>
-                    <div class="inline-flex w-full items-center justify-center gap-2 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600") px-4 py-2">
-                        <span class="h-2.5 w-2.5 rounded-full @((CurrentUser?.IsActive ?? false) ? "bg-emerald-500" : "bg-slate-400")"></span>
-                        <span>@((CurrentUser?.IsActive ?? false) ? "En ligne" : "Hors ligne")</span>
-                    </div>
-                </div>
-            </section>
+                    <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(CurrentUser?.Bio, "Aucune biographie renseignée.")</p>
+                </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-slate-700">Réseaux sociaux</h3>
-                    <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
-                            class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
-                        <i class="fas fa-pen text-xs"></i>
-                        Modifier
-                    </button>
-                </div>
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-start justify-between gap-4">
+                        <h2 class="text-lg font-semibold tracking-tight text-slate-800">Skills and Technologies</h2>
+                        <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
+                                title="Modifier les competences"
+                                class="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                    </div>
 
-                @if (SocialLinks.Count == 0)
-                {
-                    <p class="text-sm text-slate-500">Aucun lien social enregistré.</p>
-                }
-                else
-                {
                     <div class="flex flex-wrap gap-3">
-                        @foreach (var link in SocialLinks)
+                        @foreach (var skill in ResolveSkills(CurrentUser?.Skills))
                         {
-                            <a href="@link.Url"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-600 text-xl text-white transition hover:bg-indigo-500"
-                               title="@link.Platform">
-                                <i class="@link.Icone"></i>
-                            </a>
+                            <span class="rounded-lg bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
                         }
                     </div>
-                }
-            </section>
-        </div>
+                </section>
 
-        <div class="space-y-6">
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div class="mb-4 flex items-center justify-between gap-4">
-                    <h2 class="text-lg font-semibold tracking-tight text-slate-800">A propos</h2>
-                    <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
-                            title="Modifier la biographie"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
-                        <i class="fas fa-pen"></i>
-                    </button>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                        <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
+                            <i class="far fa-calendar-check text-indigo-600"></i>
+                            Events
+                        </p>
+                        <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">24</p>
+                        <p class="mt-2 text-lg text-slate-500">Evenement organise</p>
+                    </article>
+
+                    <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                        <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
+                            <i class="far fa-comment-alt text-indigo-600"></i>
+                            Contributions
+                        </p>
+                        <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">142</p>
+                        <p class="mt-2 text-lg text-slate-500">Community posts</p>
+                    </article>
+
+                    <article class="rounded-lg border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
+                        <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
+                            <i class="far fa-newspaper text-indigo-600"></i>
+                            Blog posts
+                        </p>
+                        <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">15</p>
+                        <p class="mt-2 text-lg text-slate-500">Articles publies</p>
+                    </article>
                 </div>
-                <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(CurrentUser?.Bio, "Aucune biographie renseignée.")</p>
-            </section>
-
-            <section class="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div class="mb-4 flex items-start justify-between gap-4">
-                    <h2 class="text-lg font-semibold tracking-tight text-slate-800">Skills and Technologies</h2>
-                    <button @onclick='() => Navigation.NavigateTo("/admin/profile/informations")'
-                            title="Modifier les competences"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">
-                        <i class="fas fa-pen"></i>
-                    </button>
-                </div>
-
-                <div class="flex flex-wrap gap-3">
-                    @foreach (var skill in ResolveSkills(CurrentUser?.Skills))
-                    {
-                        <span class="rounded-md bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">@skill</span>
-                    }
-                </div>
-            </section>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
-                    <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
-                        <i class="far fa-calendar-check text-indigo-600"></i>
-                        Events
-                    </p>
-                    <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">24</p>
-                    <p class="mt-2 text-lg text-slate-500">Evenement organise</p>
-                </article>
-
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
-                    <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
-                        <i class="far fa-comment-alt text-indigo-600"></i>
-                        Contributions
-                    </p>
-                    <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">142</p>
-                    <p class="mt-2 text-lg text-slate-500">Community posts</p>
-                </article>
-
-                <article class="rounded-2xl border border-slate-200 bg-slate-100/80 p-6 shadow-sm">
-                    <p class="mb-3 flex items-center gap-3 text-base font-semibold uppercase tracking-wide text-slate-500">
-                        <i class="far fa-newspaper text-indigo-600"></i>
-                        Blog posts
-                    </p>
-                    <p class="text-2xl sm:text-4xl font-bold tracking-tight text-slate-800">15</p>
-                    <p class="mt-2 text-lg text-slate-500">Articles publies</p>
-                </article>
             </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-8">
+        <AdminBreadcrumb />
+
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-[390px_1fr]">
+            <div class="space-y-6">
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="flex flex-col items-center space-y-4">
+                        <Skeleton Type="SkeletonType.Custom" Class="h-32 rounded-lg w-full" />
+                        <Skeleton Type="SkeletonType.Avatar" Size="96px" Class="h-24 w-24" />
+                        <Skeleton Type="SkeletonType.Title" Class="w-1/2" />
+                        <Skeleton Type="SkeletonType.Text" Lines="2" Class="w-3/4" />
+                    </div>
+                    <div class="mt-7 space-y-3">
+                        <Skeleton Type="SkeletonType.Text" Lines="4" />
+                    </div>
+                </section>
+
+                <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                    <Skeleton Type="SkeletonType.Title" Class="w-1/3 mb-4" />
+                    <div class="flex flex-wrap gap-3">
+                        <Skeleton Type="SkeletonType.Badge" Width="40px" />
+                        <Skeleton Type="SkeletonType.Badge" Width="40px" />
+                        <Skeleton Type="SkeletonType.Badge" Width="40px" />
+                    </div>
+                </section>
+            </div>
+
+            <div class="space-y-6">
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-center justify-between">
+                        <Skeleton Type="SkeletonType.Title" Class="w-1/4" />
+                        <Skeleton Type="SkeletonType.Button" Width="40px" />
+                    </div>
+                    <Skeleton Type="SkeletonType.Text" Lines="3" />
+                </section>
+
+                <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
+                    <div class="mb-4 flex items-start justify-between">
+                        <Skeleton Type="SkeletonType.Title" Class="w-1/3" />
+                        <Skeleton Type="SkeletonType.Button" Width="40px" />
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <Skeleton Type="SkeletonType.Badge" />
+                        <Skeleton Type="SkeletonType.Badge" />
+                        <Skeleton Type="SkeletonType.Badge" />
+                        <Skeleton Type="SkeletonType.Badge" />
+                        <Skeleton Type="SkeletonType.Badge" />
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <SkeletonCard Class="rounded-lg border border-slate-200" />
+                    <SkeletonCard Class="rounded-lg border border-slate-200" />
+                    <SkeletonCard Class="rounded-lg border border-slate-200" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private UserDto? CurrentUser => UserStateService.CurrentUser;
     private List<SocialLinkDto> SocialLinks => CurrentUser?.SocialLinks ?? new();
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         UserStateService.OnChange += HandleStateChanged;
 
-        if (UserStateService.CurrentUser is null)
-            await UserStateService.LoadUserFromStorageAsync();
-
-        if (UserStateService.CurrentUser is null)
+        try
         {
-            var profil = await ProfileService.GetProfileAsync();
-            await UserStateService.SetUserAsync(profil);
+            if (UserStateService.CurrentUser is null)
+                await UserStateService.LoadUserFromStorageAsync();
+
+            if (UserStateService.CurrentUser is null)
+            {
+                var profil = await ProfileService.GetProfileAsync();
+                if (profil.Id != Guid.Empty)
+                    await UserStateService.SetUserAsync(profil);
+            }
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
