@@ -80,7 +80,7 @@ else
                             }
                             @if (!string.IsNullOrWhiteSpace(post.Content))
                             {
-                                <div class="prose prose-sm max-w-none">
+                                <div class="prose prose-sm max-w-none" @onmouseover="@(() => {})" @onmouseout="@(() => {})">
                                     @((MarkupString)post.Content)
                                 </div>
                             }
@@ -124,7 +124,6 @@ else
     private void GoBack()
     {
         var returnUrl = PreviewState.ReturnUrl ?? "/admin/blog/create";
-        PreviewState.Clear();
         Navigation.NavigateTo(returnUrl);
     }
 

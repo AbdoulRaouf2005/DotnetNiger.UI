@@ -477,23 +477,41 @@
                 return;
             }
 
-            organizerName = existingEvent.OrganizerName;
-            eventRequest = MapToRequest(existingEvent);
-            galleryImageUrls = existingEvent.GalleryImageUrls?.ToList() ?? new();
-            eventRequest.GalleryImageUrls = galleryImageUrls;
-            eventMode = eventRequest.EventType?.ToLowerInvariant() switch
+            var expectedReturn = $"/admin/events/edit/{Id}";
+            if (PreviewState.PendingEventRequest is not null && PreviewState.ReturnUrl == expectedReturn)
             {
-                "online" => "online",
-                "hybrid" => "hybrid",
-                _ => "physical"
-            };
-            speakers = existingEvent.Speakers?.Select(s => new SpeakerDto
+                eventRequest = PreviewState.PendingEventRequest;
+                galleryImageUrls = eventRequest.GalleryImageUrls?.ToList() ?? new();
+                speakers = eventRequest.Speakers?.ToList() ?? new();
+                eventMode = eventRequest.EventType?.ToLowerInvariant() switch
+                {
+                    "online" => "online",
+                    "hybrid" => "hybrid",
+                    _ => "physical"
+                };
+                organizerName = existingEvent.OrganizerName;
+                PreviewState.PendingEventRequest = null;
+            }
+            else
             {
-                UserId = s.UserId,
-                Name = s.Name,
-                Role = s.Role,
-                AvatarUrl = s.AvatarUrl
-            }).ToList() ?? new();
+                organizerName = existingEvent.OrganizerName;
+                eventRequest = MapToRequest(existingEvent);
+                galleryImageUrls = existingEvent.GalleryImageUrls?.ToList() ?? new();
+                eventRequest.GalleryImageUrls = galleryImageUrls;
+                eventMode = eventRequest.EventType?.ToLowerInvariant() switch
+                {
+                    "online" => "online",
+                    "hybrid" => "hybrid",
+                    _ => "physical"
+                };
+                speakers = existingEvent.Speakers?.Select(s => new SpeakerDto
+                {
+                    UserId = s.UserId,
+                    Name = s.Name,
+                    Role = s.Role,
+                    AvatarUrl = s.AvatarUrl
+                }).ToList() ?? new();
+            }
         }
         finally
         {
@@ -555,6 +573,9 @@
         eventRequest.Description = await EditorRef.GetContentAsync();
         eventRequest.Speakers = speakers.ToList();
         eventRequest.GalleryImageUrls = galleryImageUrls;
+
+        // Sauvegarder l'état du formulaire pour restauration après retour
+        PreviewState.PendingEventRequest = eventRequest;
 
         var previewDto = new EventDto
         {

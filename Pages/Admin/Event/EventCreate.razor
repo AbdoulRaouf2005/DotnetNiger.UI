@@ -166,7 +166,7 @@
 
                     <div>
                         <label class="block text-sm font-semibold mb-2">Description</label>
-                        <Editor @ref="EditorRef" EditorId="eventDescription" InitialContent="" />
+                        <Editor @ref="EditorRef" EditorId="eventDescription" InitialContent="@eventRequest.Description" />
                         @if (showDescriptionError)
                         {
                             <p class="text-red-500 text-sm mt-1">La description est obligatoire.</p>
@@ -476,6 +476,20 @@
             IsCurrentUserAdmin = UserStateService.IsAdmin;
 
             allMembers = await UserService.GetUsersAsync();
+
+            // Restaurer le formulaire si on revient d'un aperçu
+            if (PreviewState.PendingEventRequest is not null && PreviewState.ReturnUrl == "/admin/events/nouveau")
+            {
+                eventRequest = PreviewState.PendingEventRequest;
+                speakers = eventRequest.Speakers?.ToList() ?? new();
+                eventMode = eventRequest.EventType?.ToLowerInvariant() switch
+                {
+                    "online" => "online",
+                    "hybrid" => "hybrid",
+                    _ => "physical"
+                };
+                PreviewState.PendingEventRequest = null;
+            }
         }
         finally
         {
@@ -553,6 +567,9 @@
             _ => eventRequest.EventType
         };
         eventRequest.Speakers = speakers.ToList();
+
+        // Sauvegarder l'état du formulaire pour restauration après retour
+        PreviewState.PendingEventRequest = eventRequest;
 
         var previewDto = new EventDto
         {

@@ -1,3 +1,4 @@
+using DotnetNiger.UI.Models.Requests;
 using DotnetNiger.UI.Models.Responses;
 
 namespace DotnetNiger.UI.Services;
@@ -7,6 +8,10 @@ public class PreviewStateService
     public PostDto? BlogPreview { get; set; }
     public EventDto? EventPreview { get; set; }
     public string? ReturnUrl { get; set; }
+
+    // Sauvegarde du formulaire pour restauration après retour
+    public CreatePostRequest? PendingPostRequest { get; set; }
+    public CreateEventRequest? PendingEventRequest { get; set; }
 
     public void SetBlogPreview(PostDto post, string returnUrl)
     {
@@ -27,5 +32,7 @@ public class PreviewStateService
         BlogPreview = null;
         EventPreview = null;
         ReturnUrl = null;
+        PendingPostRequest = null;
+        PendingEventRequest = null;
     }
 }

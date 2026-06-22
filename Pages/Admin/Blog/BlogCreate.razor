@@ -37,7 +37,7 @@
 
                 <div>
                     <label class="mb-2 block text-sm font-semibold text-gray-700">Contenu</label>
-                    <Editor @ref="EditorRef" EditorId="blogDescription" InitialContent="" />
+                    <Editor @ref="EditorRef" EditorId="blogDescription" InitialContent="@postRequest.Content" />
                     @if (showContentError)
                     {
                         <p class="text-red-500 text-sm mt-1">Le contenu de l'article est obligatoire.</p>
@@ -86,6 +86,13 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Restaurer le formulaire si on revient d'un aperçu
+        if (PreviewState.PendingPostRequest is not null && PreviewState.ReturnUrl == "/admin/blog/create")
+        {
+            postRequest = PreviewState.PendingPostRequest;
+            PreviewState.PendingPostRequest = null;
+        }
+
         // Charger depuis UserStateService ; fallback sur ProfileService puis synchroniser.
         if (UserStateService.CurrentUser is null)
             await UserStateService.LoadUserFromStorageAsync();
@@ -112,6 +119,19 @@
     private async Task HandlePreview()
     {
         postRequest.Content = await EditorRef.GetContentAsync();
+
+        // Sauvegarder l'état du formulaire pour restauration après retour
+        PreviewState.PendingPostRequest = new CreatePostRequest
+        {
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            PostType = postRequest.PostType,
+            CategoryIds = postRequest.CategoryIds.ToList(),
+            TagNames = postRequest.TagNames.ToList(),
+            IsPublished = postRequest.IsPublished
+        };
 
         var previewDto = new PostDto
         {

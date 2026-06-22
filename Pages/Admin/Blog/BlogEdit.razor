@@ -130,8 +130,30 @@
             return;
         }
 
-        originalPost = post;
-        postRequest = MapToUpdateRequest(post);
+        // Restaurer le formulaire si on revient d'un aperçu
+        var expectedReturn = $"/admin/blog/edit/{Id}";
+        if (PreviewState.PendingPostRequest is not null && PreviewState.ReturnUrl == expectedReturn)
+        {
+            originalPost = post;
+            postRequest = new UpdatePostRequest
+            {
+                Title = PreviewState.PendingPostRequest.Title,
+                Content = PreviewState.PendingPostRequest.Content,
+                Excerpt = PreviewState.PendingPostRequest.Excerpt,
+                CoverImageUrl = PreviewState.PendingPostRequest.CoverImageUrl,
+                PostType = PreviewState.PendingPostRequest.PostType,
+                CategoryIds = PreviewState.PendingPostRequest.CategoryIds.ToList(),
+                TagNames = PreviewState.PendingPostRequest.TagNames.ToList(),
+                IsPublished = PreviewState.PendingPostRequest.IsPublished
+            };
+            PreviewState.PendingPostRequest = null;
+        }
+        else
+        {
+            originalPost = post;
+            postRequest = MapToUpdateRequest(post);
+        }
+
         isLoading = false;
     }
     private void HandleImageUploaded(string imageUrl)
@@ -147,6 +169,19 @@
     private async Task HandlePreview()
     {
         postRequest.Content = await EditorRef.GetContentAsync();
+
+        // Sauvegarder l'état du formulaire pour restauration après retour
+        PreviewState.PendingPostRequest = new CreatePostRequest
+        {
+            Title = postRequest.Title,
+            Content = postRequest.Content,
+            Excerpt = postRequest.Excerpt,
+            CoverImageUrl = postRequest.CoverImageUrl,
+            PostType = postRequest.PostType,
+            CategoryIds = postRequest.CategoryIds.ToList(),
+            TagNames = postRequest.TagNames.ToList(),
+            IsPublished = postRequest.IsPublished
+        };
 
         var previewDto = new PostDto
         {

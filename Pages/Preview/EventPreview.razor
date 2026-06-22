@@ -163,7 +163,6 @@ else
     private void GoBack()
     {
         var returnUrl = PreviewState.ReturnUrl ?? "/admin/events/nouveau";
-        PreviewState.Clear();
         Navigation.NavigateTo(returnUrl);
     }
 
