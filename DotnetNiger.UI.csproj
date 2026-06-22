@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>NU1900</NoWarn>
+    <PublishTrimmed>true</PublishTrimmed>
+    <BlazorWebAssemblyLoadAllGlobalizationData>false</BlazorWebAssemblyLoadAllGlobalizationData>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -13,7 +15,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.23" PrivateAssets="all" />
 
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
-		<PackageReference Include="TinyMCE.Blazor" Version="2.2.1" />
 	</ItemGroup>
 
   <ItemGroup>

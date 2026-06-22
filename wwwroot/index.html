@@ -19,9 +19,6 @@
 
     <link href="lib/fontawesome/css/all.min.css" rel="stylesheet" />
 
-    <link rel="stylesheet" href="lib/tinymce/skins/ui/oxide/skin.min.css" />
-    <link rel="stylesheet" href="lib/tinymce/skins/ui/oxide/content.min.css" />
-
     <meta property="og:title" content="Dotnet Niger" />
     <meta property="og:description" content="Communauté .NET du Niger" />
     <meta property="og:image" content="/images/og-default.jpg" />
@@ -34,11 +31,11 @@
 <body>
     <div id="app" class="bg-[#F4F2F2] min-h-screen">
         <div class="flex justify-center items-center min-h-screen">
-            <div class="flex flex-col items-center space-y-4">
+            <div class="flex flex-col items-center space-y-6">
                 <div class="w-28 h-28 border-8 border-gray-300 border-t-secondary rounded-full animate-spin"></div>
+                <p class="text-sm text-gray-500 animate-pulse">Chargement de l'application...</p>
             </div>
         </div>
-        <div class="loading-progress-text"></div>
     </div>
     <div id="blazor-error-ui" class="bg-red-600 text-white px-4 py-2 rounded-md" style="display:none;">
         An unhandled error has occurred.
@@ -46,12 +43,8 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <!-- Charger TinyMCE depuis npm (mode hors ligne) -->
-    <script src="lib/tinymce/tinymce.min.js"></script>
-    <!-- Puis charger les fonctions d'initialisation -->
+
     <script src="tinymce-init.js"></script>
-    <script src="lib/iconify/iconify-icon.min.js"></script>
-    <!-- Chargement de Blazor -->
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="Script.js"></script>
 </body>

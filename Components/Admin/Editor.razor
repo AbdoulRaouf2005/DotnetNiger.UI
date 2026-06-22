@@ -1,5 +1,3 @@
-@* Composant admin : wrapper TinyMCE autonome. *@
-@* Utiliser RichTextEditor pour les pages create/edit. *@
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
@@ -13,7 +11,7 @@
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("initTinyMCE", EditorId, InitialContent);
+            await JS.InvokeVoidAsync("loadTinyMCE", EditorId, InitialContent);
         }
     }
 
