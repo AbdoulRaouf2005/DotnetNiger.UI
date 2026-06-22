@@ -1,13 +1,13 @@
 ﻿@page "/blog"
 @using Microsoft.AspNetCore.Components
-@using DotnetNiger.UI.Components
-@using DotnetNiger.UI.Components.Admin.Cards
+@using DotnetNiger.UI.Components.Cards;
+@using DotnetNiger.UI.Components.Admin.Cards 
 @inject IPostService PostService
 
 
 <PageTitle>Blog - .NET Niger</PageTitle>
 
-<section class="bg-[#e8e3f6] px-4 py-8 sm:py-12 md:py-14 lg:px-10">
+<section class="bg-accent-bg px-4 py-8 sm:py-12 md:py-14 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl">
 		<div class="mb-6 sm:mb-8 text-center">
 			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">DotnetBlog</h1>
@@ -41,10 +41,10 @@
 
 			@if (!string.IsNullOrWhiteSpace(tag))
 				{
-					<div class="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 rounded-lg bg-[#d6e7ff] px-4 py-3 text-sm text-gray-700">
+					<div class="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 rounded-lg bg-info-bg px-4 py-3 text-sm text-gray-700">
 						<i class="fa-solid fa-tag text-xs"></i>
 						<span>Articles filtrés par le tag : <strong>#@tag</strong></span>
-						<a href="/blog" class="ml-auto text-xs font-semibold text-[#3b82f6] hover:underline">Réinitialiser</a>
+						<a href="/blog" class="ml-auto text-xs font-semibold text-info-text hover:underline">Réinitialiser</a>
 					</div>
 				}
 

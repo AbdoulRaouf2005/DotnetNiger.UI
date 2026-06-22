@@ -1,11 +1,11 @@
 ﻿@page "/propos"
 
-@using DotnetNiger.UI.Components
+@using DotnetNiger.UI.Components.Cards;
 @inject IUserService UserService
 
 <PageTitle>À propos - .NET Niger</PageTitle>
 
-<div class="bg-[#F4F2F2] text-slate-800">
+<div class="bg-primary text-slate-800">
 	<!-- HERO -->
 	<section class="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
 		<div
@@ -31,11 +31,11 @@
 
 			<div class="mt-7 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
 				<a href="#vision"
-				   class="inline-flex items-center justify-center rounded-lg bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.30)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+				   class="inline-flex items-center justify-center rounded-lg bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.30)] transition hover:-translate-y-0.5 hover:bg-accent-hover">
 					Découvrir Notre Vision
 				</a>
 				<a href="#equipe"
-				   class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-[#512BD4]/30 hover:bg-[#fbfaff]">
+				   class="inline-flex items-center justify-center rounded-lg border border-secondary/15 bg-white px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-secondary shadow-sm transition hover:-translate-y-0.5 hover:border-secondary/30 hover:bg-[#fbfaff]">
 					Rencontrer l'équipe
 				</a>
 			</div>
@@ -43,10 +43,10 @@
 	</section>
 
 	<!-- VISION -->
-	<section id="vision" class="bg-[#ECE7FF] px-4 py-12 sm:py-16 md:py-20 lg:px-8">
+	<section id="vision" class="bg-border-soft px-4 py-12 sm:py-16 md:py-20 lg:px-8">
 		<div class="mx-auto max-w-5xl text-center">
 			<div
-				class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+				class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-accent-hover">
 				Notre mission
 			</div>
 			<h2
@@ -67,7 +67,7 @@
 		<div class="mx-auto max-w-6xl">
 			<div class="text-center">
 				<div
-					class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+					class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-accent-hover">
 					Nos valeurs fondamentales
 				</div>
 				<h2
@@ -96,11 +96,11 @@
 			</section>
 
 			<!-- TIMELINE -->
-			<section class="bg-[#F7F8FC] px-4 py-12 sm:py-16 md:py-20 lg:px-8">
+			<section class="bg-surface px-4 py-12 sm:py-16 md:py-20 lg:px-8">
 				<div class="mx-auto max-w-6xl">
 					<div class="text-center">
 						<div
-							class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#6a4df0]">
+							class="mb-3 sm:mb-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-accent-hover">
 							Timeline
 						</div>
 						<h2
@@ -116,7 +116,7 @@
 								class="rounded-lg border border-white bg-white p-4 sm:p-6 shadow-[0_8px_30px_rgba(15,23,42,0.06)] ring-1 ring-slate-100">
 								<div class="flex items-start justify-between gap-3 sm:gap-4">
 									<div
-										class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-[#ECE7FF] text-base sm:text-xl text-[#512BD4]">
+										class="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-border-soft text-base sm:text-xl text-secondary">
 										<i class="@milestone.Icon"></i>
 									</div>
 									<span
@@ -163,7 +163,7 @@
 										<div class="space-y-3 p-4 sm:space-y-4 sm:p-5">
 											<div>
 												<h3 class="text-base sm:text-lg font-bold text-slate-900">@leader.Name</h3>
-												<p class="text-xs sm:text-sm font-semibold text-[#F97316]">@leader.Role</p>
+												<p class="text-xs sm:text-sm font-semibold text-warning">@leader.Role</p>
 											</div>
 
 											<p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600">
@@ -176,10 +176,10 @@
 						</section>
 
 						<!-- MEMBERS -->
-						<section class="bg-[#F7F8FC] px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
+						<section class="bg-surface px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
 							<div class="mx-auto max-w-6xl text-center">
 								<button type="button" @onclick="ToggleMembersSection"
-									  class="inline-flex items-center gap-2 rounded-full bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-[#6a4df0]">
+									  class="inline-flex items-center gap-2 rounded-full bg-secondary px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white shadow-[0_12px_30px_rgba(81,43,212,0.25)] transition hover:-translate-y-0.5 hover:bg-accent-hover">
 									<i class="fa-solid @MembersToggleIconClass"></i>
 									<span>@(showMembersSection ? "Masquer les membres" : "Voir tous les membres")</span>
 								</button>
@@ -208,7 +208,7 @@
 												<i class="fa-solid fa-exclamation-triangle text-3xl text-amber-500"></i>
 												<p class="mt-3 text-sm text-slate-600">Impossible de charger la liste des membres.</p>
 												<button type="button" @onclick="LoadMembersAsync"
-														class="mt-3 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#6a4df0]">
+														class="mt-3 inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white transition hover:bg-accent-hover">
 													<i class="fa-solid fa-rotate"></i> Réessayer
 												</button>
 											</div>
@@ -242,7 +242,7 @@
 
 											<div class="mt-8 sm:mt-10 flex items-center gap-3">
 												<h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Membres</h2>
-												<span class="rounded-full bg-[#ECE7FF] px-3 py-1 text-xs font-bold text-[#512BD4]">@filteredMembers.Count</span>
+												<span class="rounded-full bg-border-soft px-3 py-1 text-xs font-bold text-secondary">@filteredMembers.Count</span>
 											</div>
 
 											<div class="mt-5 sm:mt-6 grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -261,26 +261,26 @@
 @code {
 	private readonly IReadOnlyList<ValueItem> values = new[]
 	{
-		new ValueItem("Collaboration", "fa-solid fa-people-group", "bg-[#ECE7FF]", "text-[#512BD4]", "L'esprit de partage est au coeur de notre ADN. Ensemble, nous apprenons et grandissons à la fois."),
-		new ValueItem("Innovation", "fa-solid fa-lightbulb", "bg-[#FFF0F5]", "text-[#C13C76]", "Repousser les limites du possible avec .NET pour résoudre les défis locaux par le code."),
-		new ValueItem("Excellence", "fa-solid fa-graduation-cap", "bg-[#EAF2FF]", "text-[#2E5EA8]", "Nous visons la qualité technique et l'éthique professionnelle dans tous nos projets communautaires.")
+		new ValueItem("Collaboration", "fa-solid fa-people-group", "bg-border-soft", "text-secondary", "L'esprit de partage est au coeur de notre ADN. Ensemble, nous apprenons et grandissons à la fois."),
+		new ValueItem("Innovation", "fa-solid fa-lightbulb", "bg-info-light-bg", "text-info", "Repousser les limites du possible avec .NET pour résoudre les défis locaux par le code."),
+		new ValueItem("Excellence", "fa-solid fa-graduation-cap", "bg-info-light-bg", "text-info", "Nous visons la qualité technique et l'éthique professionnelle dans tous nos projets communautaires.")
 	};
 
 	private readonly IReadOnlyList<MilestoneItem> milestones = new[]
 	{
-		new MilestoneItem("2024", "La Fondation", "fa-solid fa-rocket", "bg-secondary", "text-[#5D48FF]", Description: "Un petit groupe de passionnés se réunit à Niamey pour poser les jalons de l'écosystème .NET au Niger, avec l'ambition de créer un pont vers l'innovation mondiale."),
-		new MilestoneItem("2025", "L'Expansion", "fa-solid fa-users", "bg-secondary", "text-[#4A78C2]", "Lancement du premier grand meetup communautaire réunissant plus de 100 développeurs et étudiants, marquant le début d'une dynamique de partage sans précédent."),
-		new MilestoneItem("2026", "La Reconnaissance", "fa-solid fa-award", "bg-secondary", "text-[#B94A8A]", "Signature de partenariats stratégiques avec des institutions locales et intégration officielle dans le réseau global des communautés .NET.")
+		new MilestoneItem("2024", "La Fondation", "fa-solid fa-rocket", "bg-secondary", "text-accent", Description: "Un petit groupe de passionnés se réunit à Niamey pour poser les jalons de l'écosystème .NET au Niger, avec l'ambition de créer un pont vers l'innovation mondiale."),
+		new MilestoneItem("2025", "L'Expansion", "fa-solid fa-users", "bg-secondary", "text-info", "Lancement du premier grand meetup communautaire réunissant plus de 100 développeurs et étudiants, marquant le début d'une dynamique de partage sans précédent."),
+		new MilestoneItem("2026", "La Reconnaissance", "fa-solid fa-award", "bg-secondary", "text-info", "Signature de partenariats stratégiques avec des institutions locales et intégration officielle dans le réseau global des communautés .NET.")
 	};
 
 	private readonly IReadOnlyList<LeaderItem> leaders = new[]
 	{
 		new LeaderItem("Ahmed Moussa", "Community Lead", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-[#F97316]", "Porte la vision de la communauté et structure les initiatives pour faire grandir l'écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
+"text-warning", "Porte la vision de la communauté et structure les initiatives pour faire grandir l'écosystème .NET au Niger.", new[] { "Vision", "Mentorat", "Community" }),
 		new LeaderItem("Abdallah Ibrahim", "Technical Outreach", "bg-gradient-to-br from-[#5C2020] via-[#2D3A44] to-[#0E1A22]",
-"text-[#EC4899]", "Facilite les ateliers, les rencontres techniques et l'accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
+"text-info", "Facilite les ateliers, les rencontres techniques et l'accès aux opportunités pour les développeurs locaux.", new[] { "ASP.NET Core", "Azure", "Architecture" }),
 		new LeaderItem("Ibrahim Sani", "Content Strategy", "bg-gradient-to-br from-[#8A1E16] via-[#4B1711] to-[#1E0B0A]",
-"text-[#F59E0B]", "Expert en communication technique, il simplifie les concepts complexes et les rend utiles à tous.",
+"text-warning", "Expert en communication technique, il simplifie les concepts complexes et les rend utiles à tous.",
 new[] { "Editorial", "UX", "Culture" })
 	};
 

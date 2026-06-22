@@ -10,14 +10,14 @@
 
 <div class="flex gap-4">
     <!-- Avatar -->
-    <div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-[#e5edf9]">
+    <div class="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-avatar-bg">
         @if (!string.IsNullOrWhiteSpace(Comment.AuthorAvatar))
         {
             <img src="@Comment.AuthorAvatar" alt="@Comment.AuthorName" class="h-full w-full object-cover" />
         }
         else
         {
-            <div class="flex h-full w-full items-center justify-center text-sm font-bold text-[#5b4df5]">
+            <div class="flex h-full w-full items-center justify-center text-sm font-bold text-accent">
                 @GetInitial(Comment.AuthorName)
             </div>
         }
@@ -85,7 +85,7 @@
             <div class="mt-3 space-y-3">
                 <textarea
                     @bind="editedContent"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                     rows="3"
                     maxlength="1000"
                     placeholder="Modifiez votre commentaire..."
@@ -93,7 +93,7 @@
                 <div class="flex gap-2">
                     <button
                         type="button"
-                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5]"
+                        class="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-active"
                         @onclick="HandleUpdate">
                         Enregistrer
                     </button>
@@ -143,14 +143,14 @@
             {
                 <button
                     type="button"
-                    class="mt-3 text-sm font-semibold text-gray-600 hover:text-[#5b4df5]"
+                    class="mt-3 text-sm font-semibold text-gray-600 hover:text-accent"
                     @onclick="ToggleReplyForm">
                     @(showReplyForm ? "Annuler" : "Répondre")
                 </button>
             }
             else
             {
-                <a href="/auth/login" class="mt-3 inline-block text-sm font-semibold text-gray-400 hover:text-[#5b4df5]">
+                <a href="/auth/login" class="mt-3 inline-block text-sm font-semibold text-gray-400 hover:text-accent">
                     Connectez-vous pour répondre
                 </a>
             }
@@ -162,7 +162,7 @@
             <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <textarea
                     @bind="replyContent"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-[#5b4df5] focus:ring-1 focus:ring-[#5b4df5]"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 placeholder:text-gray-400 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
                     rows="3"
                     maxlength="1000"
                     placeholder="Écrivez votre réponse..."
@@ -170,7 +170,7 @@
                 <div class="mt-3 flex gap-2">
                     <button
                         type="button"
-                        class="px-4 py-2 rounded-lg bg-[#5b4df5] text-white text-sm font-semibold hover:bg-[#4a3cd5] disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent-active disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled="@(string.IsNullOrWhiteSpace(replyContent) || isSubmittingReply)"
                         @onclick="HandleReplySubmit">
                         @(isSubmittingReply ? "Envoi..." : "Envoyer la réponse")
@@ -392,7 +392,7 @@
         html = Regex.Replace(html, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
         html = Regex.Replace(html, @"\*(.+?)\*", "<em>$1</em>");
         html = Regex.Replace(html, @"`(.+?)`", "<code class=\"bg-gray-100 px-1 rounded text-red-600 text-xs\">$1</code>");
-        html = Regex.Replace(html, @"\[([^\]]+)\]\(([^)]+)\)", "<a href=\"$2\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-[#5b4df5] underline\">$1</a>");
+        html = Regex.Replace(html, @"\[([^\]]+)\]\(([^)]+)\)", "<a href=\"$2\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"text-accent underline\">$1</a>");
 
         return new MarkupString(html);
     }

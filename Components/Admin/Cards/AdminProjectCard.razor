@@ -19,7 +19,7 @@
     <div class="p-5">
         <div class="mb-3 flex items-start justify-between gap-3">
             <div class="min-w-0">
-                <h3 class="truncate text-lg font-semibold text-[#111827]">@Project?.Title</h3>
+                <h3 class="truncate text-lg font-semibold text-title">@Project?.Title</h3>
                 <div class="mt-2 flex flex-wrap items-center gap-2">
                     <span class="rounded-full px-3 py-1 text-xs font-semibold @StatusCssClass">
                         <span class="mr-1 inline-block h-2 w-2 rounded-full @StatusDotCssClass"></span>
@@ -38,14 +38,14 @@
                                  OnDelete="DeleteProject" />
         </div>
 
-        <p class="mb-4 line-clamp-3 text-sm leading-6 text-[#4b5563]">@Project?.Description</p>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body">@Project?.Description</p>
 
         @if (!string.IsNullOrWhiteSpace(Project?.Technologies))
         {
             <div class="mb-4 flex flex-wrap gap-1">
                 @foreach (var tech in Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Take(3))
                 {
-                    <span class="rounded-lg bg-[#F4F2F2] px-2 py-1 text-xs font-medium text-gray-700">@tech</span>
+                    <span class="rounded-lg bg-primary px-2 py-1 text-xs font-medium text-gray-700">@tech</span>
                 }
                 @if (Project.Technologies.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Length > 3)
                 {
@@ -54,12 +54,12 @@
             </div>
         }
 
-        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-[#4b5563]">
+        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-body">
             <span class="truncate font-medium">@Project?.AuthorName</span>
             <div class="flex items-center gap-2">
                 @if (!string.IsNullOrWhiteSpace(Project?.GithubUrl))
                 {
-                    <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer" class="text-gray-400 transition hover:text-[#111827]" @onclick:stopPropagation>
+                    <a href="@Project.GithubUrl" target="_blank" rel="noopener noreferrer" class="text-gray-400 transition hover:text-title" @onclick:stopPropagation>
                         <i class="fab fa-github text-base"></i>
                     </a>
                 }

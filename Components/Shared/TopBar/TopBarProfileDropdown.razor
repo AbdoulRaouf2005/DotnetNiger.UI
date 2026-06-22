@@ -46,7 +46,7 @@
                 @onclick="CloseMenu"
                 aria-label="Fermer le menu"></button>
 
-        <div class="absolute right-0 top-[52px] z-30 hidden w-72 overflow-hidden rounded-lg border border-white bg-[#F9F9F9] shadow-[0_14px_40px_rgba(15,23,42,0.12)] ring-1 ring-white/80 md:block">
+        <div class="absolute right-0 top-[52px] z-30 hidden w-72 overflow-hidden rounded-lg border border-white bg-surface shadow-[0_14px_40px_rgba(15,23,42,0.12)] ring-1 ring-white/80 md:block">
             <div class="border-b border-white px-4 py-4">
                 <div class="flex items-center gap-3">
                     <div class="h-11 w-11 overflow-hidden rounded-full border border-white bg-white shadow-sm">
@@ -105,7 +105,7 @@
             <div class="h-px bg-white"></div>
 
             <button type="button"
-                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-[#BE185D] transition hover:bg-[#FCE7F3]"
+                    class="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-danger transition hover:bg-danger-hover-bg"
                     @onclick="LogoutAsync">
                 <span>Déconnexion</span>
                 <i class="fas fa-sign-out-alt"></i>

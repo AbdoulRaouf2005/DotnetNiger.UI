@@ -38,22 +38,22 @@
                                         <img src="@(post.CoverImageUrl ?? "/Images/ImageBlog.jpg")" alt="@post.Title" class="h-full w-full object-cover" />
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="truncate text-sm font-semibold text-[#111827]">@post.Title</p>
-                                        <p class="truncate text-xs text-[#6b7280]">@post.PostType</p>
+                                        <p class="truncate text-sm font-semibold text-title">@post.Title</p>
+                                        <p class="truncate text-xs text-muted">@post.PostType</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@post.AuthorName</td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@GetPostTypeLabel(post.PostType)</td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">
+                            <td class="px-6 py-4 text-sm text-body">@post.AuthorName</td>
+                            <td class="px-6 py-4 text-sm text-body">@GetPostTypeLabel(post.PostType)</td>
+                            <td class="px-6 py-4 text-sm text-body">
                                 <p class="max-w-md truncate">@GetPreviewText(post)</p>
                             </td>
                             <td class="px-6 py-4 text-sm">
-                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(IsPublished(post) ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700")">
+                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(IsPublished(post) ? "bg-success-bg text-success" : "bg-amber-100 text-amber-700")">
                                     @(IsPublished(post) ? "Publié" : "Brouillon")
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@GetDateLabel(post)</td>
+                            <td class="px-6 py-4 text-sm text-body">@GetDateLabel(post)</td>
                             <td class="px-6 py-4 text-sm">
                                 <AdminActionDropdown ItemId="post.Id"
                                                      Status="@(IsPublished(post) ? "Published" : "Pending")"

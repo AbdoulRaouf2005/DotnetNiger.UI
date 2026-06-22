@@ -10,13 +10,13 @@
     <div class="p-5">
         <div class="mb-3 flex items-start justify-between gap-3">
             <div class="min-w-0">
-                <h3 class="truncate text-lg font-semibold text-[#111827]">@Event?.Title</h3>
+                <h3 class="truncate text-lg font-semibold text-title">@Event?.Title</h3>
                 <div class="mt-2 flex flex-wrap items-center gap-2">
                     <span class="rounded-full px-3 py-1 text-xs font-semibold @StatusCssClass">
                         <span class="mr-1 inline-block h-2 w-2 rounded-full @StatusDotCssClass"></span>
                         @StatusLabel
                     </span>
-                    <span class="rounded-full bg-[#F4F2F2] px-3 py-1 text-xs font-semibold text-gray-700">@Event?.EventType</span>
+                    <span class="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-gray-700">@Event?.EventType</span>
                 </div>
             </div>
 
@@ -34,9 +34,9 @@
                                  OnReject="DeleteEvent" />
         </div>
 
-        <p class="mb-4 line-clamp-3 text-sm leading-6 text-[#4b5563]">@Event?.Description</p>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body">@Event?.Description</p>
 
-        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-[#4b5563]">
+        <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-body">
             <span class="truncate font-medium">@Event?.OrganizerName</span>
             <span class="whitespace-nowrap">@Event?.StartDate.ToString("dd/MM/yyyy HH:mm")</span>
         </div>

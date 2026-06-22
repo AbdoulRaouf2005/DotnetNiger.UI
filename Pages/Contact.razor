@@ -6,7 +6,7 @@
 
 <PageTitle>Contact - .NET Niger</PageTitle>
 
-<div class="bg-[#F4F2F2] text-slate-800 min-h-screen">
+<div class="bg-primary text-slate-800 min-h-screen">
     <section class="relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
         <div
             class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(81,43,212,0.10),_transparent_36%),linear-gradient(180deg,_#fbfafc_0%,_#f4f2f2_100%)]">
@@ -100,7 +100,7 @@
                         <p class="mt-2 text-sm text-slate-600">Merci de nous avoir contactés. Nous reviendrons vers vous
                             rapidement.</p>
                             <button @onclick="ResetForm"
-                                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-[#6a4df0]">
+                                    class="mt-6 inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-accent-hover">
                                 Envoyer un autre message
                             </button>
                         </div>
@@ -163,7 +163,7 @@
                                             </div>
 
                                             <button type="submit" disabled="@isLoading"
-                                                    class="w-full rounded-lg bg-secondary hover:bg-[#6a4df0] text-white py-3 font-medium shadow-md transition disabled:opacity-60">
+                                                    class="w-full rounded-lg bg-secondary hover:bg-accent-hover text-white py-3 font-medium shadow-md transition disabled:opacity-60">
                                                 @(isLoading ? "Envoi en cours..." : "Envoyer le message")
                                             </button>
                                         </EditForm>

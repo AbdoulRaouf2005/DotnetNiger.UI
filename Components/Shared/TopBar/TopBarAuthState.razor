@@ -73,11 +73,51 @@
     <NotAuthorized>
         @if (Mobile)
         {
-            <button type="button"
-                    class="flex w-full items-center justify-center rounded-lg bg-secondary px-3 py-2 text-white transition duration-150 ease-in-out hover:bg-hover"
-                    @onclick="NavigateToLoginAsync">
-                <span class="text-sm font-semibold text-white">Connexion</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button @onclick="ToggleOverlay" class="text-secondary hover:text-hover focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+
+                <button type="button"
+                        class="flex items-center justify-center rounded-lg bg-secondary px-3 py-2 text-white transition duration-150 ease-in-out hover:bg-hover"
+                        @onclick="NavigateToLoginAsync">
+                    <i class="fas fa-sign-in-alt text-lg"></i>
+                </button>
+            </div>
+
+            @if (isOverlayOpen)
+            {
+                <div class="fixed inset-0 z-30 bg-black/50" @onclick="CloseOverlay"></div>
+                <div class="fixed top-0 right-0 z-40 flex h-screen w-[75%] flex-col bg-white shadow-xl">
+                    <div class="flex items-center justify-between border-b p-4">
+                        <span class="text-lg font-bold text-gray-900">Menu</span>
+                        <button @onclick="CloseOverlay"
+                                class="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+
+                    <nav class="flex-1 space-y-1 overflow-y-auto p-4">
+                        @foreach (var item in GuestMobileNavigationItems)
+                        {
+                            <NavLink href="@item.Href" Match="@item.Match"
+                                     class="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                                     ActiveClass="bg-secondary/10 text-secondary" @onclick="CloseOverlay">
+                                <i class="@item.Icon w-6 text-lg"></i>
+                                <span>@item.Label</span>
+                            </NavLink>
+                        }
+                    </nav>
+
+                    <div class="border-t p-4">
+                        <button @onclick="NavigateToLoginAsync"
+                                class="flex w-full items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-3 text-sm font-semibold text-white transition hover:bg-hover">
+                            <i class="fa-solid fa-sign-in-alt"></i>
+                            <span>Connexion</span>
+                        </button>
+                    </div>
+                </div>
+            }
         }
         else
         {
@@ -109,6 +149,18 @@
     private string? ResolvedAvatarUrl => StringHelper.NormalizeImagePath(profile?.AvatarUrl);
 
     private string Initials => StringHelper.GetInitials(DisplayName);
+
+    private MobileNavItem[] GuestMobileNavigationItems { get; } =
+    [
+        new MobileNavItem("/", "Accueil", "fa-solid fa-house", NavLinkMatch.All),
+        new MobileNavItem("/propos", "À propos", "fa-solid fa-circle-info"),
+        new MobileNavItem("/ressources", "Ressources", "fa-solid fa-folder"),
+        new MobileNavItem("/community", "Communauté", "fa-solid fa-users"),
+        new MobileNavItem("/blog", "Blog", "fa-solid fa-newspaper"),
+        new MobileNavItem("/evenements", "Événements", "fa-solid fa-calendar"),
+        new MobileNavItem("/partners", "Partenaires", "fa-solid fa-handshake"),
+        new MobileNavItem("/contact", "Contact", "fa-solid fa-envelope")
+    ];
 
     private MobileNavItem[] MobileNavigationItems { get; } =
     [

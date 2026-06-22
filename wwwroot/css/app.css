@@ -81,3 +81,59 @@ body{
 .animate-slide-in {
       animation: slide-in 0.3s ease-out;
 }
+
+/* ===== THÈME SOMBRE ===== */
+[data-theme="dark"] {
+  --color-primary: #0f172a;
+  --color-secondary: #7c5cfc;
+  --color-text: #e2e8f0;
+  --color-hover: #8b70ff;
+  --color-active: #6B4FE0;
+  --color-focus: #7c5cfc;
+  --color-soft: #1e293b;
+  --color-white: #1e293b;
+
+  /* Textes */
+  --color-title: #f1f5f9;
+  --color-subtitle: #cbd5e1;
+  --color-body: #94a3b8;
+  --color-label: #cbd5e1;
+  --color-muted: #64748b;
+  --color-placeholder: #475569;
+
+  /* Accent */
+  --color-accent: #8b70ff;
+  --color-accent-hover: #a086ff;
+  --color-accent-active: #7c5cfc;
+
+  /* Surfaces */
+  --color-surface: #1e293b;
+  --color-surface-alt: #334155;
+  --color-section-alt: #1e293b;
+  --color-tag-bg: #334155;
+  --color-avatar-bg: #334155;
+
+  /* Statuts */
+  --color-success: #22c55e;
+  --color-success-bg: #052e16;
+  --color-success-light-bg: #052e16;
+  --color-info: #3b82f6;
+  --color-info-bg: #1e3a5f;
+  --color-info-light-bg: #1e3a5f;
+  --color-info-text: #60a5fa;
+  --color-warning: #f97316;
+  --color-danger: #fb7185;
+  --color-danger-hover-bg: #4c1d28;
+
+  /* Bordures */
+  --color-border-soft: #334155;
+  --color-border: #334155;
+  --color-border-input: #475569;
+
+  /* Spéciaux */
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-role-badge: #22c55e;
+
+  /* Ombres */
+  --tw-shadow-colored: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}

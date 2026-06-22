@@ -45,6 +45,9 @@ builder.Services.AddScoped<AuthenticationStateProvider>(
     sp => sp.GetRequiredService<CustomAuthStateProvider>());
 builder.Services.AddScoped<ILocalStorageService, JsLocalStorageService>();
 
+// Theme
+builder.Services.AddScoped<ThemeService>();
+
 // Services applicatifs — basculer entre Mock et API via "UseMockServices" dans appsettings.json
 var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
 

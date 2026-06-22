@@ -11,13 +11,13 @@
         <div class="mb-8 flex items-center justify-between gap-4">
         <section>
                 <AdminBreadcrumb />
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Consultez, filtrez et modérez les articles dans une interface plus claire et plus rapide.</p>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-body md:text-base">Consultez, filtrez et modérez les articles dans une interface plus claire et plus rapide.</p>
         </section>
         <button @onclick='() => NavigationManager.NavigateTo("/admin/blog/create")'
-                    class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
-                <i class="fas fa-plus text-sm"></i>
-                <span class="hidden sm:block">Nouveau</span>
-            </button>
+                class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
+            <i class="fas fa-plus text-sm"></i>
+            <span class="hidden sm:block">Nouveau</span>
+        </button>
         </div>
 
         <section class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
@@ -26,12 +26,12 @@
                     <i class="fas fa-search absolute left-0 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input type="text" placeholder="Rechercher un article..."
                            @bind="searchQuery" @bind:event="oninput"
-                           class="w-full border-0 bg-transparent pl-7 text-sm text-[#111827] outline-none placeholder:text-gray-400" />
+                           class="w-full border-0 bg-transparent pl-7 text-sm text-title outline-none placeholder:text-gray-400" />
                 </div>
             </div>
 
             <select @bind="selectedType"
-                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-title shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Type d'article</option>
                 <option value="Tutorial">Tutorial</option>
                 <option value="Article">Article</option>
@@ -39,7 +39,7 @@
             </select>
 
             <select @bind="selectedStatus"
-                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#111827] shadow-sm outline-none transition hover:border-gray-300">
+                    class="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-title shadow-sm outline-none transition hover:border-gray-300">
                 <option value="">Statut</option>
                 <option value="published">Publié</option>
             </select>

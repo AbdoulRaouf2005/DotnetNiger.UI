@@ -1,6 +1,6 @@
 ﻿@page "/"
 @* Page d'accueil publique du site .NET Niger. *@
-@using DotnetNiger.UI.Components
+@using DotnetNiger.UI.Components.Cards;
 @using DotnetNiger.UI.Models.Responses
 @using DotnetNiger.UI.Services.Contracts
 @inject IJSRuntime JS
@@ -12,7 +12,7 @@
 
 
 <section class="min-h-screen flex items-center">
-    <div class="max-w-6xl mx-auto px-6">
+    <div class="max-w-6xl mx-auto px-6 py-4">
 
         <div class="grid lg:grid-cols-2 gap-16 items-center">
 
@@ -26,12 +26,12 @@
 
                 <!-- Image qui monte sur la première -->
                 <img src="/Images/Hero/Fond2.jpg" loading="lazy"
-                     class="absolute top-24 left-40 w-52 md:w-72 rounded-lg shadow-2xl border-4 border-[#F4F2F2] z-20"
+                     class="absolute top-24 left-40 w-52 md:w-72 rounded-lg shadow-2xl border-4 border-primary z-20"
                      alt="">
 
                 <!-- Troisième image -->
                 <img src="/Images/Hero/Fond3.jpg" loading="lazy"
-                     class="absolute top-72 left-20 w-52 md:w-64 rounded-lg shadow-2xl border-4 border-[#F4F2F2] z-30"
+                     class="absolute top-72 left-20 w-52 md:w-64 rounded-lg shadow-2xl border-4 border-primary z-30"
                      alt="">
 
             </div>

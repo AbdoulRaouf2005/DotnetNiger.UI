@@ -1,11 +1,13 @@
 ﻿@page "/evenements"
-@using DotnetNiger.UI.Components
+@using DotnetNiger.UI.Components.Cards;
+@using DotnetNiger.UI.Components.Admin.Cards;
+
 @inject IEventService EventService
 @inject IJSRuntime JS
 
 <PageTitle>Événements - .NET Niger</PageTitle>
 
-<section class="bg-[#e8e3f6] px-4 py-14 sm:px-6 lg:px-10">
+<section class="bg-accent-bg px-4 py-14 sm:px-6 lg:px-10">
 	<div class="mx-auto w-full max-w-6xl">
 		<div class="mb-8 sm:mb-10 text-center">
 			<h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-secondary">Événements et Meetups .NET Niger</h1>

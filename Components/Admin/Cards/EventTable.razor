@@ -35,20 +35,20 @@
                                         <img src="@(ev.CoverImageUrl ?? "/Images/ImageBlog.jpg")" alt="@ev.Title" class="h-full w-full object-cover" />
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="truncate text-sm font-semibold text-[#111827]">@ev.Title</p>
-                                        <p class="truncate text-xs text-[#6b7280]">@ev.Location</p>
+                                        <p class="truncate text-sm font-semibold text-title">@ev.Title</p>
+                                        <p class="truncate text-xs text-muted">@ev.Location</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.OrganizerName</td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.EventType</td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563] whitespace-nowrap">@ev.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="px-6 py-4 text-sm text-body">@ev.OrganizerName</td>
+                            <td class="px-6 py-4 text-sm text-body">@ev.EventType</td>
+                            <td class="px-6 py-4 text-sm text-body whitespace-nowrap">@ev.StartDate.ToString("dd/MM/yyyy HH:mm")</td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @GetStatusClass(ev)">
                                     @GetStatusLabel(ev)
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-[#4b5563]">@ev.RegisteredCount / @ev.Capacity</td>
+                            <td class="px-6 py-4 text-sm text-body">@ev.RegisteredCount / @ev.Capacity</td>
                             <td class="px-6 py-4 text-sm">
                                 <AdminActionDropdown ItemId="ev.Id"
                                                      Status="@(IsPending(ev) ? "Pending" : "Published")"
@@ -87,7 +87,7 @@
 
     private static string GetStatusClass(EventDto ev)
     {
-        return IsPublished(ev) ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-amber-100 text-amber-700";
+        return IsPublished(ev) ? "bg-success-bg text-success" : "bg-amber-100 text-amber-700";
     }
 
     private Task OpenEvent(Guid id)

@@ -66,7 +66,7 @@ else
             <div class="mb-8 flex items-center justify-between gap-4">
                 <section>
                     <AdminBreadcrumb />
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-[#4b5563] md:text-base">Gérez les projets de la communauté.</p>
+                    <p class="mt-2 max-w-2xl text-sm leading-6 text-body md:text-base">Gérez les projets de la communauté.</p>
                 </section>
                 <button @onclick='() => Navigation.NavigateTo("/admin/projects/nouveau")'
                         class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(91,77,245,0.25)] transition hover:brightness-95">
@@ -122,22 +122,22 @@ else
                                         <tr @key="project.Id" class="transition hover:bg-gray-50/80">
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[#EEEAFE] flex items-center justify-center text-[#5b4df5]">
+                                                    <div class="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-fond_transparent flex items-center justify-center text-accent">
                                                         <i class="fas fa-code-branch text-lg"></i>
                                                     </div>
                                                     <div class="min-w-0">
-                                                        <p class="truncate text-sm font-semibold text-[#111827]">@project.Title</p>
-                                                        <p class="truncate text-xs text-[#6b7280]">@project.Technologies</p>
+                                                        <p class="truncate text-sm font-semibold text-title">@project.Title</p>
+                                                        <p class="truncate text-xs text-muted">@project.Technologies</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-[#4b5563]">@project.AuthorName</td>
+                                            <td class="px-6 py-4 text-sm text-body">@project.AuthorName</td>
                                             <td class="px-6 py-4 text-sm">
-                                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(project.Status == "active" ? "bg-[#D1FAE5] text-[#16a34a]" : "bg-gray-100 text-gray-700")">
+                                                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold @(project.Status == "active" ? "bg-success-bg text-success" : "bg-gray-100 text-gray-700")">
                                                     @(project.Status == "active" ? "Actif" : "Archivé")
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-[#4b5563] whitespace-nowrap">@project.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                            <td class="px-6 py-4 text-sm text-body whitespace-nowrap">@project.CreatedAt.ToString("dd/MM/yyyy")</td>
                                             <td class="px-6 py-4 text-sm">
                                                 <AdminActionDropdown ItemId="project.Id"
                                                                       Status="@(project.IsPublished ? "Published" : "Pending")"

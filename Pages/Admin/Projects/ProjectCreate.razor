@@ -65,25 +65,25 @@
             </div>
 
             <div class="rounded-[22px] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-8">
-                <h1 class="text-2xl font-bold text-[#111827]">Nouveau projet</h1>
-                <p class="mt-1 text-sm text-[#6b7280]">Ajoutez un projet à la vitrine communautaire.</p>
+                <h1 class="text-2xl font-bold text-title">Nouveau projet</h1>
+                <p class="mt-1 text-sm text-muted">Ajoutez un projet à la vitrine communautaire.</p>
 
                 <EditForm Model="@projectRequest" OnValidSubmit="HandleSubmit" class="mt-8 space-y-6">
                 <DataAnnotationsValidator />
 
                 <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                        <label class="block text-sm font-semibold text-[#111827]">Titre *</label>
+                        <label class="block text-sm font-semibold text-title">Titre *</label>
                         <InputText @bind-Value="projectRequest.Title"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                    placeholder="Nom du projet" />
                         <ValidationMessage For="@(() => projectRequest.Title)" class="mt-1 text-xs text-red-500" />
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-[#111827]">Statut</label>
+                        <label class="block text-sm font-semibold text-title">Statut</label>
                         <InputSelect @bind-Value="projectRequest.Status"
-                                     class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20">
+                                     class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20">
                             <option value="active">Actif</option>
                             <option value="archived">Archivé</option>
                         </InputSelect>
@@ -91,41 +91,41 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[#111827]">Description *</label>
+                    <label class="block text-sm font-semibold text-title">Description *</label>
                     <InputTextArea @bind-Value="projectRequest.Description"
                                    rows="5"
-                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                                   class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                    placeholder="Décrivez le projet..." />
                     <ValidationMessage For="@(() => projectRequest.Description)" class="mt-1 text-xs text-red-500" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[#111827]">URL GitHub</label>
+                    <label class="block text-sm font-semibold text-title">URL GitHub</label>
                     <InputText @bind-Value="projectRequest.GithubUrl"
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                placeholder="https://github.com/..." />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[#111827]">Technologies</label>
+                    <label class="block text-sm font-semibold text-title">Technologies</label>
                     <InputText @bind-Value="projectRequest.Technologies"
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                placeholder="ASP.NET Core, Blazor, PostgreSQL..." />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[#111827]">Image URL</label>
+                    <label class="block text-sm font-semibold text-title">Image URL</label>
                     <InputText @bind-Value="projectRequest.ImageUrl"
-                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#5b4df5] focus:ring-2 focus:ring-[#5b4df5]/20"
+                               class="mt-1 w-full rounded-lg border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                                placeholder="https://..." />
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <label class="flex items-center gap-2 text-sm text-[#111827]">
+                    <label class="flex items-center gap-2 text-sm text-title">
                         <InputCheckbox @bind-Value="projectRequest.IsFeatured" />
                         Projet à la une
                     </label>
-                    <label class="flex items-center gap-2 text-sm text-[#111827]">
+                    <label class="flex items-center gap-2 text-sm text-title">
                         <InputCheckbox @bind-Value="projectRequest.IsPublished" />
                         Publié
                     </label>
@@ -137,8 +137,8 @@
                 }
 
                 <div class="flex gap-4">
-                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700">
-                        <i class="fas fa-check"></i>
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-green-700">
+                        <i class="fas fa-paper-plane"></i>
                         Créer le projet
                     </button>
                     <button type="button" @onclick="GoBack" class="inline-flex items-center gap-2 rounded-lg bg-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300">
