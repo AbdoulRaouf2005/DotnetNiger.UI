@@ -88,7 +88,7 @@ else
 
                     @if (!string.IsNullOrWhiteSpace(resource.Description))
                     {
-                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">@resource.Description</p>
+                        <p class="text-sm sm:text-base text-gray-600 leading-relaxed mb-6 break-words">@resource.Description</p>
                     }
 
                     @if (resource.Tags.Count > 0)

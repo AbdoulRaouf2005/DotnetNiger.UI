@@ -102,7 +102,7 @@
                 <div class="lg:col-span-2 space-y-4">
                     @* --- Hero card --- *@
                     <article class="overflow-hidden rounded-lg bg-white shadow-sm">
-                        <div class="overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)] mx-4 sm:mx-8 mt-4 sm:mt-8 aspect-video">
+                        <div class="overflow-hidden rounded-md bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)] mx-4 sm:mx-8 mt-4 sm:mt-8 aspect-video">
                             <img src="@GetEventCoverUrl()" alt="@CurrentEvent.Title" class="h-full w-full object-cover" />
                         </div>
                         <div class="space-y-4 p-4 sm:space-y-5 sm:p-8">
@@ -266,8 +266,8 @@
                         <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-700">
                             À propos de l'événement
                         </h2>
-                        <p class="mt-3 sm:mt-4 text-xs sm:text-sm leading-relaxed text-gray-600 sm:text-base">
-                            @CurrentEvent.Description
+                        <p class="prose prose-sm max-w-none break-words mt-3">
+                                    @((MarkupString)CurrentEvent.Description)
                         </p>
                     </article>
 

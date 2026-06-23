@@ -174,21 +174,16 @@
 
 				<hr class="border-gray-200" />
 
-				<div class="overflow-hidden rounded-3xl bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
+				<div class="overflow-hidden rounded-md bg-[#0b1220] shadow-[0_18px_40px_rgba(15,23,42,0.16)]">
 					<img src="@GetCoverImage()" alt="@post.Title" class="h-56 w-full object-cover sm:h-[330px]" />
 				</div>
 
 				<div class="space-y-8 sm:space-y-10 pt-1">
 					<div class="space-y-5 sm:space-y-6 text-sm sm:text-[15px] leading-7 text-gray-600">
-						@if (!string.IsNullOrWhiteSpace(post.Excerpt))
-						{
-							<div class="italic border-l-4 border-accent pl-4 py-2 bg-section-alt text-sm sm:text-base text-gray-700 font-medium">
-								@post.Excerpt
-							</div>
-						}
+						
 						@if (!string.IsNullOrWhiteSpace(post.Content))
 						{
-							<div class="prose prose-sm max-w-none" @onmouseover="@(() => { })" @onmouseout="@(() => { })">
+							<div class="prose prose-sm max-w-none break-words">
 								@((MarkupString)post.Content)
 							</div>
 						}

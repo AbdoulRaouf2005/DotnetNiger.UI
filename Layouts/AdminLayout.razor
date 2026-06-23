@@ -4,8 +4,8 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
-@* @if (_authorized)
-{  *@
+@if (_authorized)
+{ 
     <div class="flex flex-col h-screen">
        <Topbar ToggleSidebar="ToggleSidebar" ToggleCollapsed="ToggleCollapsed" IsCollapsed="isCollapsed"/>
       <div class="flex flex-1 overflow-hidden">
@@ -18,21 +18,22 @@
       </div>
     </div>
     <ToastContainer />
-@* }
+}
 else
 {
     <div class="flex items-center justify-center h-screen">
         <p>Vérification des autorisations...</p>
     </div>
-} *@
+}
 
 @code{
   bool sidebarOpen = false;
   bool isCollapsed = false;
+  bool  _authorized ;
 
   protected override async Task OnInitializedAsync()
   {
-      @* var state = await AuthStateProvider.GetAuthenticationStateAsync();
+      var state = await AuthStateProvider.GetAuthenticationStateAsync();
       if (state.User.Identity?.IsAuthenticated != true)
       {
           Navigation.NavigateTo("/", forceLoad: true);
@@ -50,7 +51,7 @@ else
           return;
       }
 
-      _authorized = true;  *@
+      _authorized = true; 
   }
 
   void ToggleCollapsed(){

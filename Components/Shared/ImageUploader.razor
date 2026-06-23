@@ -35,10 +35,9 @@
     }
     else
     {
-        <label for="@_fileInputId"
-               class="block border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer
-                      border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50">
-            <div class="flex flex-col items-center gap-3 py-8">
+        <label class="relative block border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer
+                       border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50 overflow-hidden">
+            <div class="flex flex-col items-center gap-3 py-8 pointer-events-none">
                 <i class="fa-solid fa-cloud-upload-alt text-5xl text-gray-400"></i>
                 <div>
                     <p class="text-gray-600 font-medium">
@@ -52,8 +51,7 @@
 
             <InputFile OnChange="HandleFileSelected"
                        accept=".jpg,.jpeg,.png,.webp,.gif"
-                       class="hidden"
-                       id="@_fileInputId" />
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
         </label>
     }
 
@@ -75,7 +73,6 @@
 </div>
 
 @code {
-    private string _fileInputId = $"image-uploader-{Guid.NewGuid():N}";
     private bool isLoading;
     private string? PreviewUrl;
     private string? ErrorMessage;
@@ -129,13 +126,7 @@
         try
         {
             var dimensions = await GetImageDimensionsAsync(file);
-            if (dimensions is null)
-            {
-                ErrorMessage = "Impossible de lire les dimensions de l'image.";
-                return;
-            }
-
-            if (dimensions.Width > MaxWidth || dimensions.Height > MaxHeight)
+            if (dimensions is not null && (dimensions.Width > MaxWidth || dimensions.Height > MaxHeight))
             {
                 ErrorMessage = $"L'image est trop grande ({dimensions.Width}x{dimensions.Height}). Dimensions max autorisées : {MaxWidth}x{MaxHeight}px.";
                 return;

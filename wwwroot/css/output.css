@@ -12,6 +12,41 @@ body{
   --color-focus: #AFA3FF;
   --color-soft: #EEEAFE;
   --color-white: #FFFFFF;
+  /* Textes */
+  --color-title: #111827;
+  --color-subtitle: #374151;
+  --color-body: #4b5563;
+  --color-label: #374151;
+  --color-muted: #9ca3af;
+  --color-placeholder: #d1d5db;
+  /* Accent */
+  --color-accent: #512BD4;
+  --color-accent-hover: #6B4FE0;
+  --color-accent-active: #3F1FB3;
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f9fafb;
+  --color-section-alt: #f3f4f6;
+  --color-tag-bg: #e5e7eb;
+  --color-avatar-bg: #e5e7eb;
+  /* Statuts */
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+  --color-success-light-bg: #f0fdf4;
+  --color-info: #2563eb;
+  --color-info-bg: #dbeafe;
+  --color-info-light-bg: #eff6ff;
+  --color-info-text: #1d4ed8;
+  --color-warning: #ea580c;
+  --color-danger: #dc2626;
+  --color-danger-hover-bg: #fef2f2;
+  /* Bordures */
+  --color-border-soft: #e5e7eb;
+  --color-border: #d1d5db;
+  --color-border-input: #d1d5db;
+  /* Spéciaux */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-role-badge: #16a34a;
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 16px;
@@ -92,6 +127,40 @@ body{
 }
 
 /* ===== THÈME SOMBRE ===== */
+
+/* ===== LIEN ACTIF TOPBAR ===== */
+
+.nav-active {
+  background-color: var(--color-active) !important;
+  color: #fff !important;
+  border-radius: 0.5rem;
+}
+
+/* ===== SCROLLBAR SIDEBAR ===== */
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  -webkit-transition: background 0.2s;
+  transition: background 0.2s;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
 
 [data-theme="dark"] {
   --color-primary: #0f172a;
@@ -972,10 +1041,6 @@ video {
   margin-bottom: 0.5rem;
 }
 
-.-mt-16{
-  margin-top: -4rem;
-}
-
 .mb-1{
   margin-bottom: 0.25rem;
 }
@@ -1808,8 +1873,8 @@ video {
   white-space: nowrap;
 }
 
-.text-wrap{
-  text-wrap: wrap;
+.break-words{
+  overflow-wrap: break-word;
 }
 
 .rounded{
@@ -1852,14 +1917,14 @@ video {
   border-radius: 0.75rem;
 }
 
-.rounded-t-lg{
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-}
-
 .rounded-t-xl{
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
+}
+
+.rounded-l{
+  border-top-left-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
 }
 
 .border{

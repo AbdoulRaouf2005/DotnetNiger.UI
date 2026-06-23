@@ -80,7 +80,7 @@ else
                             }
                             @if (!string.IsNullOrWhiteSpace(post.Content))
                             {
-                                <div class="prose prose-sm max-w-none" @onmouseover="@(() => {})" @onmouseout="@(() => {})">
+                                <div class="prose prose-sm max-w-none break-words">
                                     @((MarkupString)post.Content)
                                 </div>
                             }
