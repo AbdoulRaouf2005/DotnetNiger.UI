@@ -5,7 +5,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 @* @if (_authorized)
-{ *@
+{  *@
     <div class="flex flex-col h-screen">
        <Topbar ToggleSidebar="ToggleSidebar" ToggleCollapsed="ToggleCollapsed" IsCollapsed="isCollapsed"/>
       <div class="flex flex-1 overflow-hidden">
@@ -29,7 +29,6 @@ else
 @code{
   bool sidebarOpen = false;
   bool isCollapsed = false;
-  bool _authorized;
 
   protected override async Task OnInitializedAsync()
   {
@@ -51,7 +50,7 @@ else
           return;
       }
 
-      _authorized = true; *@
+      _authorized = true;  *@
   }
 
   void ToggleCollapsed(){
