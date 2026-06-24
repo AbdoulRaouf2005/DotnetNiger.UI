@@ -14,13 +14,15 @@ public class MockAuthService : IAuthService
     private static Dictionary<string, string> _refreshTokens = new();
 
     private readonly CustomAuthStateProvider _authProvider;
+    private readonly IUserStateService _userStateService;
     private UserDto? _currentUser;
     private TokenDto? _currentToken;
     private DateTime? _tokenExpiry;
 
-    public MockAuthService(CustomAuthStateProvider authProvider)
+    public MockAuthService(CustomAuthStateProvider authProvider, IUserStateService userStateService)
     {
         _authProvider = authProvider;
+        _userStateService = userStateService;
     }
 
     #region Authentification
@@ -167,6 +169,9 @@ public class MockAuthService : IAuthService
         _currentUser = null;
         _currentToken = null;
         _tokenExpiry = null;
+
+        await _authProvider.ClearTokensAsync();
+        await _userStateService.ClearUserAsync();
     }
 
     #endregion

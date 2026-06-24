@@ -24,7 +24,7 @@
 
         @if (!string.IsNullOrWhiteSpace(Member?.Bio))
         {
-            <p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600">@Member.Bio</p>
+            <p class="text-xs sm:text-sm leading-6 sm:leading-7 text-slate-600 break-words">@((MarkupString)Member.Bio)</p>
         }
 
         @if (Member?.SocialLinks?.Any() == true)

@@ -7,10 +7,12 @@ namespace DotnetNiger.UI.Services.Mock;
 public class ProfileService : IProfileService
 {
     private readonly IUserStateService _userStateService;
+    private readonly IUserService _userService;
 
-    public ProfileService(IUserStateService userStateService)
+    public ProfileService(IUserStateService userStateService, IUserService userService)
     {
         _userStateService = userStateService;
+        _userService = userService;
     }
 
     private UserDto ResolveUser()
@@ -35,6 +37,7 @@ public class ProfileService : IProfileService
         if (request.City is not null)        user.City        = request.City;
 
         await _userStateService.UpdateUserAsync(user);
+        await _userService.UpdateUserAsync(user);
 
         return await Task.FromResult(user);
     }

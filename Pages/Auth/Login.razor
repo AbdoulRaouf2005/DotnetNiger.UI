@@ -3,34 +3,127 @@
 @inject IUserStateService UserStateService
 @inject NavigationManager Navigation
 @inject Microsoft.Extensions.Configuration.IConfiguration Config
+@using DotnetNiger.UI.Helpers
 
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        if (Config.GetValue<bool>("UseMockServices"))
+<PageTitle>Connexion - .NET Niger</PageTitle>
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div class="w-full @(Config.GetValue<bool>("UseMockServices") ? "max-w-lg" : "max-w-md")">
+
+        @if (Config.GetValue<bool>("UseMockServices"))
         {
-            var result = await Auth.LoginAsync(new LoginRequest
-            {
-                Email = "admin@dotnet.niger",
-                Password = "password123"
-            });
+            <div class="bg-white rounded-lg shadow-xl p-8 md:p-10">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Connexion</h1>
+                    <p class="text-gray-500 text-sm mt-1">Mode démo - Sélectionnez un compte</p>
+                </div>
 
-            if (result.Success && result.Data is not null)
-            {
-                await UserStateService.SetUserAsync(result.Data.User);
-                Navigation.NavigateTo("/");
-            }
-            else
-            {
-                Navigation.NavigateTo("/");
-            }
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="mb-4 rounded-lg px-4 py-3 text-sm bg-red-50 border border-red-200 text-red-700">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="space-y-4">
+                    <button type="button" disabled="@isLoading"
+                        class="w-full text-left p-4 rounded-lg border-2 border-purple-200 bg-purple-50 hover:bg-purple-100 hover:border-purple-400 transition disabled:opacity-60"
+                        @onclick="() => LoginAs(AdminEmail)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user-shield text-purple-700"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-900">Ali Mahamane</p>
+                                <p class="text-sm text-gray-500">admin&#64;dotnet.niger</p>
+                            </div>
+                            <span class="ml-auto text-xs font-medium px-2.5 py-1 rounded-full bg-purple-200 text-purple-800">Admin</span>
+                        </div>
+                    </button>
+
+                    <button type="button" disabled="@isLoading"
+                        class="w-full text-left p-4 rounded-lg border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 transition disabled:opacity-60"
+                        @onclick="() => LoginAs(MemberEmail)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-blue-700"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-900">Fatima Oumar</p>
+                                <p class="text-sm text-gray-500">fatima&#64;dotnet.niger</p>
+                            </div>
+                            <span class="ml-auto text-xs font-medium px-2.5 py-1 rounded-full bg-blue-200 text-blue-800">Membre</span>
+                        </div>
+                    </button>
+                </div>
+
+                @if (isLoading)
+                {
+                    <div class="text-center mt-6">
+                        <div class="inline-block w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="text-sm text-gray-500 mt-2">Connexion en cours...</p>
+                    </div>
+                }
+            </div>
         }
         else
+        {
+            <div class="bg-white rounded-lg shadow-xl p-10 md:p-12">
+                <div class="max-w-md mx-auto text-center">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Connexion</h1>
+                    <p class="text-gray-500 mb-6">Redirection vers le service d'authentification...</p>
+                    <div class="inline-block w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@code {
+    private const string AdminEmail = "admin@dotnet.niger";
+    private const string MemberEmail = "fatima@dotnet.niger";
+
+    private bool isLoading;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Config.GetValue<bool>("UseMockServices"))
         {
             var apiBase = Config["ApiBaseUrl"] ?? "http://localhost:5000";
             var returnUrl = $"{Navigation.BaseUri.TrimEnd('/')}/auth/external-callback";
             var loginUrl = $"{apiBase}/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
             Navigation.NavigateTo(loginUrl, forceLoad: true);
+        }
+    }
+
+    private async Task LoginAs(string email)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        var result = await Auth.LoginAsync(new LoginRequest
+        {
+            Email = email,
+            Password = "password123"
+        });
+
+        isLoading = false;
+
+        if (result.Success && result.Data is not null)
+        {
+            await UserStateService.SetUserAsync(result.Data.User);
+
+            var isAdmin = result.Data.User.Roles.Any(r => RoleConstants.IsAdminRole(r));
+            Navigation.NavigateTo(isAdmin ? "/admin" : "/");
+        }
+        else
+        {
+            errorMessage = result.Message ?? "Erreur de connexion.";
         }
     }
 }

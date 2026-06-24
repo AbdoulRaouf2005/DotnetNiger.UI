@@ -96,7 +96,14 @@
                             <i class="fas fa-pen"></i>
                         </button>
                     </div>
-                    <p class="max-w-4xl text-lg leading-relaxed text-slate-600">@DisplayOrFallback(CurrentUser?.Bio, "Aucune biographie renseignée.")</p>
+                    @if (!string.IsNullOrWhiteSpace(CurrentUser?.Bio))
+                    {
+                        <div class="break-words text-lg leading-relaxed text-slate-600 prose prose-slate max-w-none">@((MarkupString)CurrentUser.Bio)</div>
+                    }
+                    else
+                    {
+                        <p class="max-w-4xl text-lg leading-relaxed text-slate-600">Aucune biographie renseignée.</p>
+                    }
                 </section>
 
                 <section class="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
