@@ -6,6 +6,8 @@
 @inject IUserStateService UserStateService
 @inject IProfileService ProfileService
 @inject NavigationManager Navigation
+@inject IUploadService UploadService
+@inject IJSRuntime JS
 
 @if (!isLoading)
 {
@@ -67,21 +69,44 @@
                                 </div>
 
                                 <div class="flex-1 space-y-3">
-                                    <ImageUploader UploadType="UploadType.User"
-                                                   ExistingImageUrl="@model.AvatarUrl"
-                                                   OnImageUploaded="HandleImageUploaded"
-                                                   OnImageDeleted="HandleImageDeleted" />
-
                                     <div>
                                         <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar</label>
-                                        <p class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">Le fichier selectionne met automatiquement a jour l'apercu et la valeur du profil.</p>
+                                        <InputFile accept=".jpg,.jpeg,.png,.webp,.gif"
+                                                   OnChange="HandleFileSelected"
+                                                   class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:file:brightness-110" />
+                                        <p class="mt-1 text-xs text-slate-500">Formats : JPG, PNG, WebP, GIF — Max 5 Mo</p>
                                     </div>
+
+                                    @if (isUploading)
+                                    {
+                                        <div class="flex items-center gap-2 text-sm text-blue-600">
+                                            <i class="fa-solid fa-spinner fa-spin"></i>
+                                            Upload en cours...
+                                        </div>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(uploadError))
+                                    {
+                                        <div class="flex items-center gap-2 rounded-lg bg-red-50 p-2 text-xs text-red-700">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            @uploadError
+                                        </div>
+                                    }
                                 </div>
                             </div>
 
                             <div class="mt-5">
                                 <label class="mb-2 block text-sm font-semibold uppercase tracking-wide text-slate-500">Avatar URL</label>
-                                <InputText @bind-Value="model.AvatarUrl" class="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                                <div class="flex gap-2">
+                                    <InputText @bind-Value="model.AvatarUrl" class="h-12 flex-1 rounded-lg border border-slate-200 bg-white px-4 text-base text-slate-700 focus:border-indigo-400 focus:outline-none" />
+                                    @if (!string.IsNullOrWhiteSpace(model.AvatarUrl))
+                                    {
+                                        <button type="button" @onclick="ClearAvatar"
+                                                class="rounded-lg bg-red-500 px-3 text-sm font-semibold text-white transition hover:bg-red-600">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -217,6 +242,8 @@ else
     private string? messageSocial;
     private string displayEmail = string.Empty;
     private bool isLoading = true;
+    private bool isUploading;
+    private string? uploadError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -277,12 +304,53 @@ else
         Navigation.NavigateTo("/profile");
     }
 
-    private void HandleImageUploaded(string imageUrl)
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
-        model.AvatarUrl = imageUrl;
+        uploadError = null;
+        var file = e.File;
+        if (file is null) return;
+
+        if (file.Size > 5 * 1024 * 1024)
+        {
+            uploadError = "Le fichier ne doit pas dépasser 5 Mo.";
+            return;
+        }
+
+        isUploading = true;
+        try
+        {
+            using var memoryStream = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
+
+            using var dimStream = new MemoryStream(bytes);
+            using var dotNetRef = new DotNetStreamReference(dimStream);
+            var dims = await JS.InvokeAsync<ImageDimensions>("getImageDimensionsFromStream", dotNetRef);
+
+            if (dims.width > 1200 || dims.height > 1200)
+            {
+                uploadError = $"L'image dépasse 1200×1200 px (actuelle : {dims.width}×{dims.height} px).";
+                return;
+            }
+
+            var base64 = Convert.ToBase64String(bytes);
+            var response = await UploadService.UploadImageBase64Async(base64, file.Name, UploadType.User);
+            if (response.Success)
+                model.AvatarUrl = response.ImageUrl;
+            else
+                uploadError = response.Message ?? "Erreur lors de l'upload.";
+        }
+        catch (Exception ex)
+        {
+            uploadError = $"Erreur : {ex.Message}";
+        }
+        finally
+        {
+            isUploading = false;
+        }
     }
 
-    private void HandleImageDeleted()
+    private void ClearAvatar()
     {
         model.AvatarUrl = string.Empty;
     }
@@ -329,4 +397,10 @@ else
     private void Annuler() => Navigation.NavigateTo("/profile");
 
     private string AvatarPreviewUrl => string.IsNullOrWhiteSpace(model.AvatarUrl) ? "/Images/Fond.jpeg" : model.AvatarUrl;
+
+    private class ImageDimensions
+    {
+        public int width { get; set; }
+        public int height { get; set; }
+    }
 }

@@ -36,7 +36,7 @@
                                  OnReject="DeletePost" />
         </div>
 
-        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body">@GetPreviewText()</p>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body break-words">@GetPreviewText()</p>
 
         <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-body">
             <span class="truncate font-medium">@post?.AuthorName</span>
@@ -71,7 +71,7 @@
         var plainText = Regex.Replace(source, "<.*?>", string.Empty);
         plainText = WebUtility.HtmlDecode(plainText).Trim();
 
-        return plainText.Length <= 140 ? plainText : $"{plainText[..140].Trim()}...";
+        return plainText.Length <= 120 ? plainText : $"{plainText[..120].Trim()}...";
     }
 
     private Task OpenPost(Guid id)

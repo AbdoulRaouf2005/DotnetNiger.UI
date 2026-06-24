@@ -38,7 +38,7 @@
                                  OnDelete="DeleteProject" />
         </div>
 
-        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body">@Project?.Description</p>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body break-words">@Project?.Description</p>
 
         @if (!string.IsNullOrWhiteSpace(Project?.Technologies))
         {

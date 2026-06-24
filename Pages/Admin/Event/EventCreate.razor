@@ -11,6 +11,8 @@
 @inject IEventService EventService
 @inject IToastService ToastService
 @inject IUserService UserService
+@inject IUploadService UploadService
+@inject IJSRuntime JS
 @inject PreviewStateService PreviewState
 
 <div class="p-6 bg-primary">
@@ -262,6 +264,58 @@
                             </button>
                         }
                     </div>
+
+                    @* ── Galerie photos ── *@
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Galerie photos</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                            @foreach (var (url, index) in galleryImageUrls.Select((u, i) => (u, i)))
+                            {
+                                <div class="relative group">
+                                    <img src="@url" class="h-24 w-full rounded-lg object-cover border border-gray-200" />
+                                    <button type="button" @onclick="() => RemoveGalleryImage(index)"
+                                            class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white text-xs shadow opacity-0 group-hover:opacity-100 transition hover:bg-red-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        @if (isUploadingGallery)
+                        {
+                            <div class="flex flex-col items-center gap-3 py-8 border-2 border-dashed rounded-lg border-gray-300 bg-gray-100">
+                                <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500"></i>
+                                <p class="text-gray-600 font-medium">Upload en cours...</p>
+                            </div>
+                        }
+                        else if (showGalleryUploader)
+                        {
+                            <div key="@galleryUploaderKey"
+                                 class="relative block border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50 overflow-hidden">
+                                <div class="flex flex-col items-center gap-3 py-8 pointer-events-none">
+                                    <i class="fa-solid fa-cloud-upload-alt text-5xl text-gray-400"></i>
+                                    <div>
+                                        <p class="text-gray-600 font-medium">
+                                            <span class="text-blue-600 underline">Cliquez</span> pour sélectionner un fichier
+                                        </p>
+                                        <p class="text-gray-400 text-sm mt-1">Formats : JPG, PNG, WebP, GIF &mdash; Max 5 Mo</p>
+                                    </div>
+                                </div>
+                                <InputFile OnChange="HandleGalleryUpload" multiple
+                                           accept=".jpg,.jpeg,.png,.webp,.gif"
+                                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                            </div>
+                            <button type="button" @onclick="() => showGalleryUploader = false"
+                                    class="mt-2 text-xs text-gray-500 hover:text-gray-700">Annuler</button>
+                        }
+                        else
+                        {
+                            <button type="button" @onclick="() => showGalleryUploader = true"
+                                    class="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-secondary transition">
+                                <i class="fas fa-plus text-gray-400"></i>
+                                <p class="text-sm text-gray-500 mt-1">Ajouter une photo</p>
+                            </button>
+                        }
+                    </div>
                 </div>
 
                 @* ── Block 2 : image + mode + champs dynamiques ── *@
@@ -371,7 +425,8 @@
     {
         StartDate = DateTime.Now,
         EndDate = DateTime.Now.AddHours(2),
-        Capacity = 100
+        Capacity = 100,
+        EventType = "Physical"
     };
     
     private Guid currentUserId;
@@ -388,6 +443,11 @@
     private List<UserDto> filteredMembers = new();
     private bool showMemberSearch;
     private string memberSearchQuery = string.Empty;
+
+    private List<string> galleryImageUrls = new();
+    private bool showGalleryUploader;
+    private int galleryUploaderKey;
+    private bool isUploadingGallery;
 
     private void RemoveSpeaker(int index)
     {
@@ -433,6 +493,31 @@
         });
         showMemberSearch = false;
         memberSearchQuery = string.Empty;
+    }
+
+    private async Task HandleGalleryUpload(InputFileChangeEventArgs e)
+    {
+        isUploadingGallery = true;
+        try
+        {
+            foreach (var file in e.GetMultipleFiles())
+            {
+                var response = await UploadService.UploadImageAsync(file, UploadType.Event);
+                if (response.Success)
+                    galleryImageUrls.Add(response.ImageUrl);
+            }
+            showGalleryUploader = false;
+            galleryUploaderKey++;
+        }
+        finally
+        {
+            isUploadingGallery = false;
+        }
+    }
+
+    private void RemoveGalleryImage(int index)
+    {
+        galleryImageUrls.RemoveAt(index);
     }
 
     private void SetEventMode(string mode)
@@ -482,6 +567,7 @@
             {
                 eventRequest = PreviewState.PendingEventRequest;
                 speakers = eventRequest.Speakers?.ToList() ?? new();
+                galleryImageUrls = eventRequest.GalleryImageUrls?.ToList() ?? new();
                 eventMode = eventRequest.EventType?.ToLowerInvariant() switch
                 {
                     "online" => "online",
@@ -541,12 +627,15 @@
         // 4. Ajouter les intervenants
         eventRequest.Speakers = speakers.ToList();
 
-        // 5. Laisser DataAnnotations valider le reste
+        // 5. Ajouter les images de la galerie
+        eventRequest.GalleryImageUrls = galleryImageUrls.ToList();
+
+        // 6. Laisser DataAnnotations valider le reste
         //    (Title, EventType, dates• via le validator inline)
         try
         {
             await EventService.CreateEventAsync(eventRequest, currentUserId, IsCurrentUserAdmin);
-            ToastService.ShowToast("é‰vénement créé avec succès.", ToastLevel.Success);
+            ToastService.ShowToast("événement créé avec succès.", ToastLevel.Success);
             Navigation.NavigateTo("/admin/events");
         }
         catch (Exception ex)
@@ -567,6 +656,7 @@
             _ => eventRequest.EventType
         };
         eventRequest.Speakers = speakers.ToList();
+        eventRequest.GalleryImageUrls = galleryImageUrls.ToList();
 
         // Sauvegarder l'état du formulaire pour restauration après retour
         PreviewState.PendingEventRequest = eventRequest;
