@@ -34,7 +34,7 @@
                                  OnReject="DeleteEvent" />
         </div>
 
-        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body">@Event?.Description</p>
+        <p class="mb-4 line-clamp-3 text-sm leading-6 text-body break-words">@((MarkupString)(Event?.Description ?? string.Empty))</p>
 
         <div class="flex items-center justify-between gap-3 border-t border-gray-100 pt-4 text-sm text-body">
             <span class="truncate font-medium">@Event?.OrganizerName</span>
